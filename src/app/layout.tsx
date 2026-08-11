@@ -4,6 +4,8 @@ import { siteConfig } from "@/config/site";
 import "./globals.css";
 import "./components.css";
 import "./mvp.css";
+import "./hero-image.css";
+import "./result-example.css";
 import "./responsive.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });

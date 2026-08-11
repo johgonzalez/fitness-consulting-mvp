@@ -6,6 +6,7 @@ export const siteConfig = {
   serviceName: "Consultoria Fitness Online",
   durationDays: 90,
   siteUrl: "",
+  whatsappUrl: "https://wa.me/message/EZPUTABJWNZKP1",
   whatsappNumber: "",
   whatsappMessage:
     "Olá, Thiago! Conheci sua consultoria pelo site e gostaria de entender melhor como funciona.",
@@ -13,6 +14,7 @@ export const siteConfig = {
   about:
     "Thiago Tavares é personal trainer e trabalha com acompanhamento individualizado para ajudar cada aluno a desenvolver força, condicionamento, confiança e consistência. Seu método parte da realidade de cada pessoa, criando treinos possíveis de executar e preparados para evoluir ao longo do tempo.",
   professionalData: {
+    cref: "A confirmar",
     education: "Informação a confirmar",
     registration: "Informação a confirmar",
     credentials: "Informações a confirmar",
