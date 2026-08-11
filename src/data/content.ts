@@ -9,10 +9,9 @@ export const painPoints = [
 ];
 
 export const steps = [
-  ["01", "Avaliação inicial", "Entendimento de rotina, objetivos, limitações, histórico e disponibilidade."],
-  ["02", "Planejamento personalizado", "Criação de um treino compatível com sua realidade e seu nível."],
-  ["03", "Acompanhamento", "Contato pelo aplicativo e WhatsApp para orientações e suporte."],
-  ["04", "Ajustes e evolução", "Revisões estratégicas conforme desempenho, feedback e progresso."],
+  ["01", "Entendemos seu objetivo", "Rotina, nível, disponibilidade e objetivo."],
+  ["02", "Criamos seu treino", "Planejamento personalizado para sua realidade."],
+  ["03", "Acompanhamos sua evolução", "Suporte, revisões e ajustes durante o processo."],
 ] as const;
 
 export const benefits = [
@@ -22,6 +21,13 @@ export const benefits = [
   { icon: CircleGauge, title: "Ajustes estratégicos", text: "O plano acompanha seu desempenho, feedback e evolução." },
   { icon: MessageCircle, title: "Suporte próximo", text: "Um canal direto para tirar dúvidas durante o acompanhamento." },
   { icon: Smartphone, title: "Treino no celular", text: "Acesso simples para treinar com autonomia onde estiver." },
+];
+
+export const mvpBenefits = [
+  { icon: Dumbbell, title: "Treino feito para você", text: "Um plano alinhado ao seu objetivo e à sua rotina." },
+  { icon: MessageCircle, title: "Acompanhamento direto", text: "Suporte próximo para você não treinar no escuro." },
+  { icon: ChartNoAxesCombined, title: "Ajustes na evolução", text: "O planejamento muda conforme seu desempenho." },
+  { icon: Smartphone, title: "Treino no celular", text: "Exercícios, séries e cargas sempre acessíveis." },
 ];
 
 export const audiences = [
@@ -34,9 +40,11 @@ export const audiences = [
 ];
 
 export const offerItems = [
-  "Avaliação inicial", "Treino totalmente personalizado", "Acesso ao treino pelo aplicativo",
-  "Orientações de execução", "Acompanhamento por WhatsApp", "Revisões periódicas",
-  "Ajustes estratégicos de treino", `Acompanhamento por ${siteConfig.durationDays} dias`,
+  "Avaliação inicial",
+  "Treino personalizado",
+  "Acesso ao treino pelo celular",
+  "Acompanhamento por WhatsApp",
+  `Revisões e ajustes durante ${siteConfig.durationDays} dias`,
 ];
 
 export const trustItems = [

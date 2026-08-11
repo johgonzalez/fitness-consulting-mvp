@@ -3,8 +3,8 @@ import { Inter, Manrope } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 import "./components.css";
+import "./mvp.css";
 import "./responsive.css";
-import "./mobile-first.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });

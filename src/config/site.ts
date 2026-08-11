@@ -27,6 +27,6 @@ export const siteConfig = {
 export const navigation = [
   { label: "Como funciona", href: "#como-funciona" },
   { label: "Benefícios", href: "#beneficios" },
-  { label: "Sobre", href: "#sobre" },
+  { label: "Consultoria", href: "#oferta" },
   { label: "Dúvidas", href: "#duvidas" },
 ] as const;
