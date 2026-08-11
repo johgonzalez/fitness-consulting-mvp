@@ -4,6 +4,7 @@ export type AnalyticsEvent =
   | "click_whatsapp_offer"
   | "click_whatsapp_final"
   | "click_instagram"
+  | "click_perfil_pro"
   | "view_faq"
   | "scroll_50"
   | "scroll_90";

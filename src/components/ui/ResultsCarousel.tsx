@@ -6,12 +6,12 @@ import { useRef, useState } from "react";
 
 const slides = [
   {
-    src: "/images/resultado-demo-masculino-limpo-v1.webp",
-    alt: "Exemplo ilustrativo masculino de evolução física, com antes e depois",
+    src: "/images/resultado-ia-feminino-v1.jpg",
+    alt: "Exemplo feminino ilustrativo de evolução física criado por inteligência artificial",
   },
   {
-    src: "/images/resultado-demo-feminino-v1.webp",
-    alt: "Exemplo ilustrativo feminino de evolução física, com antes e depois",
+    src: "/images/resultado-ia-masculino-v1.jpg",
+    alt: "Exemplo masculino ilustrativo de evolução física criado por inteligência artificial",
   },
 ];
 
@@ -47,6 +47,7 @@ export function ResultsCarousel() {
     >
       <div className="before-after-media" aria-live="polite">
         <Image src={slide.src} alt={slide.alt} fill sizes="(max-width: 680px) 100vw, 1120px" unoptimized />
+        <span className="result-ai-label">Imagem ilustrativa gerada por IA</span>
 
         <button className="result-carousel-arrow previous" type="button" onClick={() => showSlide(activeSlide - 1)} aria-label="Ver resultado anterior">
           <ChevronLeft aria-hidden="true" />
@@ -61,7 +62,7 @@ export function ResultsCarousel() {
       <figcaption>
         <div>
           <strong>Demonstração de layout</strong>
-          <p>Imagem ilustrativa. Substituir por um resultado real e autorizado antes da publicação.</p>
+          <p>Imagens, depoimentos e resultados são ilustrativos e não representam promessa de transformação.</p>
         </div>
         <div className="result-carousel-dots" aria-label="Escolher resultado">
           {slides.map((item, index) => (

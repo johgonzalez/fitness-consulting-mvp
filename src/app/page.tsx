@@ -8,7 +8,8 @@ import { FAQSection } from "@/components/sections/FAQSection";
 import { FinalCTASection } from "@/components/sections/FinalCTASection";
 import { FloatingWhatsApp } from "@/components/ui/FloatingWhatsApp";
 import { ScrollTracking } from "@/components/ui/ScrollTracking";
+import { MessageTicker } from "@/components/ui/MessageTicker";
 
 export default function Home() {
-  return <><Header/><main><HeroSection/><HowItWorksSection/><BenefitsAndProofSection/><OfferSection/><FAQSection/><FinalCTASection/></main><Footer/><FloatingWhatsApp/><ScrollTracking/></>;
+  return <><Header/><main><HeroSection/><MessageTicker/><HowItWorksSection/><BenefitsAndProofSection/><OfferSection/><FAQSection/><FinalCTASection/></main><Footer/><FloatingWhatsApp/><ScrollTracking/></>;
 }

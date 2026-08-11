@@ -1,5 +1,4 @@
 import { Activity, ChartNoAxesCombined, CircleGauge, Dumbbell, HeartPulse, MessageCircle, Play, Smartphone } from "lucide-react";
-import { siteConfig } from "@/config/site";
 
 export const painPoints = [
   "Você treina, mas não sabe se está fazendo o exercício corretamente.",
@@ -9,9 +8,10 @@ export const painPoints = [
 ];
 
 export const steps = [
-  ["01", "Entendemos seu objetivo", "Rotina, nível, disponibilidade e objetivo."],
-  ["02", "Criamos seu treino", "Planejamento personalizado para sua realidade."],
-  ["03", "Acompanhamos sua evolução", "Suporte, revisões e ajustes durante o processo."],
+  ["01", "Avaliação inicial", "Entendemos rotina, nível, disponibilidade e objetivo."],
+  ["02", "Planejamento personalizado", "Estruturamos um plano adequado à sua realidade."],
+  ["03", "Treino no celular", "Você recebe exercícios, séries e cargas de forma organizada."],
+  ["04", "Acompanhamento e ajustes", "O plano evolui de acordo com seu desempenho e feedback."],
 ] as const;
 
 export const benefits = [
@@ -43,8 +43,9 @@ export const offerItems = [
   "Avaliação inicial",
   "Treino personalizado",
   "Acesso ao treino pelo celular",
-  "Acompanhamento por WhatsApp",
-  `Revisões e ajustes durante ${siteConfig.durationDays} dias`,
+  "Suporte via WhatsApp",
+  "Revisões periódicas",
+  "Ajustes de acordo com sua evolução",
 ];
 
 export const trustItems = [

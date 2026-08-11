@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: siteConfig.seo.title, description: siteConfig.seo.description },
 };
 
-const structuredData = { "@context": "https://schema.org", "@type": "Person", name: siteConfig.name, jobTitle: siteConfig.descriptor, description: `${siteConfig.serviceName} com planejamento personalizado e acompanhamento.` };
+const structuredData = { "@context": "https://schema.org", "@type": "ProfessionalService", name: `${siteConfig.serviceName} — demonstração`, description: siteConfig.seo.description, areaServed: siteConfig.location };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return <html lang="pt-BR" className={`${inter.variable} ${manrope.variable}`}><body><a href="#conteudo" className="skip-link">Pular para o conteúdo</a><div id="conteudo">{children}</div><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} /></body></html>;

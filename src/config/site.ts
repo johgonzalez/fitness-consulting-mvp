@@ -1,7 +1,7 @@
 export const siteConfig = {
-  name: "Thiago Tavares",
-  shortName: "Thiago",
-  initials: "TT",
+  name: "Rafael Martins",
+  shortName: "Rafael",
+  initials: "RM",
   descriptor: "Personal Trainer",
   serviceName: "Consultoria Fitness Online",
   durationDays: 90,
@@ -9,20 +9,22 @@ export const siteConfig = {
   whatsappUrl: "https://wa.me/message/EZPUTABJWNZKP1",
   whatsappNumber: "",
   whatsappMessage:
-    "Olá, Thiago! Conheci sua consultoria pelo site e gostaria de entender melhor como funciona.",
+    "Olá! Conheci a consultoria pelo site demonstrativo e gostaria de entender melhor como funciona.",
   instagramUrl: "",
+  perfilProUrl: "https://perfil.pro",
+  location: "São Paulo, SP",
   about:
-    "Thiago Tavares é personal trainer e trabalha com acompanhamento individualizado para ajudar cada aluno a desenvolver força, condicionamento, confiança e consistência. Seu método parte da realidade de cada pessoa, criando treinos possíveis de executar e preparados para evoluir ao longo do tempo.",
+    "Rafael Martins é Personal Trainer e trabalha com consultoria online personalizada para quem quer evoluir com um plano estruturado, acompanhamento próximo e ajustes ao longo do processo.",
   professionalData: {
-    cref: "A confirmar",
-    education: "Informação a confirmar",
-    registration: "Informação a confirmar",
-    credentials: "Informações a confirmar",
+    cref: "000000-G/SP",
+    education: "Educação Física — dado demonstrativo",
+    registration: "CREF 000000-G/SP",
+    credentials: "Perfil profissional demonstrativo",
   },
   seo: {
-    title: "Consultoria Fitness Online | Thiago Tavares Personal Trainer",
+    title: "Consultoria Online Personal Trainer | Site Demonstrativo",
     description:
-      "Treino personalizado, acompanhamento online e ajustes estratégicos para emagrecimento, hipertrofia e evolução física com Thiago Tavares.",
+      "Exemplo de landing page profissional para Personal Trainers divulgarem consultoria online, serviços e captação de novos alunos.",
   },
 } as const;
 
