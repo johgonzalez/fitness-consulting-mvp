@@ -1,0 +1,25 @@
+import type { Metadata } from "next";
+import { Inter, Manrope } from "next/font/google";
+import { siteConfig } from "@/config/site";
+import "./globals.css";
+import "./components.css";
+import "./responsive.css";
+import "./mobile-first.css";
+
+const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
+const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  metadataBase: siteConfig.siteUrl ? new URL(siteConfig.siteUrl) : undefined,
+  title: siteConfig.seo.title,
+  description: siteConfig.seo.description,
+  alternates: siteConfig.siteUrl ? { canonical: siteConfig.siteUrl } : undefined,
+  openGraph: { title: siteConfig.seo.title, description: siteConfig.seo.description, type: "website", locale: "pt_BR" },
+  twitter: { card: "summary_large_image", title: siteConfig.seo.title, description: siteConfig.seo.description },
+};
+
+const structuredData = { "@context": "https://schema.org", "@type": "Person", name: siteConfig.name, jobTitle: siteConfig.descriptor, description: `${siteConfig.serviceName} com planejamento personalizado e acompanhamento.` };
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="pt-BR" className={`${inter.variable} ${manrope.variable}`}><body><a href="#conteudo" className="skip-link">Pular para o conteúdo</a><div id="conteudo">{children}</div><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} /></body></html>;
+}

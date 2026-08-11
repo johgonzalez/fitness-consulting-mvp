@@ -1,0 +1,3 @@
+import { benefits } from "@/data/content";
+import { SectionHeading } from "@/components/ui/SectionHeading";
+export function BenefitsSection(){return <section id="beneficios" className="section light-section benefits"><div className="container"><SectionHeading eyebrow="O que muda" title="Mais do que receber uma ficha de treino." description="Você entende o que fazer, por que fazer e como continuar evoluindo." light/><div className="benefit-grid">{benefits.map(({icon:Icon,title,text},i)=><article key={title}><span className="benefit-index">0{i+1}</span><div className="icon-box"><Icon/></div><h3>{title}</h3><p>{text}</p></article>)}</div></div></section>}
