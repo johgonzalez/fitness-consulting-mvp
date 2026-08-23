@@ -12,6 +12,8 @@ This timing distinction is material:
 - `REMOTE DATABASE MODIFIED BEFORE THIS OVERRIDE: YES`.
 - Current local/remote migration parity is through `202608220009` rather than the override's expected pre-work baseline of `202608220005`.
 
+A subsequent repeated unattended Sprint 3A instruction resulted only in a local fixture completion: the `COMPLETED` example now includes final trainer feedback, typed answers and a source-linked historical measurement. No Supabase command or hosted write was executed for that completion.
+
 ## Repository and checkpoint
 
 - Repository root: `C:/Users/jogue/OneDrive/Documentos/Thiago Pesonal Treiner`
@@ -46,7 +48,7 @@ The Sprint 3A implementation includes:
 - private student media metadata and storage-read authorization;
 - seven RLS-protected application tables;
 - three `pt-BR` system template definitions;
-- four local-only fixture summaries (`DRAFT`, `SENT`, `ANSWERED`, `COMPLETED`);
+- four local-only fixture summaries (`DRAFT`, `SENT`, `ANSWERED`, `COMPLETED`), with completed feedback, answers and a source-linked historical measurement;
 - SQL functional, RLS, cross-tenant and storage tests;
 - implementation documentation.
 
@@ -210,6 +212,8 @@ pnpm build
 - ESLint: pass.
 - Next 16.2.12 production build: pass; 20 pages generated/validated.
 
+These three application gates were run again after completing the detailed local `COMPLETED` fixture and remained green.
+
 ### Checkpoint
 
 ```powershell
@@ -271,7 +275,13 @@ This review adds:
 
 - `docs/PPERFIL_SPRINT_3A_OVERNIGHT_REVIEW.md`
 
-No existing tracked file was modified by the Sprint 3A checkpoint. The wider worktree still contains unrelated earlier product changes and was preserved.
+The subsequent fixture-completion pass modified only:
+
+- `src/data/demo/assessments.ts`
+- `docs/PPERFIL_SPRINT_3A_ASSESSMENT_FOUNDATION.md`
+- `docs/PPERFIL_SPRINT_3A_OVERNIGHT_REVIEW.md`
+
+The wider worktree still contains unrelated earlier product changes and was preserved.
 
 ## Git diff summary
 

@@ -129,7 +129,7 @@ The assessment boundary is separate from the trainer repository:
 - `src/lib/validation/assessments.ts` — BCP 47/template parser and command validation;
 - `src/lib/assessments/service.ts` — use-case boundary;
 - `src/lib/supabase/assessments.ts` — server-only Supabase adapter and RPC mapping;
-- `src/data/demo/assessments.ts` — four local-only state examples (`DRAFT`, `SENT`, `ANSWERED`, `COMPLETED`).
+- `src/data/demo/assessments.ts` — four local-only state examples (`DRAFT`, `SENT`, `ANSWERED`, `COMPLETED`), plus completed feedback, answers and a source-linked historical measurement.
 
 The adapter revalidates the current Supabase user before every call. Client-side or TypeScript checks are usability boundaries; PostgreSQL functions, grants and RLS are authoritative.
 
