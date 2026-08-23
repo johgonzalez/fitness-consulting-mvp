@@ -103,6 +103,11 @@ insert into draft_update_gate_results values
     'update public.assessments set template_version_id=%L::uuid where id=%L::uuid',
     'a3100000-0000-4000-8000-000000000002',
     (select value from draft_update_gate_context where key = 'trainer_a_draft')
+  ))),
+  ('Relationship and student reject direct change', pg_temp.raises(format(
+    'update public.assessments set trainer_student_relationship_id=%L::uuid where id=%L::uuid',
+    '3b130000-0000-4000-8000-000000000002',
+    (select value from draft_update_gate_context where key = 'trainer_a_draft')
   )));
 
 -- A no-op call does not manufacture an audit event.
@@ -164,6 +169,14 @@ insert into public.assessments(
   '3b140000-0000-4000-8000-000000000002',
   '3b130000-0000-4000-8000-000000000001',
   'a3100000-0000-4000-8000-000000000003',
+  'IN_REVIEW', 'In-review metadata is immutable', false,
+  now() - interval '3 days', now() - interval '2 days',
+  now() - interval '1 day', null,
+  '3b100000-0000-4000-8000-000000000001'
+), (
+  '3b140000-0000-4000-8000-000000000003',
+  '3b130000-0000-4000-8000-000000000001',
+  'a3100000-0000-4000-8000-000000000003',
   'COMPLETED', 'Completed metadata is immutable', false,
   now() - interval '4 days', now() - interval '3 days',
   now() - interval '2 days', now() - interval '1 day',
@@ -178,9 +191,14 @@ insert into draft_update_gate_results values
       '3b140000-0000-4000-8000-000000000001','Changed Answered',true,null
     )
   $sql$)),
+  ('IN_REVIEW assessment rejects update', pg_temp.raises($sql$
+    select public.update_draft_assessment(
+      '3b140000-0000-4000-8000-000000000002','Changed In Review',true,null
+    )
+  $sql$)),
   ('COMPLETED assessment rejects update', pg_temp.raises($sql$
     select public.update_draft_assessment(
-      '3b140000-0000-4000-8000-000000000002','Changed Completed',true,null
+      '3b140000-0000-4000-8000-000000000003','Changed Completed',true,null
     )
   $sql$));
 

@@ -18,7 +18,7 @@ O workspace demo continua sem escrita remota: o formulário pode ser revisado vi
 
 ## Gate
 
-`supabase/tests/draft_assessment_update_security.sql` executa em transação com `ROLLBACK` e cobre ownership, cross-tenant, relacionamento inativo, estudante, anônimo, estados `SENT`/`ANSWERED`/`COMPLETED`, imutabilidade do template versionado e evento de auditoria.
+`supabase/tests/draft_assessment_update_security.sql` executa em transação com `ROLLBACK` e cobre ownership, cross-tenant, relacionamento inativo, estudante, anônimo, estados `SENT`/`ANSWERED`/`IN_REVIEW`/`COMPLETED`, imutabilidade do template versionado, relacionamento/aluno e evento de auditoria.
 
 Resultado final em 23/08/2026:
 
@@ -26,8 +26,9 @@ Resultado final em 23/08/2026:
 - paridade local/remota completa e `db push --dry-run` sem pendências;
 - `db lint --linked --level warning` sem erros;
 - preflight da migration + gate novo em transação revertida: PASS;
-- gate novo pós-apply: 12/12 cenários PASS, com `ROLLBACK` confirmado;
-- regressão completa de `assessment_foundation_security.sql`: PASS;
+- gate novo pós-apply: 14/14 cenários PASS, com `ROLLBACK` confirmado;
+- regressão completa de `assessment_foundation_security.sql`: 49/49 PASS, com `ROLLBACK` confirmado;
+- regressão de `rls_isolation.sql`: 8/8 PASS, com `ROLLBACK` confirmado;
 - catálogo: owner `postgres`, `SECURITY DEFINER`, `search_path=""`, `authenticated=EXECUTE`, `anon=NO EXECUTE`;
 - TypeScript, ESLint e Next production build: PASS;
 - QA local do formulário em Light/Dark e 1440x900/390x844: sem erro de console e sem overflow horizontal;
