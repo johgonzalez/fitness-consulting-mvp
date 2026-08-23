@@ -69,6 +69,7 @@
   font-size:.72rem;
   font-weight:760;
   text-decoration:none;
+  transition:transform 160ms ease,box-shadow 160ms ease,background-color 160ms ease;
 }
 .ppv3-button svg{width:16px;height:16px}
 .ppv3-button--primary{
@@ -324,7 +325,11 @@
   height:100%;
   min-width:0;
   border-radius:inherit;
+  transform-origin:left center;
+  animation:ppv3-draw 520ms cubic-bezier(.2,.8,.2,1) both;
 }
+.ppv3-funnel__row:nth-child(2) .ppv3-funnel__bar{animation-delay:70ms}
+.ppv3-funnel__row:nth-child(3) .ppv3-funnel__bar{animation-delay:140ms}
 .ppv3-funnel__bar--info{background:linear-gradient(90deg,var(--ppv3-cyan),color-mix(in srgb,var(--ppv3-cyan) 45%,white))}
 .ppv3-funnel__bar--accent{background:linear-gradient(90deg,var(--ppv3-purple),var(--pp-purple-500,#9a83ff))}
 .ppv3-funnel__bar--success{background:linear-gradient(90deg,var(--ppv3-green),color-mix(in srgb,var(--ppv3-green) 50%,white))}
@@ -358,6 +363,7 @@
   background:var(--ppv3-surface-soft);
   color:inherit;
   text-decoration:none;
+  transition:transform 160ms ease,background-color 160ms ease,box-shadow 160ms ease;
 }
 .ppv3-attention-item__icon{width:38px;height:38px;border-radius:13px}
 .ppv3-attention-item>span:nth-child(2) strong{
@@ -417,6 +423,7 @@
   color:var(--ppv3-text-2);
   font-size:.56rem;
   text-decoration:none;
+  transition:transform 160ms ease,background-color 160ms ease;
 }
 .ppv3-student-row:last-child{border-bottom:0}
 .ppv3-student-row:hover{background:color-mix(in srgb,var(--ppv3-surface-soft) 58%,transparent)}
@@ -466,7 +473,11 @@
   grid-template-columns:9px minmax(0,1fr) auto;
   gap:8px;
   align-items:start;
+  animation:ppv3-activity-in 320ms cubic-bezier(.2,.8,.2,1) both;
 }
+.ppv3-activity li:nth-child(2){animation-delay:45ms}
+.ppv3-activity li:nth-child(3){animation-delay:90ms}
+.ppv3-activity li:nth-child(4){animation-delay:135ms}
 .ppv3-activity-dot{
   width:7px;
   height:7px;
@@ -514,6 +525,76 @@
   margin:3px 0 0;
   color:var(--ppv3-muted);
   font-size:.5rem;
+}
+
+/* Motion system: alive, not animated. All entrance effects use compositor-only
+   properties and never change document geometry. */
+.ppv3-page-head,
+.ppv3-grid>.ppv3-card,
+.ppv3-grid>.ppv3-rail{
+  animation:ppv3-reveal 420ms cubic-bezier(.2,.8,.2,1) both;
+}
+.ppv3-grid>.ppv3-card:nth-child(1){animation-delay:35ms}
+.ppv3-grid>.ppv3-card:nth-child(2){animation-delay:75ms}
+.ppv3-grid>.ppv3-card:nth-child(3){animation-delay:110ms}
+.ppv3-grid>.ppv3-card:nth-child(4){animation-delay:135ms}
+.ppv3-grid>.ppv3-card:nth-child(5){animation-delay:160ms}
+.ppv3-grid>.ppv3-card:nth-child(6){animation-delay:185ms}
+.ppv3-grid>.ppv3-card:nth-child(7){animation-delay:215ms}
+.ppv3-grid>.ppv3-card:nth-child(8){animation-delay:245ms}
+.ppv3-grid>.ppv3-rail{animation-delay:275ms}
+.ppv3-kpi>div:last-child>strong{
+  display:inline-block;
+  animation:ppv3-number-settle 420ms cubic-bezier(.2,.8,.2,1) both;
+  animation-delay:220ms;
+}
+.ppv3-button:hover,
+.ppv3-attention-item:hover{transform:translateY(-1px)}
+.ppv3-attention-item:hover{box-shadow:0 8px 20px color-mix(in srgb,var(--ppv3-purple) 8%,transparent)}
+.ppv3-button:active,
+.ppv3-attention-item:active,
+.ppv3-student-row:active{transform:scale(.985)}
+.ppv3-student-row:hover{transform:translateX(2px)}
+
+@keyframes ppv3-reveal{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes ppv3-number-settle{
+  from{opacity:.35;transform:translateY(4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes ppv3-draw{
+  from{transform:scaleX(0)}
+  to{transform:scaleX(1)}
+}
+@keyframes ppv3-activity-in{
+  from{opacity:0;transform:translateX(-5px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .ppv3-page-head,
+  .ppv3-grid>.ppv3-card,
+  .ppv3-grid>.ppv3-rail,
+  .ppv3-kpi>div:last-child>strong,
+  .ppv3-funnel__bar,
+  .ppv3-activity li{
+    animation:none!important;
+  }
+  .ppv3-button,
+  .ppv3-attention-item,
+  .ppv3-student-row{
+    transition:none!important;
+  }
+  .ppv3-button:hover,
+  .ppv3-button:active,
+  .ppv3-attention-item:hover,
+  .ppv3-attention-item:active,
+  .ppv3-student-row:hover,
+  .ppv3-student-row:active{
+    transform:none;
+  }
 }
 
 @media(max-width:1000px){

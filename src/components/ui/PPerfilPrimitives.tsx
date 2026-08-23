@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
+import { PersonAvatar, type PersonAvatarProps } from "@/components/ui/PersonAvatar";
 
 type StatusTone = "accent" | "success" | "warning" | "danger" | "info" | "neutral";
 
@@ -9,22 +9,8 @@ export function Status({ children, tone = "neutral" }: { children: ReactNode; to
   return <span className={`pp-status pp-status--${tone}`}>{children}</span>;
 }
 
-export function Avatar({
-  name,
-  imageUrl,
-  size = "medium",
-  status,
-}: {
-  name: string;
-  imageUrl?: string | null;
-  size?: "small" | "medium" | "large";
-  status?: "online" | "offline";
-}) {
-  const initials = name.split(" ").filter(Boolean).map((part) => part[0]).slice(0, 2).join("").toUpperCase();
-  return <span className={`pp-avatar pp-avatar--${size}`} aria-label={name}>
-    {imageUrl ? <Image src={imageUrl} alt="" fill sizes={size === "large" ? "56px" : size === "small" ? "32px" : "40px"} unoptimized /> : <span aria-hidden="true">{initials || "PP"}</span>}
-    {status ? <i className={`pp-avatar__status pp-avatar__status--${status}`} aria-hidden="true" /> : null}
-  </span>;
+export function Avatar(props: PersonAvatarProps) {
+  return <PersonAvatar {...props} />;
 }
 
 export function Metric({

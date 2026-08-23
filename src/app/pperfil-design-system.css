@@ -470,14 +470,60 @@
   color:var(--pp-text-secondary);
   font-weight:700;
 }
-.pp-avatar>img { border-radius:inherit;object-fit:cover; }
-.pp-avatar>span { font-size:.61rem; }
+.pp-avatar__fallback {
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  border-radius:inherit;
+  background:
+    radial-gradient(circle at 30% 22%,color-mix(in srgb,var(--pp-accent) 15%,transparent),transparent 42%),
+    linear-gradient(145deg,var(--pp-surface-elevated),color-mix(in srgb,var(--pp-surface-subtle) 88%,var(--pp-success-soft)));
+  color:color-mix(in srgb,var(--pp-text-secondary) 78%,var(--pp-accent));
+}
+.pp-avatar__fallback::after {
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:18%;
+  right:18%;
+  bottom:-24%;
+  height:48%;
+  border-radius:50% 50% 16px 16px;
+  background:color-mix(in srgb,var(--pp-accent) 10%,var(--pp-border-strong));
+}
+.pp-avatar__fallback svg {
+  position:relative;
+  z-index:1;
+  width:48%;
+  height:48%;
+  stroke-width:1.8;
+}
+.pp-avatar__image {
+  z-index:2;
+  border-radius:inherit;
+  object-fit:cover;
+  opacity:0;
+  transition:opacity var(--pp-motion-fast,160ms) ease-out;
+}
+.pp-avatar[data-avatar-state="loaded"]>.pp-avatar__image { opacity:1; }
+.pp-avatar[data-avatar-state="loading"]>.pp-avatar__fallback { color:var(--pp-text-muted); }
 .pp-avatar--small { width:32px;height:32px; }
 .pp-avatar--medium { width:40px;height:40px; }
 .pp-avatar--large { width:56px;height:56px; }
-.pp-avatar__status { position:absolute;right:-1px;bottom:0;width:9px;height:9px;border:2px solid var(--pp-surface);border-radius:50%; }
+.pp-avatar__status { position:absolute;z-index:3;right:-1px;bottom:0;width:9px;height:9px;border:2px solid var(--pp-surface);border-radius:50%; }
 .pp-avatar__status--online { background:var(--pp-success); }
 .pp-avatar__status--offline { background:var(--pp-text-muted); }
+.match-card .pp-person-avatar { width:64px;height:64px; }
+
+@media (max-width:390px) {
+  .match-card .pp-person-avatar { width:54px;height:54px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .pp-avatar__image { transition:none; }
+}
 
 .pp-section-header {
   display:flex;
