@@ -18,12 +18,16 @@ function isSafeHttpsUrl(value: string): boolean {
   }
 }
 
+function isSafePublicAssetPath(value: string): boolean {
+  return value.startsWith("/images/") && !value.includes("..") && !value.includes("\\");
+}
+
 function resolveLocation(value: string | null, resolveStoragePath: (path: string) => string | null): string | null {
   if (!value) return null;
   if (isSafeHttpsUrl(value)) return value;
   if (value.includes("..") || value.startsWith("/")) return null;
   const resolved = resolveStoragePath(value);
-  return resolved && isSafeHttpsUrl(resolved) ? resolved : null;
+  return resolved && (isSafeHttpsUrl(resolved) || isSafePublicAssetPath(resolved)) ? resolved : null;
 }
 
 export function resolveExerciseMedia(

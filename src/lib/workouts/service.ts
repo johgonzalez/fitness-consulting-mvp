@@ -129,9 +129,96 @@ export class WorkoutService {
     return this.workouts.addSession(versionId, input.name.trim(), input.description?.trim() || null, input.estimatedDurationMinutes ?? null);
   }
 
+  async updateSession(sessionId: string, input: {
+    name: string;
+    description?: string | null;
+    estimatedDurationMinutes?: number | null;
+  }): Promise<void> {
+    assertWorkoutUuid(sessionId, "sessionId");
+    assertWorkoutText(input.name, "name", 1, 120);
+    if (input.estimatedDurationMinutes != null
+      && (!Number.isInteger(input.estimatedDurationMinutes) || input.estimatedDurationMinutes < 1 || input.estimatedDurationMinutes > 600)) {
+      throw new Error("estimatedDurationMinutes must be between 1 and 600.");
+    }
+    return this.workouts.updateSession(sessionId, input.name.trim(), input.description?.trim() || null, input.estimatedDurationMinutes ?? null);
+  }
+
+  reorderSessions(versionId: string, sessionIds: string[]): Promise<void> {
+    assertWorkoutUuid(versionId, "versionId");
+    sessionIds.forEach((id) => assertWorkoutUuid(id, "sessionId"));
+    return this.workouts.reorderSessions(versionId, sessionIds);
+  }
+
+  removeSession(sessionId: string): Promise<void> {
+    assertWorkoutUuid(sessionId, "sessionId");
+    return this.workouts.removeSession(sessionId);
+  }
+
   addSection(sessionId: string, sectionType: WorkoutSectionType, name?: string | null): Promise<string> {
     assertWorkoutUuid(sessionId, "sessionId");
     return this.workouts.addSection(sessionId, sectionType, name?.trim() || null);
+  }
+
+  updateSection(sectionId: string, sectionType: WorkoutSectionType, name?: string | null): Promise<void> {
+    assertWorkoutUuid(sectionId, "sectionId");
+    if (name) assertWorkoutText(name, "name", 1, 120);
+    return this.workouts.updateSection(sectionId, sectionType, name?.trim() || null);
+  }
+
+  reorderSections(sessionId: string, sectionIds: string[]): Promise<void> {
+    assertWorkoutUuid(sessionId, "sessionId");
+    sectionIds.forEach((id) => assertWorkoutUuid(id, "sectionId"));
+    return this.workouts.reorderSections(sessionId, sectionIds);
+  }
+
+  removeSection(sectionId: string): Promise<void> {
+    assertWorkoutUuid(sectionId, "sectionId");
+    return this.workouts.removeSection(sectionId);
+  }
+
+  addExercise(input: {
+    sectionId: string;
+    exerciseId: string;
+    supersetGroupKey?: string | null;
+    trainerNote?: string | null;
+    studentInstruction?: string | null;
+    tempo?: string | null;
+  }): Promise<string> {
+    assertWorkoutUuid(input.sectionId, "sectionId");
+    assertWorkoutUuid(input.exerciseId, "exerciseId");
+    if (input.trainerNote) assertWorkoutText(input.trainerNote, "trainerNote", 1, 2000);
+    if (input.studentInstruction) assertWorkoutText(input.studentInstruction, "studentInstruction", 1, 2000);
+    return this.workouts.addExercise(input);
+  }
+
+  updateExercise(input: {
+    workoutExerciseId: string;
+    supersetGroupKey?: string | null;
+    trainerNote?: string | null;
+    studentInstruction?: string | null;
+    tempo?: string | null;
+  }): Promise<void> {
+    assertWorkoutUuid(input.workoutExerciseId, "workoutExerciseId");
+    if (input.trainerNote) assertWorkoutText(input.trainerNote, "trainerNote", 1, 2000);
+    if (input.studentInstruction) assertWorkoutText(input.studentInstruction, "studentInstruction", 1, 2000);
+    return this.workouts.updateExercise(input);
+  }
+
+  replaceExercise(workoutExerciseId: string, exerciseId: string): Promise<void> {
+    assertWorkoutUuid(workoutExerciseId, "workoutExerciseId");
+    assertWorkoutUuid(exerciseId, "exerciseId");
+    return this.workouts.replaceExercise(workoutExerciseId, exerciseId);
+  }
+
+  reorderExercises(sectionId: string, workoutExerciseIds: string[]): Promise<void> {
+    assertWorkoutUuid(sectionId, "sectionId");
+    workoutExerciseIds.forEach((id) => assertWorkoutUuid(id, "workoutExerciseId"));
+    return this.workouts.reorderExercises(sectionId, workoutExerciseIds);
+  }
+
+  removeExercise(workoutExerciseId: string): Promise<void> {
+    assertWorkoutUuid(workoutExerciseId, "workoutExerciseId");
+    return this.workouts.removeExercise(workoutExerciseId);
   }
 
   upsertSet(workoutExerciseId: string, input: WorkoutSetInput): Promise<string> {
@@ -139,6 +226,11 @@ export class WorkoutService {
     if (input.id) assertWorkoutUuid(input.id, "setId");
     assertWorkoutSetInput(input);
     return this.workouts.upsertSet(workoutExerciseId, input);
+  }
+
+  removeSet(workoutSetId: string): Promise<void> {
+    assertWorkoutUuid(workoutSetId, "workoutSetId");
+    return this.workouts.removeSet(workoutSetId);
   }
 
   approve(versionId: string): Promise<void> {

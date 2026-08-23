@@ -52,8 +52,8 @@ function exercise(
     locale: "pt-BR",
     media: [{
       id: id.replace("e410", "e420"),
-      mediaType: "VIDEO",
-      urlOrStoragePath: `exercise-library/pt-BR/${id}.mp4`,
+      mediaType: "IMAGE",
+      urlOrStoragePath: `exercise-library/pt-BR/${id}.webp`,
       thumbnailUrlOrPath: `exercise-library/pt-BR/${id}.webp`,
       provider: "PPERFIL_DEMO",
       sourceUrl: null,
