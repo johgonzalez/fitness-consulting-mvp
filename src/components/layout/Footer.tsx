@@ -19,7 +19,7 @@ export function Footer({ profile }: { profile: PublicTrainerProfile }) {
         <p>Site demonstrativo desenvolvido pela Perfil.Pro. Nomes, imagens, CREF, depoimentos e resultados apresentados nesta página são ilustrativos.</p>
         <a href={siteConfig.perfilProUrl} target="_blank" rel="noreferrer">Quero um site como este <ArrowUpRight aria-hidden="true" /></a>
       </div>
-      <div className="container footer-bottom">© {new Date().getFullYear()} Projeto demonstrativo.<span>Landing page para Personal Trainers.</span></div>
+      <div className="container footer-bottom">© {new Date().getFullYear()} Projeto demonstrativo.<span>Exercise data by <a href="https://repdb.co" target="_blank" rel="noreferrer">RepDB (repdb.co)</a></span></div>
     </footer>
   );
 }

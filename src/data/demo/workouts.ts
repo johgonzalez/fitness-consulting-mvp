@@ -29,6 +29,32 @@ const EXERCISE_IDS = {
   intervalRun: "e4100000-0000-4000-8000-000000000008",
 } as const;
 
+const PRODUCTION_MEDIA_PATHS = new Map<string, string[]>([
+  [EXERCISE_IDS.squat, [
+    "trainer-public-media/system/exercises/repdb-free-v1/squat-start.webp",
+    "trainer-public-media/system/exercises/repdb-free-v1/squat-peak.webp",
+  ]],
+  [EXERCISE_IDS.dumbbellPress, [
+    "trainer-public-media/system/exercises/repdb-free-v1/db-bench-press-start.webp",
+    "trainer-public-media/system/exercises/repdb-free-v1/db-bench-press-peak.webp",
+  ]],
+  [EXERCISE_IDS.romanianDeadlift, [
+    "trainer-public-media/system/exercises/repdb-free-v1/romanian-deadlift-start.webp",
+    "trainer-public-media/system/exercises/repdb-free-v1/romanian-deadlift-peak.webp",
+  ]],
+  [EXERCISE_IDS.reverseLunge, [
+    "trainer-public-media/system/exercises/repdb-free-v1/reverse-lunge-start.webp",
+    "trainer-public-media/system/exercises/repdb-free-v1/reverse-lunge-peak.webp",
+  ]],
+  [EXERCISE_IDS.latPulldown, [
+    "trainer-public-media/system/exercises/repdb-free-v1/lat-pulldown-start.webp",
+    "trainer-public-media/system/exercises/repdb-free-v1/lat-pulldown-peak.webp",
+  ]],
+  [EXERCISE_IDS.plank, [
+    "trainer-public-media/system/exercises/repdb-free-v1/plank-main.webp",
+  ]],
+]);
+
 function exercise(
   id: string,
   name: string,
@@ -38,6 +64,7 @@ function exercise(
   instructions: string,
   coachingCues: string[],
 ): Exercise {
+  const productionMediaPaths = PRODUCTION_MEDIA_PATHS.get(id);
   return {
     id,
     sourceType: "PPERFIL_LIBRARY",
@@ -50,18 +77,18 @@ function exercise(
     instructions,
     coachingCues,
     locale: "pt-BR",
-    media: [{
-      id: id.replace("e410", "e420"),
-      mediaType: "IMAGE",
-      urlOrStoragePath: `exercise-library/pt-BR/${id}.webp`,
-      thumbnailUrlOrPath: `exercise-library/pt-BR/${id}.webp`,
-      provider: "PPERFIL_DEMO",
+    media: productionMediaPaths?.map((path, index) => ({
+      id: id.replace("e410", index === 0 ? "e420" : "e421"),
+      mediaType: "IMAGE" as const,
+      urlOrStoragePath: path,
+      thumbnailUrlOrPath: path,
+      provider: "REPDB_FREE_V1",
       sourceUrl: null,
-      licenseType: "LOCAL_DEVELOPMENT_FIXTURE",
-      creatorCredit: null,
-      productionStatus: "DEVELOPMENT",
-      sortOrder: 0,
-    }],
+      licenseType: "RepDB Free Tier License v1.0",
+      creatorCredit: "RepDB",
+      productionStatus: "APPROVED" as const,
+      sortOrder: index,
+    })) ?? [],
   };
 }
 

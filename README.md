@@ -109,3 +109,7 @@ pnpm build
 5. Não configure `service_role` no frontend ou em variáveis `NEXT_PUBLIC_*`.
 
 O projeto agora usa o runtime Next.js; `output: "export"` foi removido. Cloudflare permanece como futura camada de DNS/CDN, sem lógica de autenticação delegada a ela.
+
+## Créditos de dados de exercícios
+
+Exercise data by [RepDB (repdb.co)](https://repdb.co). O Media Pack V1 usa somente os WebP do free tier dentro do aplicativo, conforme a licença e a atribuição documentadas em [`docs/PPERFIL_EXERCISE_MEDIA_PACK_V1.md`](docs/PPERFIL_EXERCISE_MEDIA_PACK_V1.md). Os ativos não são redistribuídos neste repositório.

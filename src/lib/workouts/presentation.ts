@@ -1,5 +1,6 @@
 import type { Exercise, WorkoutVersionStatus } from "@/lib/domain/workouts";
 import { resolveDemoWorkoutStoragePath } from "@/data/demo/workout-media";
+import { resolvePublicExerciseStoragePath } from "@/lib/exercises/public-storage";
 import { resolveExerciseMediaList } from "@/lib/exercises/media-resolver";
 
 export const workoutStatusLabels: Record<WorkoutVersionStatus, string> = {
@@ -75,11 +76,17 @@ export function formatWorkoutDateTime(value: string | null, fallback = "—") {
     : fallback;
 }
 
-export function exerciseMediaUrl(exercise: Exercise, demoMode: boolean) {
-  const resolved = resolveExerciseMediaList(exercise.media, {
+export function exerciseMediaItems(exercise: Exercise, demoMode: boolean) {
+  return resolveExerciseMediaList(exercise.media, {
     allowNonProduction: demoMode,
-    resolveStoragePath: demoMode ? resolveDemoWorkoutStoragePath : () => null,
+    resolveStoragePath: demoMode
+      ? (path) => resolvePublicExerciseStoragePath(path) ?? resolveDemoWorkoutStoragePath(path)
+      : resolvePublicExerciseStoragePath,
   });
+}
+
+export function exerciseMediaUrl(exercise: Exercise, demoMode: boolean) {
+  const resolved = exerciseMediaItems(exercise, demoMode);
   return resolved[0]?.thumbnailUrl ?? resolved[0]?.url ?? null;
 }
 

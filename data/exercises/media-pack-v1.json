@@ -1,0 +1,1709 @@
+{
+  "schemaVersion": "pperfil-exercise-media-pack-v1",
+  "packVersion": "1.0.0",
+  "generatedAt": "2026-08-23T00:00:00.000Z",
+  "provider": "RepDB Free",
+  "source": {
+    "repository": "https://github.com/RepDB/exercise-dataset",
+    "commit": "045845b61e4aefd9e684fa84518b84c665ea3cd3",
+    "datasetCount": 250,
+    "datasetSha256": "03d8061189448f78ee05dbea3e65f98501fc4486340f86f6e78eaacd89cfa7ec",
+    "license": "RepDB Free Tier License v1.0",
+    "licenseUrl": "https://github.com/RepDB/exercise-dataset/blob/045845b61e4aefd9e684fa84518b84c665ea3cd3/LICENSE-DATA.md",
+    "licenseSha256": "8f736a4d3cc1aca05c25fdba69fb131d927a187ae5b3a6b370876d8de013abc9",
+    "attributionUrl": "https://github.com/RepDB/exercise-dataset/blob/045845b61e4aefd9e684fa84518b84c665ea3cd3/ATTRIBUTION.md",
+    "attributionSha256": "baa24a7c685d308ccfe28fe2fccbf12403ad6537d56c0b6189c4bcb0268f38b4",
+    "attributionText": "Exercise data by RepDB (repdb.co)",
+    "commercialInAppUse": true,
+    "redistributionAsDataset": false,
+    "generativeAiUse": false,
+    "premiumSamplesAllowed": false
+  },
+  "storage": {
+    "bucket": "trainer-public-media",
+    "prefix": "system/exercises/repdb-free-v1",
+    "public": true,
+    "cacheControl": "public, max-age=31536000, immutable"
+  },
+  "database": {
+    "mediaType": "IMAGE",
+    "provider": "REPDB_FREE_V1",
+    "licenseType": "RepDB Free Tier License v1.0",
+    "creatorCredit": "RepDB",
+    "productionStatus": "APPROVED"
+  },
+  "mappedExerciseCount": 49,
+  "mediaRecordCount": 96,
+  "skippedPriority": [
+    {
+      "pperfilName": "Agachamento goblet",
+      "reason": "Free-tier RepDB asset uses a kettlebell while the PPerfil V1 record specifies a dumbbell."
+    },
+    {
+      "pperfilName": "Remada baixa",
+      "reason": "Only a wide-grip seated cable-row asset is available; grip-specific guidance would overstate the generic PPerfil record."
+    },
+    {
+      "pperfilName": "Rosca alternada",
+      "reason": "The free-tier dumbbell curl asset does not establish alternating-arm execution."
+    },
+    {
+      "pperfilName": "Pallof press",
+      "reason": "No semantically equivalent free-tier RepDB exercise exists in the pinned snapshot."
+    },
+    {
+      "pperfilName": "Burpee",
+      "reason": "The pinned free-tier asset contains only the bottom pose and does not safely communicate the complete dynamic movement."
+    },
+    {
+      "pperfilName": "Mobilidade de quadril",
+      "reason": "Only movement-specific hip stretches exist; none safely represents the generic PPerfil mobility record."
+    }
+  ],
+  "mappings": [
+    {
+      "pperfilExerciseId": "9f1049de-221e-5a0a-b693-b48d2a5fe34e",
+      "pperfilSlug": "agachamento-livre",
+      "pperfilName": "Agachamento livre",
+      "repdbId": "squat",
+      "repdbName": "Barbell Back Squat",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact movement and barbell equipment match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/squat/",
+      "assets": [
+        {
+          "id": "adcdc24b-de2d-5af5-b0ab-a2e49ebf4193",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/squat-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/squat-start.webp",
+          "sha256": "e39e3084f50617552f45ccb03753fc618e47c03a2da2b139a34aaf07f9bbe99f",
+          "byteSize": 15622,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "cd1979cc-3ac6-5d51-8e25-a6ff933e750d",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/squat-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/squat-peak.webp",
+          "sha256": "d6913ea6c3df9962f1686e693b6dbe4edc19e26f90fa49c4cb46df400825dba2",
+          "byteSize": 17830,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "840ba735-3b2d-52ef-9dbf-71f6ac5e642d",
+      "pperfilSlug": "leg-press-45",
+      "pperfilName": "Leg press 45°",
+      "repdbId": "leg-press",
+      "repdbName": "Leg Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "RepDB free-tier asset depicts the common sled leg press used by this machine record.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/leg-press/",
+      "assets": [
+        {
+          "id": "33f75e85-e74e-5ff1-8093-dd6e03b228ae",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/leg-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-press-start.webp",
+          "sha256": "68c7769b023cab2ffd3d5fd1877fc7d2b1d102f9a1b0412ae67f9cf412f38dd2",
+          "byteSize": 32620,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "3efb1814-6a2e-5cf9-bb38-4c779be0388a",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/leg-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-press-peak.webp",
+          "sha256": "2115ffe5c1363ad8de2b4410ef20ce43aa4b4959dcd2fb77de1579772c9c49ae",
+          "byteSize": 38040,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "6d88d4ea-4f9a-558b-a5e5-6cfe3da42e11",
+      "pperfilSlug": "leg-press-horizontal",
+      "pperfilName": "Leg press horizontal",
+      "repdbId": "horizontal-leg-press",
+      "repdbName": "Horizontal Leg Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact horizontal machine movement match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/horizontal-leg-press/",
+      "assets": [
+        {
+          "id": "2f311fc6-9f59-5d0c-80f6-8d1435384fd7",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/horizontal-leg-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/horizontal-leg-press-start.webp",
+          "sha256": "d79838de764195c3f2f54a09ada23342da918f4ced4bc87670590ede9bf4e098",
+          "byteSize": 23302,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "4ed0efcd-fdaa-5e78-87fa-95024499a66f",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/horizontal-leg-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/horizontal-leg-press-peak.webp",
+          "sha256": "2d34fd87648e9e647cf1312733c3e7225fc6beec5e128de13a25346f04c16ea6",
+          "byteSize": 29858,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "05b62a25-7d65-5a2b-92aa-657896c05980",
+      "pperfilSlug": "cadeira-extensora",
+      "pperfilName": "Cadeira extensora",
+      "repdbId": "leg-extension",
+      "repdbName": "Leg Extension",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact machine knee-extension match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/leg-extension/",
+      "assets": [
+        {
+          "id": "4877bcb2-9f00-5006-9d84-b3a57942f2f0",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/leg-extension-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-extension-start.webp",
+          "sha256": "97c34b7bbd7c3278bff9b8fb5e80263f5e9254e567f8068833d611d67318b030",
+          "byteSize": 17456,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "c6bc383a-3665-58f0-a163-f56faa4e9299",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/leg-extension-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-extension-peak.webp",
+          "sha256": "04f79670ee65dd0e3ae710221942c2f3e1b27b696516ce87c8936c32539d4acc",
+          "byteSize": 19168,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "3ac26d57-5de9-5ea5-b36f-21ab0b664307",
+      "pperfilSlug": "mesa-flexora",
+      "pperfilName": "Mesa flexora",
+      "repdbId": "leg-curl",
+      "repdbName": "Lying Leg Curl",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact lying leg-curl match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/leg-curl/",
+      "assets": [
+        {
+          "id": "69f35467-2644-5b05-9ee7-d477bf17af7a",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/leg-curl-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-curl-start.webp",
+          "sha256": "9eed895562e2a3d7ade074fc59c3b56a07230a3a97ed5a3d35a0fa5eb6ed5e1f",
+          "byteSize": 20646,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "b9730d9b-3e2c-57bd-ba0b-22d000c96dca",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/leg-curl-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/leg-curl-peak.webp",
+          "sha256": "e1f4229433709ce48f3c317693a23d6a8e2525497328cad3b8235f3aad9b4911",
+          "byteSize": 21096,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "9df78aa7-6ac0-5c6a-a98b-e36df44c3895",
+      "pperfilSlug": "levantamento-terra-romeno",
+      "pperfilName": "Levantamento terra romeno",
+      "repdbId": "romanian-deadlift",
+      "repdbName": "Romanian Deadlift",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact movement and barbell equipment match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/romanian-deadlift/",
+      "assets": [
+        {
+          "id": "dcc2812a-fe1c-5f04-898b-7f72ebbe5b5e",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/romanian-deadlift-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/romanian-deadlift-start.webp",
+          "sha256": "5385feab2763a9d09e590f2f81e04fb694ca2bd9eeacfd55fb1b0d05b1cf9677",
+          "byteSize": 10440,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "1ebd6f2e-b361-5ce2-8bc5-b6c21fc3a104",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/romanian-deadlift-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/romanian-deadlift-peak.webp",
+          "sha256": "88602d0076e4401a13037daf77faa3482731f7e11c876b099704b0d9e0b11553",
+          "byteSize": 12540,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "d23d138d-f875-5059-a2f9-a40a70091ed6",
+      "pperfilSlug": "terra-romeno-com-halteres",
+      "pperfilName": "Terra romeno com halteres",
+      "repdbId": "dumbbell-romanian-deadlift",
+      "repdbName": "Dumbbell Romanian Deadlift",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact movement and dumbbell equipment match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/dumbbell-romanian-deadlift/",
+      "assets": [
+        {
+          "id": "4d2f73d6-46f6-52fe-8e44-3e9dbb64a12e",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/dumbbell-romanian-deadlift-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-romanian-deadlift-start.webp",
+          "sha256": "b314c8ca72f445b5aa5c8b7697bc61ede6740ee58ef729311b3931eee0e45f48",
+          "byteSize": 13856,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "b3cba3be-f070-530c-9f18-b99ecaca7614",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/dumbbell-romanian-deadlift-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-romanian-deadlift-peak.webp",
+          "sha256": "89cc2f28aea4da32e2988c63f1f4369a328d900c40be3f5c641e9fffbffeef65",
+          "byteSize": 10222,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "5c14e5b9-08bc-5631-9053-9b9d0e930adc",
+      "pperfilSlug": "hip-thrust",
+      "pperfilName": "Hip thrust",
+      "repdbId": "hip-thrust",
+      "repdbName": "Barbell Hip Thrust",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact barbell hip-thrust match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/hip-thrust/",
+      "assets": [
+        {
+          "id": "be82c7c0-dd5b-5751-a9d5-446124a13875",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/hip-thrust-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/hip-thrust-start.webp",
+          "sha256": "6794aee8a00e985068dedfa37bffee1c4f0a9f6d56867a27a1c948c072207a12",
+          "byteSize": 18314,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "88d8350f-6b64-5596-8042-6695657a17f2",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/hip-thrust-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/hip-thrust-peak.webp",
+          "sha256": "9ebed9ca43e730f993889992401250113c8522f6f962b96ecbc35605875d3185",
+          "byteSize": 16702,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "bb3737c1-b9d8-5318-bd19-81e70dc34f8e",
+      "pperfilSlug": "afundo",
+      "pperfilName": "Afundo",
+      "repdbId": "lunge",
+      "repdbName": "Lunge",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact bodyweight lunge match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/lunge/",
+      "assets": [
+        {
+          "id": "a8ef0870-2be7-532d-9691-61e99f6ab296",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/lunge-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lunge-start.webp",
+          "sha256": "ed90d9f5109d3ddb382534f6d4fd2089e9b57a6d01bafb034fba8f75ee6393af",
+          "byteSize": 11776,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "c109f7eb-6774-5948-a3e2-651616088c8b",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/lunge-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lunge-peak.webp",
+          "sha256": "5a7e7bce85a3e9b0d8b37288f54c76508c1925d83e87096bfe016f245313671d",
+          "byteSize": 12472,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "768779df-0cb1-5dd5-b0ed-dd4f4eac96be",
+      "pperfilSlug": "avanco-reverso-com-halteres",
+      "pperfilName": "Avanço reverso com halteres",
+      "repdbId": "reverse-lunge",
+      "repdbName": "Reverse Lunge",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact reverse-lunge and dumbbell match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/reverse-lunge/",
+      "assets": [
+        {
+          "id": "ca4eeebf-9a33-5485-930c-b566b7312286",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/reverse-lunge-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/reverse-lunge-start.webp",
+          "sha256": "6fe4ad5959ccf3a4d992330a01e6abe6cf60af04b6de2d8159ef5a5ec4d2c261",
+          "byteSize": 13720,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "b75d8aa0-7496-5566-a5bf-a12dd4e30d67",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/reverse-lunge-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/reverse-lunge-peak.webp",
+          "sha256": "e30d31de450581e6bfe146de0aeac1565350dc66b519a70b2552d18ae0fe970d",
+          "byteSize": 15896,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "32f2bbe6-17e8-513e-9502-409be5d9e289",
+      "pperfilSlug": "agachamento-bulgaro",
+      "pperfilName": "Agachamento búlgaro (Bulgarian split squat)",
+      "repdbId": "bulgarian-split-squat",
+      "repdbName": "Bulgarian Split Squat",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact Bulgarian split-squat and dumbbell match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/bulgarian-split-squat/",
+      "assets": [
+        {
+          "id": "2709c52f-fa92-51a8-90a2-b8f1157cc136",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/bulgarian-split-squat-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/bulgarian-split-squat-start.webp",
+          "sha256": "1f4cab2db267269b55c838d5a07eb5d64cd35254d1047d1523758614270fa12a",
+          "byteSize": 19082,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "202f779a-7fbf-5d9a-af0d-74be29b3805e",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/bulgarian-split-squat-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/bulgarian-split-squat-peak.webp",
+          "sha256": "d8a3ea5291af1bb8afb17f78c1cd29c2453af934b121d28dcc63cce273591e68",
+          "byteSize": 18532,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "470df95f-668d-5ef9-919a-bc17659e660d",
+      "pperfilSlug": "panturrilha-em-pe",
+      "pperfilName": "Panturrilha em pé",
+      "repdbId": "standing-calf-raise",
+      "repdbName": "Standing Calf Raise",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact standing calf machine match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/standing-calf-raise/",
+      "assets": [
+        {
+          "id": "9547979a-e7b2-545b-b308-2a42ad21cff6",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/machine-calf-raise-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/machine-calf-raise-start.webp",
+          "sha256": "811bd64a2b26039e5929ad7369af3de4874845238b960aeb251be56d5207a551",
+          "byteSize": 23640,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "44ae1261-b1a0-5ffb-ab07-47046706d5ce",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/machine-calf-raise-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/machine-calf-raise-peak.webp",
+          "sha256": "10b1c0808a7cf81a9f054b38fba90c39a61ecaff6a54cbad38b53551fb13292d",
+          "byteSize": 23394,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "f11fc7bf-c6b1-527a-80a8-7370355e529d",
+      "pperfilSlug": "panturrilha-sentada",
+      "pperfilName": "Panturrilha sentada",
+      "repdbId": "seated-calf-raise",
+      "repdbName": "Seated Calf Raise",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact seated calf machine match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/seated-calf-raise/",
+      "assets": [
+        {
+          "id": "ad01b870-9e21-5103-b883-472f662912cf",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/seated-calf-raise-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/seated-calf-raise-start.webp",
+          "sha256": "b885cb14ff2f2bd7dd54b219427ca0504150cbe8c5afc15b2aa78a90d8f4fb54",
+          "byteSize": 18080,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "774ffade-7add-51b4-8cd6-19850b38dbea",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/seated-calf-raise-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/seated-calf-raise-peak.webp",
+          "sha256": "13920bf2d5d7526241a40b1b9a73428850927250eba8379885a55a0205c3e602",
+          "byteSize": 20322,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "7f36e419-0596-56af-b697-d9ead546640a",
+      "pperfilSlug": "ponte-de-gluteos",
+      "pperfilName": "Ponte de glúteos",
+      "repdbId": "glute-bridge",
+      "repdbName": "Glute Bridge",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact bodyweight glute-bridge match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/glute-bridge/",
+      "assets": [
+        {
+          "id": "3ec9017f-7ce2-572a-aaf8-221811e7338d",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/glute-bridge-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/glute-bridge-start.webp",
+          "sha256": "34e09155d083bea5bb55e235cd5b9d61a13b302d6bc721fe01540304efc00e3d",
+          "byteSize": 11142,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "3b4cdd8b-d6cc-52c1-bc2c-ab9f7af1c85c",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/glute-bridge-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/glute-bridge-peak.webp",
+          "sha256": "e0f8f505ed78bb84f866c4d744abd9132795f0fdf7bba4547a85b8dbd24e3f92",
+          "byteSize": 12994,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "0ea1d30d-ecbc-5ed7-b7fc-529f963426d6",
+      "pperfilSlug": "levantamento-terra-sumo",
+      "pperfilName": "Levantamento terra sumo",
+      "repdbId": "sumo-deadlift",
+      "repdbName": "Sumo Deadlift",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact movement and barbell equipment match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/sumo-deadlift/",
+      "assets": [
+        {
+          "id": "17f2de74-b8b0-5fb0-94ab-f6927a55e526",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/sumo-deadlift-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/sumo-deadlift-start.webp",
+          "sha256": "12d4dedfeb2de87c358e78b2ff8007c5a9dd7853480c7cc1fca0f559497b1b8b",
+          "byteSize": 16660,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "ffb02ac1-0f45-5731-9e84-b584f09fbbb5",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/sumo-deadlift-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/sumo-deadlift-peak.webp",
+          "sha256": "7a799c518f433d9bc9f6949b95e78a185ddc19bf8d32bee3cd5828358098012a",
+          "byteSize": 16810,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "eb251d40-b1a0-5822-ad21-947355dc5ef1",
+      "pperfilSlug": "supino-reto-com-barra",
+      "pperfilName": "Supino reto com barra",
+      "repdbId": "bench-press",
+      "repdbName": "Barbell Bench Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact flat barbell bench-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/bench-press/",
+      "assets": [
+        {
+          "id": "db71aa93-0a65-5f50-bcf0-1fa258e25119",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/bench-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/bench-press-start.webp",
+          "sha256": "a14c6cf3187236330740d9a6ad3bc2cc5170d447f1ca657ad6ac5545d3cb1571",
+          "byteSize": 21554,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "1fbaa669-0f72-51dd-9038-0ef16b8ece6f",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/bench-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/bench-press-peak.webp",
+          "sha256": "8d1a88d3e497c87ee3d27840fa496c3e7a19a4f64c52521673073a5f99b8b77f",
+          "byteSize": 23314,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "7a8f194a-7e51-5637-b4ec-57f5c6fb443f",
+      "pperfilSlug": "supino-com-halteres",
+      "pperfilName": "Supino com halteres",
+      "repdbId": "db-bench-press",
+      "repdbName": "Dumbbell Bench Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact flat dumbbell bench-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/db-bench-press/",
+      "assets": [
+        {
+          "id": "3cd9e97d-eacc-5f23-b3a7-b5217278522a",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/db-bench-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/db-bench-press-start.webp",
+          "sha256": "9cc699a60007158c7540cf6b24727be4c5abcaae8a47edfa4808025f7b6eacb0",
+          "byteSize": 12970,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "07af11ec-50f3-5663-b223-804d15c4778b",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/db-bench-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/db-bench-press-peak.webp",
+          "sha256": "78b09b52d0232235dd317e4362a3743c06a057c74c555aa9e331c9292a05c62e",
+          "byteSize": 14772,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "168eff90-e2a3-5836-b121-e65b4c33a2c5",
+      "pperfilSlug": "supino-inclinado-com-barra",
+      "pperfilName": "Supino inclinado com barra",
+      "repdbId": "incline-bench-press",
+      "repdbName": "Incline Barbell Bench Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact incline barbell bench-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/incline-bench-press/",
+      "assets": [
+        {
+          "id": "08b2d292-c9fc-54cb-9286-b4b48d3be4f8",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/incline-bench-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/incline-bench-press-start.webp",
+          "sha256": "804537bd7f59f42a45c183fdfa8bdce96e9778617253e4643013dde5b0cc13cc",
+          "byteSize": 21584,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "d2474222-5774-5c17-849c-cbe9b1c14e68",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/incline-bench-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/incline-bench-press-peak.webp",
+          "sha256": "76764916f278d91d043e73ecd2feb00b566b78d76d845b58103edae06b22c4f4",
+          "byteSize": 22316,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "8c5f8a2c-66be-5b89-bc36-9db27894d071",
+      "pperfilSlug": "supino-inclinado-com-halteres",
+      "pperfilName": "Supino inclinado com halteres",
+      "repdbId": "incline-db-press",
+      "repdbName": "Incline Dumbbell Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact incline dumbbell press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/incline-db-press/",
+      "assets": [
+        {
+          "id": "0231189e-159e-5c03-ad87-0022be14ed2c",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/incline-db-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/incline-db-press-start.webp",
+          "sha256": "6d0b56825dc11ab72a74ff8313438f8e05556bc0c6b8d6d1b6da98425e585292",
+          "byteSize": 18332,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "1390aac4-eea8-51f1-94ad-5f4222d24860",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/incline-db-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/incline-db-press-peak.webp",
+          "sha256": "a991276652817062d451334f42ddf30efe3bca81d181abf9056287058492283b",
+          "byteSize": 17546,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "740da4c8-6fca-5b8b-b63f-775506ec8c42",
+      "pperfilSlug": "crucifixo-com-halteres",
+      "pperfilName": "Crucifixo com halteres",
+      "repdbId": "db-fly",
+      "repdbName": "Dumbbell Fly",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell fly match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/db-fly/",
+      "assets": [
+        {
+          "id": "988b8cd9-1b00-5c91-8fac-e73add90c8f1",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/db-fly-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/db-fly-start.webp",
+          "sha256": "96baf9b89c98466d609f08fff2e8dbd07d1a12d7cfd329be5434389a04aed8e0",
+          "byteSize": 14044,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "9e31d1bf-9cc1-5a69-af49-1a24942290b5",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/db-fly-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/db-fly-peak.webp",
+          "sha256": "34e93e53f70241044e8789cd04d0e98c08f15a05e8bd040f5d647f811ba72c74",
+          "byteSize": 12972,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "7489cf06-31f5-5252-8d57-0d4fd84488d0",
+      "pperfilSlug": "crucifixo-no-cabo",
+      "pperfilName": "Crucifixo no cabo",
+      "repdbId": "cable-fly",
+      "repdbName": "Cable Fly",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact cable fly match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/cable-fly/",
+      "assets": [
+        {
+          "id": "5f593676-7bd5-5546-9739-e5f0de59577e",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/cable-fly-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/cable-fly-start.webp",
+          "sha256": "b578214528bbd0e185e1b4cfbbcbd480c919e0df5b08ef1f0b975db3f902ec9d",
+          "byteSize": 18042,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "518bae2b-df38-547f-88f2-b7dc6df100ac",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/cable-fly-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/cable-fly-peak.webp",
+          "sha256": "38506016c2938c335c749aa7b04f2cbe4a5dd9082db12f9d856f82cb5c677fa8",
+          "byteSize": 19384,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "4de6bc6b-8257-57e3-8df5-079eb8f8636a",
+      "pperfilSlug": "flexao-de-braco",
+      "pperfilName": "Flexão de braço",
+      "repdbId": "push-up",
+      "repdbName": "Push-Up",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact standard push-up match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/push-up/",
+      "assets": [
+        {
+          "id": "a3784a7a-8634-56a9-b5af-999361ea9b50",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/push-up-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/push-up-start.webp",
+          "sha256": "55e3ebf775129451c97ccfc191e50cfb2c0a51c016bcac401477f504624554e6",
+          "byteSize": 14358,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "ee706606-3507-5ce5-8e54-33b189c4dcb6",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/push-up-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/push-up-peak.webp",
+          "sha256": "c11e6746ea723d9e5699f149eb8903172118a44c7d435a0d30551a4732a87ef3",
+          "byteSize": 15476,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "a63a056c-bf70-5a57-b470-1c6d189e5dae",
+      "pperfilSlug": "puxada-frontal",
+      "pperfilName": "Puxada frontal",
+      "repdbId": "lat-pulldown",
+      "repdbName": "Lat Pulldown",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact cable lat-pulldown match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/lat-pulldown/",
+      "assets": [
+        {
+          "id": "81cc7445-cb9e-5ba8-be40-b9b09d5d51d5",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/lat-pulldown-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lat-pulldown-start.webp",
+          "sha256": "4cb61a49bfacf947b81d86c8f6c51735bcf5e7c073297a3cb67e9a71d59292a6",
+          "byteSize": 16552,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "3d2d34c9-ac69-59a1-8b2c-a12d4b9c606e",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/lat-pulldown-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lat-pulldown-peak.webp",
+          "sha256": "5045afd713161db9944719f7168c492ca7d9a822bc54c9cd23b085b3c904810c",
+          "byteSize": 16258,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "c09cb723-4064-5ab8-aa35-5f94036aa0db",
+      "pperfilSlug": "barra-fixa-assistida",
+      "pperfilName": "Barra fixa assistida",
+      "repdbId": "assisted-pull-ups",
+      "repdbName": "Assisted Pull Ups",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact assisted pull-up machine match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/assisted-pull-ups/",
+      "assets": [
+        {
+          "id": "03f08646-d33a-5100-a528-d4fb3a3ee3b4",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/assisted-pull-ups-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/assisted-pull-ups-start.webp",
+          "sha256": "9480c74d6c29b39251fc77c2e13edd406e212027bc2031f4a98587d58c6f82d9",
+          "byteSize": 20416,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "567e55f6-bd83-5723-a6dc-caacd94aa2c3",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/assisted-pull-ups-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/assisted-pull-ups-peak.webp",
+          "sha256": "b98c126192dcbf9733c2276d0fe017f282055b4de91129f5fcc32b7d2aed7c3e",
+          "byteSize": 21630,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "2f07b2a7-ae3b-538c-bf11-d65e9fe97444",
+      "pperfilSlug": "barra-fixa",
+      "pperfilName": "Barra fixa",
+      "repdbId": "pull-up",
+      "repdbName": "Pull-Up",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact pronated pull-up match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/pull-up/",
+      "assets": [
+        {
+          "id": "c77d6b2a-0e6f-5f63-8bb3-5b32a22dbaf3",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/pull-up-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/pull-up-start.webp",
+          "sha256": "59f142697771f71a5070e3a357c22b001d6f172e5cb74247f949410513418514",
+          "byteSize": 10902,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "954e5ed6-cd86-560c-bfda-5e822ad134ad",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/pull-up-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/pull-up-peak.webp",
+          "sha256": "f4c8c624ba27f8f9efd969cf066f24ef388e3ed68dcd287f55927d8b50a9aace",
+          "byteSize": 10124,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "d7be572a-ccad-52ab-bbb8-0c220254b8cc",
+      "pperfilSlug": "chin-up",
+      "pperfilName": "Chin-up na barra",
+      "repdbId": "chin-ups",
+      "repdbName": "Chin-Ups",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact supinated chin-up match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/chin-ups/",
+      "assets": [
+        {
+          "id": "b97ba8c2-e39b-586d-8dae-bfa4eb29ef95",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/chin-ups-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/chin-ups-start.webp",
+          "sha256": "f4b755068366d3ab7d0b961ccc4a53f140efd18d1eac977914cefaf39a4294af",
+          "byteSize": 10366,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "270d4739-e6f3-5649-a6a3-16cdac2941ce",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/chin-ups-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/chin-ups-peak.webp",
+          "sha256": "3246475a8bde7964925db5b6130873dea2f79c9e0e78f611259f59758a3a95b2",
+          "byteSize": 10302,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "0c32c495-f75d-54b5-8554-62c7cd0706db",
+      "pperfilSlug": "remada-curvada",
+      "pperfilName": "Remada curvada",
+      "repdbId": "barbell-row",
+      "repdbName": "Bent-Over Barbell Row",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact bent-over barbell row match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/barbell-row/",
+      "assets": [
+        {
+          "id": "92270e95-c221-5474-9f84-6bc2bfc77f02",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/barbell-row-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/barbell-row-start.webp",
+          "sha256": "c16991dc8f4ff4cf505237c9236f7fdd13f69911e478ba61ecf02a90ec744d94",
+          "byteSize": 19438,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "93665c59-9dd8-53fd-9fe7-1a72262acc9e",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/barbell-row-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/barbell-row-peak.webp",
+          "sha256": "20a9acc8e7f5ef5015efafbf9c6bc9c0fc1731e4a69c795ab64775717e0fe054",
+          "byteSize": 18656,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "695d82c8-d713-597f-9eb5-d31740260d55",
+      "pperfilSlug": "remada-unilateral",
+      "pperfilName": "Remada unilateral com halter",
+      "repdbId": "single-arm-db-row",
+      "repdbName": "Single-Arm Dumbbell Row",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact single-arm dumbbell row match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/single-arm-db-row/",
+      "assets": [
+        {
+          "id": "617aea2f-e3eb-56d9-8d5a-6863cb65aff1",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/single-arm-db-row-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/single-arm-db-row-start.webp",
+          "sha256": "e0d787511325cb1e77d14bad496620f8f2bb8a21a9811aa19139b26080cf4434",
+          "byteSize": 16796,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "e91d72f6-408e-5583-b7c4-3ae7212f73d3",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/single-arm-db-row-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/single-arm-db-row-peak.webp",
+          "sha256": "2b02e7108c14fe6b77f298d6bff65fdb905db9bc377cd18488550b0fccf954b0",
+          "byteSize": 17034,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "1f0f98d6-fb21-50a1-afb3-3574b718bd99",
+      "pperfilSlug": "remada-apoiada-no-banco",
+      "pperfilName": "Remada apoiada no banco",
+      "repdbId": "chest-supported-db-row",
+      "repdbName": "Chest-Supported Dumbbell Row",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact chest-supported dumbbell row match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/chest-supported-db-row/",
+      "assets": [
+        {
+          "id": "464bc348-6abd-5a8a-b7b4-310f6893283b",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/chest-supported-db-row-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/chest-supported-db-row-start.webp",
+          "sha256": "b4b4929774690b2dd3554e1454ef7601df74779a95ae5fe18f9b7db6d9f5f1d1",
+          "byteSize": 18946,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "689ab83d-1aa5-53af-8637-a8ac7a1cd3c9",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/chest-supported-db-row-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/chest-supported-db-row-peak.webp",
+          "sha256": "3edf04c1ce452de08b36d59398c40b0b8a3cd0f8bef847601a1638f8191690c4",
+          "byteSize": 19820,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "494cc45a-16d6-5b9c-bbd7-ee48d90f300a",
+      "pperfilSlug": "remada-invertida",
+      "pperfilName": "Remada invertida",
+      "repdbId": "inverted-row",
+      "repdbName": "Inverted Row",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact inverted-row match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/inverted-row/",
+      "assets": [
+        {
+          "id": "9dd89652-533b-56a8-b62c-facbb8cb87f3",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/inverted-row-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/inverted-row-start.webp",
+          "sha256": "7f9c309c4a05632ee2a7db58fe39f3665541f2a5194dc1d711012fb85d27b218",
+          "byteSize": 18826,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "b25b1918-177c-5236-a6d4-d57b758c9309",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/inverted-row-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/inverted-row-peak.webp",
+          "sha256": "6b4e7b6bec2ec479d354ae6980276c052cbd1639104b45fff47ad9dc7dc96c34",
+          "byteSize": 19762,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "fd7e55b7-32dd-5ebe-a440-29d5a5f44123",
+      "pperfilSlug": "desenvolvimento-com-halteres",
+      "pperfilName": "Desenvolvimento com halteres",
+      "repdbId": "dumbbell-shoulder-press",
+      "repdbName": "Dumbbell Shoulder Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell shoulder-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/dumbbell-shoulder-press/",
+      "assets": [
+        {
+          "id": "250e4f3b-d7a5-5ff2-9d80-99f6fc9be0b2",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/dumbbell-shoulder-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-shoulder-press-start.webp",
+          "sha256": "296d2bd82e662d31cf9d87d00be61a5e6707f47216e9a514f59765c61ef9db2d",
+          "byteSize": 12610,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "fe85ef50-583e-59e7-ba72-d74160d48119",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/dumbbell-shoulder-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-shoulder-press-peak.webp",
+          "sha256": "f3586a0a3c0cb9137e15959e125e870399a57727cbf531981c8b1cf6a92b6cfb",
+          "byteSize": 12322,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "d16979d6-0982-5bf3-8b5c-54bb445cc823",
+      "pperfilSlug": "desenvolvimento-militar",
+      "pperfilName": "Desenvolvimento militar com barra",
+      "repdbId": "ohp",
+      "repdbName": "Barbell Overhead Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact barbell overhead-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/ohp/",
+      "assets": [
+        {
+          "id": "df22e8e8-7f4f-5982-9376-b04567e49f00",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/ohp-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/ohp-start.webp",
+          "sha256": "4d7cd73c2a1cc1f4312b312bb1e08b83cd7393c47b85a47aa2b64d96539e9cdb",
+          "byteSize": 14646,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "36679268-fe5a-5bca-812f-8f0abe15cd7a",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/ohp-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/ohp-peak.webp",
+          "sha256": "896371a20c1d8c3ed929a79360adfca2fc76248cdcf7746a610c14115e5bb76e",
+          "byteSize": 14164,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "85a56665-e010-5974-b40f-e4ff98e41f61",
+      "pperfilSlug": "elevacao-lateral",
+      "pperfilName": "Elevação lateral",
+      "repdbId": "lateral-raise",
+      "repdbName": "Dumbbell Lateral Raise",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell lateral-raise match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/lateral-raise/",
+      "assets": [
+        {
+          "id": "8c23dc9b-86d2-5444-86f9-fc2afe3880c3",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/lateral-raise-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lateral-raise-start.webp",
+          "sha256": "6993bfa0e16b060901792e7500b9e5481f15e93a24c3f7fc7c733316de6b6e2e",
+          "byteSize": 13098,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "d3bed173-65a8-58ed-8873-8762c14204d0",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/lateral-raise-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/lateral-raise-peak.webp",
+          "sha256": "65f3e3180a2ff014664e485266032beb75d336af89998ee526941008bb58306b",
+          "byteSize": 14494,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "e71ccc24-5323-569a-a78d-b4ffea4f0771",
+      "pperfilSlug": "elevacao-frontal",
+      "pperfilName": "Elevação frontal",
+      "repdbId": "dumbbell-front-raise",
+      "repdbName": "Dumbbell Front Raise",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell front-raise match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/dumbbell-front-raise/",
+      "assets": [
+        {
+          "id": "ec657e55-f470-5f8b-9892-96ecba722c95",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/dumbbell-front-raise-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-front-raise-start.webp",
+          "sha256": "bc0ada2f3dde4b113c0e2eab3382120bccf97971cd8db5df808b328abc038b8c",
+          "byteSize": 9734,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "784dbf57-34d4-5c03-9f12-07406dd9e887",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/dumbbell-front-raise-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dumbbell-front-raise-peak.webp",
+          "sha256": "4d70c650923be420a3d2ea896d850c5e9215732a4223e2c7670b21532f7f6775",
+          "byteSize": 9406,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "008f25f9-7e8d-5d30-a636-d946aca1d15d",
+      "pperfilSlug": "face-pull",
+      "pperfilName": "Face pull",
+      "repdbId": "face-pull",
+      "repdbName": "Cable Face Pull",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact cable face-pull match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/face-pull/",
+      "assets": [
+        {
+          "id": "fafcf2a6-5393-5216-9105-0c31d50c1949",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/face-pull-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/face-pull-start.webp",
+          "sha256": "49cdf614803a02e4b4f9d288706b0ddaceffbee5a6fba489a1cc49cbc0963dc1",
+          "byteSize": 11526,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "6bc9606b-02fe-5d6d-9d2b-670b02ba946a",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/face-pull-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/face-pull-peak.webp",
+          "sha256": "8170fd3885e7fa30ca7371aa5af4707c17ff7db7c0b52e038d6ca2b26e32be32",
+          "byteSize": 11848,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "6e1bd959-a680-526b-acd2-5679daa66356",
+      "pperfilSlug": "rosca-direta",
+      "pperfilName": "Rosca direta",
+      "repdbId": "barbell-curl",
+      "repdbName": "Barbell Curl",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact barbell curl match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/barbell-curl/",
+      "assets": [
+        {
+          "id": "5a5ed614-b5d6-5f94-886d-255a3822c538",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/barbell-curl-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/barbell-curl-start.webp",
+          "sha256": "46996e2bf0a2269609ac42052af37a211be045ee82dd1fb735c3aeea738ad4dc",
+          "byteSize": 15916,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "75282bc2-8de3-5ddf-98de-bb5d29c23255",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/barbell-curl-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/barbell-curl-peak.webp",
+          "sha256": "1eef7447817995ae697d976df59605a713ccec8048dd842e07f6dc9b4532d531",
+          "byteSize": 14308,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "1d3651ff-f3c0-5914-8b24-af278914aa71",
+      "pperfilSlug": "rosca-martelo",
+      "pperfilName": "Rosca martelo",
+      "repdbId": "hammer-curl",
+      "repdbName": "Dumbbell Hammer Curl",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell hammer-curl match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/hammer-curl/",
+      "assets": [
+        {
+          "id": "9fe42900-5bb1-5a67-878e-02e7681541db",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/hammer-curl-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/hammer-curl-start.webp",
+          "sha256": "15f3b7da1ecd7f01d7db5878914a969d49c720dc0450f327d849d4c3dae15596",
+          "byteSize": 14092,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "ca2887a2-a42d-5ca5-a337-0673f7e74e4b",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/hammer-curl-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/hammer-curl-peak.webp",
+          "sha256": "90a5a56b4801abb2fe31b420e0131499fe8688123db5a2c4b01a0741d0a522e4",
+          "byteSize": 15046,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "209c01e3-9f7c-57cb-b0ab-2aeafa6bc787",
+      "pperfilSlug": "rosca-concentrada",
+      "pperfilName": "Rosca concentrada",
+      "repdbId": "concentration-curl",
+      "repdbName": "Concentration Curl",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell concentration-curl match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/concentration-curl/",
+      "assets": [
+        {
+          "id": "76782c3f-8088-591c-837a-18c943888c99",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/concentration-curl-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/concentration-curl-start.webp",
+          "sha256": "6b0a1027cc39cd7440ccb0abdff1de66c974264bd0c00d7eeb82c77faf986843",
+          "byteSize": 20896,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "380cc207-902a-5011-aa3f-5b7dc1c60e39",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/concentration-curl-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/concentration-curl-peak.webp",
+          "sha256": "1629bcd7d5ae46c6a6d4022f6972e28f81e8ed8376bb52d9f59aff557181a339",
+          "byteSize": 21390,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "1152438f-e085-55f2-aa09-1c00dcc06305",
+      "pperfilSlug": "rosca-scott",
+      "pperfilName": "Rosca Scott",
+      "repdbId": "preacher-curl",
+      "repdbName": "Preacher Curl",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact preacher-curl pattern and supported-bar setup match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/preacher-curl/",
+      "assets": [
+        {
+          "id": "d54e3a8b-b4b5-5328-8788-cc1aa92258aa",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/preacher-curl-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/preacher-curl-start.webp",
+          "sha256": "07bd210521c7961c71d475e843ddda7b3a6f1407fc3cda52c7f1466ba9be9281",
+          "byteSize": 22554,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "fb1eac5f-079a-53d7-b850-b649452993c8",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/preacher-curl-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/preacher-curl-peak.webp",
+          "sha256": "75c5d9959105d42b641698676e1264be9d0d10b3f679737b34d0ee19f8362d30",
+          "byteSize": 25156,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "846a6af4-96fd-54c4-95f3-bae27b9e88d7",
+      "pperfilSlug": "triceps-na-polia",
+      "pperfilName": "Tríceps na polia",
+      "repdbId": "tricep-pushdown",
+      "repdbName": "Cable Tricep Pushdown",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact cable triceps-pushdown match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/tricep-pushdown/",
+      "assets": [
+        {
+          "id": "91c17d1f-dc6f-5aa3-b5b8-db2ff56b3802",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/tricep-pushdown-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/tricep-pushdown-start.webp",
+          "sha256": "6a95910acc7e22141b0fb6c71d866251f6b18eb59f10d380acd72e742f14e648",
+          "byteSize": 11690,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "a4be82ec-24e0-532f-bfab-0570f08bec1f",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/tricep-pushdown-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/tricep-pushdown-peak.webp",
+          "sha256": "81a2548ce43e8e13a9f50b8cf9f57b5475db6a86efaf2151f7f5e067f03b1f58",
+          "byteSize": 14376,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "2ecb2d3b-9986-555c-947e-fa1f8aaeb1f1",
+      "pperfilSlug": "triceps-frances",
+      "pperfilName": "Tríceps francês",
+      "repdbId": "overhead-tricep-extension",
+      "repdbName": "Overhead Tricep Extension",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dumbbell overhead triceps-extension match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/overhead-tricep-extension/",
+      "assets": [
+        {
+          "id": "77bff16a-a112-50ce-a909-04ce32043a7d",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/overhead-tricep-extension-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/overhead-tricep-extension-start.webp",
+          "sha256": "b3ed4b231cc35471873a7e27b12476090ad269505c671571ac03d5a99e18d9ce",
+          "byteSize": 10826,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "0e90d6a2-70cf-539f-b450-0a5c232cacfc",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/overhead-tricep-extension-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/overhead-tricep-extension-peak.webp",
+          "sha256": "cd8dba7e3e81e8d844e8274be544480187127b7929bff3bb11476e54c45b36b2",
+          "byteSize": 12084,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "79e59779-96cb-5fb6-9dc6-9d778470a118",
+      "pperfilSlug": "triceps-testa",
+      "pperfilName": "Tríceps testa",
+      "repdbId": "skull-crusher",
+      "repdbName": "Skull Crusher",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact barbell skull-crusher match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/skull-crusher/",
+      "assets": [
+        {
+          "id": "5644bbba-c19c-5b99-ad53-e9eefe755499",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/skull-crusher-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/skull-crusher-start.webp",
+          "sha256": "94e636b16e8d085ee986dd3eb7f54f577bf0c6542166755e8f7a9301912b35d0",
+          "byteSize": 15526,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "338956c7-d38c-5e5a-8286-754a55c4e148",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/skull-crusher-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/skull-crusher-peak.webp",
+          "sha256": "bf3bf82823c14df3e9452ae70e48a438e41204f4f1991ab3346f77e9e3918a3b",
+          "byteSize": 13286,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "31f874d9-fe82-5e61-b3ae-7b2d711a668b",
+      "pperfilSlug": "supino-fechado",
+      "pperfilName": "Supino fechado",
+      "repdbId": "close-grip-bench-press",
+      "repdbName": "Close-Grip Bench Press",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact close-grip barbell bench-press match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/close-grip-bench-press/",
+      "assets": [
+        {
+          "id": "74b80172-d2fc-5669-8930-28ed27b9105f",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/close-grip-bench-press-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/close-grip-bench-press-start.webp",
+          "sha256": "11bf151372ad6adb39236873d41cf112956179e19d3b7fb6f2453235b0663ea9",
+          "byteSize": 16412,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "e582e08d-6321-5413-9891-058c82aa8684",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/close-grip-bench-press-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/close-grip-bench-press-peak.webp",
+          "sha256": "e2feef83caac3f033c03e0c4d10203357f07d9e42696b7be6524f7ef00bb63cb",
+          "byteSize": 16602,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "4d1a476c-a999-5072-a767-522493137431",
+      "pperfilSlug": "prancha",
+      "pperfilName": "Prancha",
+      "repdbId": "plank",
+      "repdbName": "Plank",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact forearm plank match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/plank/",
+      "assets": [
+        {
+          "id": "3633b226-4513-5d7a-9563-a9557e710f3a",
+          "role": "main",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/plank-main.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/plank-main.webp",
+          "sha256": "cfa10a00babd09bce62e5953007fc4b322757fda54d7379c3042acc27676263e",
+          "byteSize": 15364,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "052464ed-ad01-5f5c-a75e-8ce14fe0a62c",
+      "pperfilSlug": "abdominal",
+      "pperfilName": "Abdominal",
+      "repdbId": "crunches",
+      "repdbName": "Crunches",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact standard bodyweight crunch match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/crunches/",
+      "assets": [
+        {
+          "id": "19b76eff-fb77-5832-b00c-5dc715bf4633",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/crunches-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/crunches-start.webp",
+          "sha256": "54aafb1a0490f6e6ea8cfbf575e611c3ed033730176f6605b1b981797b8772e4",
+          "byteSize": 11014,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "e3b0ebd6-c6ba-587e-8e5c-edad37eddc97",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/crunches-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/crunches-peak.webp",
+          "sha256": "be9f8794c3a9b8a5f7337d09d91a79355cc627ad30605a6a6538990b2d2c20bb",
+          "byteSize": 13588,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "edd4b6f2-97d8-5f72-822b-560ff5c34a99",
+      "pperfilSlug": "dead-bug",
+      "pperfilName": "Dead bug",
+      "repdbId": "dead-bug",
+      "repdbName": "Dead Bug",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact dead-bug match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/dead-bug/",
+      "assets": [
+        {
+          "id": "bf35560d-372c-5126-9172-dd2d0d828bf1",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/dead-bug-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dead-bug-start.webp",
+          "sha256": "9fd217b722f1b49607903917c554e7532dfb77266f67543efc76ed416c3e434c",
+          "byteSize": 15230,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "d62c1976-e0fd-5841-ac54-9a6af98976c8",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/dead-bug-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/dead-bug-peak.webp",
+          "sha256": "cd83d2f7aec12bfc04eafbdf6b2067443dd7194f1a34bb53ed8f79e67ad3f187",
+          "byteSize": 13054,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "88865959-d17e-5f37-9499-296c5f0790b2",
+      "pperfilSlug": "mountain-climber",
+      "pperfilName": "Mountain climber",
+      "repdbId": "mountain-climbers",
+      "repdbName": "Mountain Climbers",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact mountain-climber match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/mountain-climbers/",
+      "assets": [
+        {
+          "id": "0edead0c-d4ab-5b64-bf35-a1b1bc0f5903",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/mountain-climbers-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/mountain-climbers-start.webp",
+          "sha256": "140332bb263e70bfe63157f34fe88f6e4d6d81e6350673f93ccfac96feaf723f",
+          "byteSize": 13920,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "893e0771-4978-5018-a2ee-60056b4c0999",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/mountain-climbers-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/mountain-climbers-peak.webp",
+          "sha256": "8dd7f77ab3106dfb0cb1a7f2bac7e663a41342a09efa7bb8082caa733c45f04b",
+          "byteSize": 14600,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "78d5930f-d5f5-5e36-b72a-e1ab5dfbe1e3",
+      "pperfilSlug": "polichinelo",
+      "pperfilName": "Polichinelo",
+      "repdbId": "jumping-jacks",
+      "repdbName": "Jumping Jacks",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "Exact jumping-jack match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/jumping-jacks/",
+      "assets": [
+        {
+          "id": "c4fb5d6e-ffcc-5e2d-9114-672d3bef30ab",
+          "role": "start",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/jumping-jacks-start.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/jumping-jacks-start.webp",
+          "sha256": "3f5d49c59ae5ac7dbf9481a3d340fa00f9eb4baea496ba71ab300167ffde8d3b",
+          "byteSize": 13428,
+          "width": 512,
+          "height": 512
+        },
+        {
+          "id": "56b950d6-eb49-508c-baf5-222f55fb08d7",
+          "role": "peak",
+          "sortOrder": 1,
+          "sourcePath": "images/flat/jumping-jacks-peak.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/jumping-jacks-peak.webp",
+          "sha256": "55568810eb4b52992e774201b2e38b1cebba6af1d025202efd7ce4b7ca4918bc",
+          "byteSize": 14150,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    },
+    {
+      "pperfilExerciseId": "6e3d415a-e196-574d-8133-1e1f280962e7",
+      "pperfilSlug": "mobilidade-de-ombro",
+      "pperfilName": "Mobilidade de ombro",
+      "repdbId": "banded-shoulder-stretch",
+      "repdbName": "Banded Shoulder Stretch",
+      "matchingConfidence": "HIGH",
+      "matchingRationale": "High-confidence resistance-band shoulder mobility match.",
+      "sourceUrl": "https://exercise-dataset.com/exercise/banded-shoulder-stretch/",
+      "assets": [
+        {
+          "id": "aca2db5d-e351-56be-a15d-699ca6c29e10",
+          "role": "main",
+          "sortOrder": 0,
+          "sourcePath": "images/flat/banded-shoulder-stretch-main.webp",
+          "storagePath": "trainer-public-media/system/exercises/repdb-free-v1/banded-shoulder-stretch-main.webp",
+          "sha256": "8d18681cde96567ee6d1b357590d51d2e22d926006d35f46b0d95b322816229a",
+          "byteSize": 11246,
+          "width": 512,
+          "height": 512
+        }
+      ]
+    }
+  ]
+}

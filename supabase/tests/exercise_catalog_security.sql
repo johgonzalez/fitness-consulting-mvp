@@ -58,7 +58,7 @@ insert into exercise_catalog_gate_results values
   ('Search halter returns localized results', jsonb_array_length(public.search_exercise_library('halter',100)) >= 10),
   ('Search cabo returns localized results', jsonb_array_length(public.search_exercise_library('cabo',100)) >= 10),
   ('Search costas returns localized results', jsonb_array_length(public.search_exercise_library('costas',100)) >= 2),
-  ('SYSTEM catalog exposes no unapproved media', not jsonb_path_exists(public.search_exercise_library('agachamento livre',10), '$[*].media[*]')),
+  ('SYSTEM catalog exposes only approved media', not jsonb_path_exists(public.search_exercise_library('agachamento livre',10), '$[*].media[*] ? (@.production_status != "APPROVED")')),
   ('Trainer cannot mutate SYSTEM exercise directly', pg_temp.raises($sql$update public.exercises set name = 'Unsafe' where slug = 'agachamento-livre'$sql$));
 
 insert into exercise_catalog_gate_context
@@ -96,7 +96,8 @@ select public.upsert_workout_set(
 );
 insert into exercise_catalog_gate_results values
   ('Builder adds real SYSTEM exercise to DRAFT', public.get_trainer_workout_version((select value from exercise_catalog_gate_context where key='version')) #>> '{sessions,0,sections,0,exercises,0,exercise,name}' = 'Supino reto com barra'),
-  ('Builder receives premium media fallback state', coalesce(jsonb_array_length(public.get_trainer_workout_version((select value from exercise_catalog_gate_context where key='version')) #> '{sessions,0,sections,0,exercises,0,exercise,media}'), 0) = 0);
+  ('Builder receives approved SYSTEM media', coalesce(jsonb_array_length(public.get_trainer_workout_version((select value from exercise_catalog_gate_context where key='version')) #> '{sessions,0,sections,0,exercises,0,media}'), 0) = 2),
+  ('Unmapped SYSTEM exercise retains fallback state', coalesce(jsonb_array_length(public.search_exercise_library('agachamento goblet',10) #> '{0,media}'), 0) = 0);
 
 select public.replace_workout_exercise(
   (select value from exercise_catalog_gate_context where key='prescribed'),
