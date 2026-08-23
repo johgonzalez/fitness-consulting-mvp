@@ -612,8 +612,26 @@
   .ppv3-page-head .ppv3-button--primary{display:none}
   .ppv3-grid{gap:11px}
   .ppv3-card{border-radius:21px}
+  .ppv3-hero{order:0}
   .ppv3-hero h2{font-size:2.375rem}
-  .ppv3-kpi{grid-column:span 12}
+  .ppv3-kpi{
+    grid-column:span 6;
+    order:1;
+    min-height:96px;
+    padding:13px;
+    border-radius:18px;
+  }
+  .ppv3-kpi__top{align-items:flex-start;gap:6px}
+  .ppv3-kpi__top small{max-width:82px;font-size:.58rem;font-weight:650;line-height:1.25;text-align:right}
+  .ppv3-kpi__icon{width:30px;height:30px;border-radius:9px}
+  .ppv3-kpi__icon svg{width:14px;height:14px}
+  .ppv3-kpi strong{font-size:1.5rem;line-height:1}
+  .ppv3-kpi p{font-size:.49rem;line-height:1.35}
+  .ppv3-site-card{order:2}
+  .ppv3-acquisition{order:3}
+  .ppv3-attention{order:4}
+  .ppv3-students{order:5}
+  .ppv3-rail{order:6}
   .ppv3-funnel__row{grid-template-columns:92px minmax(0,1fr) 34px}
   .ppv3-student-table__head{display:none}
   .ppv3-student-row{grid-template-columns:minmax(0,1fr) auto}
