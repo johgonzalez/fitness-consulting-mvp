@@ -10,6 +10,7 @@ import "./responsive.css";
 import "./saas.css";
 import "./pperfil-design-system.css";
 import "./assessments.css";
+import "./student-workouts.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });

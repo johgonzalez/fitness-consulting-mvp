@@ -194,6 +194,21 @@ export const workoutExecutionDemoCompleted = buildSnapshot(
   Number.MAX_SAFE_INTEGER,
 );
 
+export const workoutExecutionDemoStarted = buildSnapshot(
+  published,
+  publishedNotStarted,
+  "5b500000-0000-4000-8000-000000000004",
+  "IN_PROGRESS",
+  0,
+);
+
+export function getDemoWorkoutExecutionForSession(workoutSessionId: string): WorkoutExecutionSnapshot | null {
+  if (workoutExecutionDemoInProgress.session.id === workoutSessionId) return structuredClone(workoutExecutionDemoInProgress);
+  if (workoutExecutionDemoPaused.session.id === workoutSessionId) return structuredClone(workoutExecutionDemoPaused);
+  if (workoutExecutionDemoStarted.session.id === workoutSessionId) return structuredClone(workoutExecutionDemoStarted);
+  return null;
+}
+
 const notStartedExerciseCount = publishedNotStarted.sections.reduce((sum, section) => sum + section.exercises.length, 0);
 const notStartedSetCount = publishedNotStarted.sections.reduce((sum, section) => sum + section.exercises.reduce((inner, exercise) => inner + exercise.sets.length, 0), 0);
 const firstNotStartedMedia = publishedNotStarted.sections.flatMap((section) => section.exercises).flatMap((exercise) => exercise.exercise.media).find((media) => media.productionStatus === "APPROVED") ?? null;
