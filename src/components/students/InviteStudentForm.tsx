@@ -1,0 +1,4 @@
+"use client";
+import { useActionState } from "react";
+import { inviteStudentAction } from "@/app/actions/students";
+export function InviteStudentForm(){const[state,action,pending]=useActionState(inviteStudentAction,{});return <form action={action} className="matrix-invite-form"><label>Nome<input name="name" autoComplete="name" maxLength={120} required placeholder="Nome do aluno"/></label><label>E-mail<input name="email" type="email" autoComplete="email" maxLength={320} required placeholder="aluno@email.com"/></label><button disabled={pending}>{pending?"Criando convite…":"Criar convite"}</button>{state.message?<p className={`matrix-message ${state.ok?"success":"error"}`} role="status">{state.message}</p>:null}{state.inviteUrl?<div className="dev-invite"><span>Link de desenvolvimento — exibido uma única vez</span><a href={state.inviteUrl}>{state.inviteUrl}</a></div>:null}</form>}

@@ -1,0 +1,5 @@
+import { Ban, UserRoundPlus } from "lucide-react";
+import { convertLeadAction, rejectLeadAction } from "@/app/actions/students";
+import type { LeadLifecycleState } from "@/lib/domain/students";
+import { ActionForm } from "@/components/students/ActionForm";
+export function LeadLifecycleActions({id,state,hasEmail}:{id:string;state:LeadLifecycleState;hasEmail:boolean}){if(state==="converted"||state==="rejected"||state==="expired")return <div className="lead-terminal"><strong>{state==="converted"?"Lead convertido":state==="rejected"?"Lead rejeitado":"Reserva expirada"}</strong><p>{state==="expired"?"O prazo terminou e a conversão foi bloqueada pelo servidor.":"Esta decisão está registrada e o histórico foi preservado."}</p></div>;return <div className="lead-primary-actions"><ActionForm action={rejectLeadAction} fields={{match_id:id}} className="reject-action"><Ban/> Rejeitar lead</ActionForm><ActionForm action={convertLeadAction} fields={{match_id:id}} className="convert-action"><UserRoundPlus/> Converter</ActionForm>{!hasEmail?<p className="matrix-message error">A conversão exige um e-mail de convite.</p>:null}</div>}

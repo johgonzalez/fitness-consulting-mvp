@@ -4,6 +4,7 @@ import type {
   AssessmentDetail,
   AssessmentSummary,
   CreateAssessmentInput,
+  UpdateDraftAssessmentInput,
 } from "@/lib/domain/assessments";
 import {
   assertFutureIsoTimestamp,
@@ -32,6 +33,18 @@ export class AssessmentService {
     }
     assertFutureIsoTimestamp(input.dueAt, "dueAt");
     return this.repository.createFromTemplate(input);
+  }
+
+  updateDraftMetadata(input: UpdateDraftAssessmentInput): Promise<void> {
+    assertUuid(input.assessmentId, "assessmentId");
+    if (input.title.trim().length < 2 || input.title.trim().length > 160) {
+      throw new Error("title must contain 2-160 characters.");
+    }
+    if (typeof input.isRequired !== "boolean") throw new Error("isRequired must be a boolean.");
+    if (input.dueAt !== null && !Number.isFinite(Date.parse(input.dueAt))) {
+      throw new Error("dueAt must be an ISO timestamp or null.");
+    }
+    return this.repository.updateDraftMetadata({ ...input, title: input.title.trim() });
   }
 
   send(assessmentId: string): Promise<void> {

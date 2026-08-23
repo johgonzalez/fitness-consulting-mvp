@@ -8,6 +8,7 @@ import type {
 import type {
   AssessmentAnswerValue,
   AssessmentDetail,
+  AssessmentEvent,
   AssessmentSummary,
   AssessmentTemplateSummary,
   AssessmentTemplateVersionSummary,
@@ -15,6 +16,7 @@ import type {
   SaveAssessmentAnswerInput,
   StudentMeasurement,
   StudentPrivateMediaMetadata,
+  UpdateDraftAssessmentInput,
 } from "@/lib/domain/assessments";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -163,6 +165,17 @@ implements AssessmentRepository, AssessmentTemplateRepository, StudentProgressRe
     return data;
   }
 
+  async updateDraftMetadata(input: UpdateDraftAssessmentInput): Promise<void> {
+    const supabase = await requireAuthenticatedClient();
+    const { error } = await supabase.rpc("update_draft_assessment", {
+      p_assessment_id: input.assessmentId,
+      p_title: input.title,
+      p_is_required: input.isRequired,
+      p_due_at: input.dueAt,
+    });
+    if (error) throw new Error(error.message);
+  }
+
   async send(assessmentId: string): Promise<void> {
     const supabase = await requireAuthenticatedClient();
     const { error } = await supabase.rpc("send_assessment", { p_assessment_id: assessmentId });
@@ -199,6 +212,24 @@ implements AssessmentRepository, AssessmentTemplateRepository, StudentProgressRe
       p_trainer_feedback: trainerFeedback,
     });
     if (error) throw new Error("Unable to complete the assessment.");
+  }
+
+  async listEvents(assessmentId: string): Promise<AssessmentEvent[]> {
+    const supabase = await requireAuthenticatedClient();
+    const { data, error } = await supabase
+      .from("assessment_events")
+      .select("id,assessment_id,event_type,actor_user_id,metadata,created_at")
+      .eq("assessment_id", assessmentId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error("Unable to load assessment history.");
+    return (data ?? []).map((row) => ({
+      id: row.id as string,
+      assessmentId: row.assessment_id as string,
+      eventType: row.event_type as AssessmentEvent["eventType"],
+      actorUserId: row.actor_user_id as string,
+      metadata: (row.metadata ?? {}) as Record<string, unknown>,
+      createdAt: row.created_at as string,
+    }));
   }
 
   async listAvailable(): Promise<AssessmentTemplateSummary[]> {

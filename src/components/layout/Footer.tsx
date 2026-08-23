@@ -1,16 +1,18 @@
 import { ArrowUpRight } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import type { PublicTrainerProfile } from "@/lib/domain/trainer";
 
-export function Footer() {
+export function Footer({ profile }: { profile: PublicTrainerProfile }) {
+  const initials = profile.display_name.split(" ").map((part) => part[0]).slice(0, 2).join("");
   return (
     <footer className="footer">
       <div className="container footer-grid">
         <div>
-          <div className="brand"><span className="brand-mark">{siteConfig.initials}</span><span><strong>{siteConfig.name}</strong><small>{siteConfig.descriptor}</small></span></div>
+          <div className="brand"><span className="brand-mark">{initials}</span><span><strong>{profile.display_name}</strong><small>Personal Trainer</small></span></div>
           <p>Consultoria fitness online com estratégia, proximidade e consistência.</p>
         </div>
         <div><h3>Navegação</h3><a href="#como-funciona">Como funciona</a><a href="#beneficios">Benefícios</a><a href="#oferta">Consultoria</a><a href="#duvidas">Dúvidas</a></div>
-        <div><h3>Perfil demonstrativo</h3><span>{siteConfig.location}</span><span>CREF {siteConfig.professionalData.cref}</span></div>
+        <div><h3>Perfil profissional</h3>{profile.city ? <span>{profile.city}</span> : null}{profile.cref ? <span>CREF {profile.cref}</span> : null}</div>
         <div><h3>Informações</h3><a href="/privacy">Política de Privacidade</a><a href="/terms">Termos de Uso</a></div>
       </div>
       <div className="container demo-disclaimer">

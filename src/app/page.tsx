@@ -1,15 +1,8 @@
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { HeroSection } from "@/components/sections/HeroSection";
-import { HowItWorksSection } from "@/components/sections/HowItWorksSection";
-import { BenefitsAndProofSection } from "@/components/sections/BenefitsAndProofSection";
-import { OfferSection } from "@/components/sections/OfferSection";
-import { FAQSection } from "@/components/sections/FAQSection";
-import { FinalCTASection } from "@/components/sections/FinalCTASection";
-import { FloatingWhatsApp } from "@/components/ui/FloatingWhatsApp";
-import { ScrollTracking } from "@/components/ui/ScrollTracking";
-import { MessageTicker } from "@/components/ui/MessageTicker";
+import { TrainerTemplate } from "@/components/templates/TrainerTemplate";
+import { trainerRepository } from "@/lib/supabase/trainers";
 
-export default function Home() {
-  return <><Header/><main><HeroSection/><MessageTicker/><HowItWorksSection/><BenefitsAndProofSection/><OfferSection/><FAQSection/><FinalCTASection/></main><Footer/><FloatingWhatsApp/><ScrollTracking/></>;
+export default async function Home() {
+  const data = await trainerRepository.findPublishedBySlug("rafael-martins");
+  if (!data) return null;
+  return <TrainerTemplate {...data} />;
 }

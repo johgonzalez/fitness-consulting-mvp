@@ -85,6 +85,15 @@ export type AssessmentAnswer = {
   updatedAt: string;
 };
 
+export type AssessmentEvent = {
+  id: string;
+  assessmentId: string;
+  eventType: "CREATED" | "DRAFT_UPDATED" | "SENT" | "ANSWER_SAVED" | "SUBMITTED" | "REVIEW_STARTED" | "COMPLETED";
+  actorUserId: string;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+};
+
 export type AssessmentSummary = {
   id: string;
   trainerStudentRelationshipId: string;
@@ -134,6 +143,13 @@ export type CreateAssessmentInput = {
   title?: string | null;
   isRequired?: boolean | null;
   dueAt?: string | null;
+};
+
+export type UpdateDraftAssessmentInput = {
+  assessmentId: string;
+  title: string;
+  isRequired: boolean;
+  dueAt: string | null;
 };
 
 export type SaveAssessmentAnswerInput = {
