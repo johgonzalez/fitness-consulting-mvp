@@ -277,6 +277,21 @@ function upperSession(prefix: string): WorkoutSession {
   );
 }
 
+function recoverySession(prefix: string): WorkoutSession {
+  return session(
+    `${prefix}1000-0000-4000-8000-000000000003`,
+    "Mobilidade e estabilidade",
+    2,
+    [section(`${prefix}2000-0000-4000-8000-000000000004`, "COOLDOWN", "Recuperação ativa", 0, [
+      prescribed(`${prefix}3000-0000-4000-8000-000000000006`, EXERCISE_IDS.reverseLunge, 0, [
+        set(`${prefix}4000-0000-4000-8000-00000000000c`, 1, { targetReps: 8, targetLoad: null, loadUnit: null, restSeconds: 45 }),
+        set(`${prefix}4000-0000-4000-8000-00000000000d`, 2, { targetReps: 8, targetLoad: null, loadUnit: null, restSeconds: 45 }),
+      ], { studentInstruction: "Priorize amplitude confortável e controle." }),
+    ])],
+    "Sessão breve disponível, sem agenda fictícia.",
+  );
+}
+
 export const workoutDemoVersions: WorkoutVersionProjection[] = [
   {
     plan: plan(PLAN_IDS.manual, RELATIONSHIPS.juliana, "Base de força", "Ganhar força com técnica consistente"),
@@ -305,7 +320,7 @@ export const workoutDemoVersions: WorkoutVersionProjection[] = [
   {
     plan: plan(PLAN_IDS.published, RELATIONSHIPS.juliana, "Hipertrofia 4x", "Evoluir volume e força com quatro estímulos semanais"),
     version: version(VERSION_IDS.published, PLAN_IDS.published, 2, "PUBLISHED", "MANUAL", { sourceVersionId: VERSION_IDS.archived }),
-    sessions: [lowerSession("e410"), upperSession("f410")],
+    sessions: [lowerSession("e410"), upperSession("f410"), recoverySession("g410")],
   },
 ];
 
