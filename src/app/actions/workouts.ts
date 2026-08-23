@@ -2,10 +2,12 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { workoutDemoExerciseLibrary } from "@/data/demo/workouts";
 import { getTrainerAssessmentRecord } from "@/lib/assessments/workspace";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import type {
   CreateCustomExerciseInput,
+  Exercise,
   WorkoutSectionType,
   WorkoutSetInput,
 } from "@/lib/domain/workouts";
@@ -21,6 +23,12 @@ export type WorkoutActionResult = {
   resultId?: string;
   generated?: WorkoutAiDraftOutput;
   providerAvailable?: boolean;
+};
+
+export type ExerciseLibrarySearchResult = {
+  ok: boolean;
+  message: string;
+  exercises: Exercise[];
 };
 
 export type WorkoutMutation =
@@ -64,6 +72,48 @@ function friendlyWorkoutError(error: unknown, fallback: string) {
 function revalidateWorkout(versionId?: string) {
   revalidatePath("/dashboard/workouts");
   if (versionId) revalidatePath(`/dashboard/workouts/${versionId}`);
+}
+
+export async function searchExerciseLibraryAction(input: {
+  query: string;
+  muscle: string;
+  equipment: string;
+  source: string;
+}): Promise<ExerciseLibrarySearchResult> {
+  const query = input.query.trim();
+  if (query.length > 120) {
+    return { ok: false, message: "Use até 120 caracteres na busca.", exercises: [] };
+  }
+  if (!["all", "PPERFIL_LIBRARY", "TRAINER_CUSTOM"].includes(input.source)) {
+    return { ok: false, message: "Filtro de origem inválido.", exercises: [] };
+  }
+
+  try {
+    const demoMode = await isDemoWorkspaceRequest();
+    const lookup = query || (input.muscle !== "all" ? input.muscle : input.equipment !== "all" ? input.equipment : null);
+    const candidates = demoMode
+      ? workoutDemoExerciseLibrary
+      : await new SupabaseWorkoutRepository().search(lookup, 100);
+    const normalized = query.toLocaleLowerCase("pt-BR");
+    const exercises = candidates.filter((exercise) => {
+      const searchable = `${exercise.name} ${exercise.primaryMuscleGroup} ${exercise.equipment.join(" ")}`.toLocaleLowerCase("pt-BR");
+      return (!normalized || searchable.includes(normalized))
+        && (input.muscle === "all" || exercise.primaryMuscleGroup === input.muscle)
+        && (input.equipment === "all" || exercise.equipment.includes(input.equipment))
+        && (input.source === "all" || exercise.sourceType === input.source);
+    });
+    return {
+      ok: true,
+      message: exercises.length === 1 ? "1 exercício encontrado." : `${exercises.length} exercícios encontrados.`,
+      exercises,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: friendlyWorkoutError(error, "Não foi possível consultar a biblioteca."),
+      exercises: [],
+    };
+  }
 }
 
 export async function createManualWorkoutAction(input: {

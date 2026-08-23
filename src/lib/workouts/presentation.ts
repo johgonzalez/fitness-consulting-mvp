@@ -33,6 +33,34 @@ export const workoutSetTypeLabels = {
   AMRAP: "AMRAP",
 } as const;
 
+export const exerciseMuscleGroupOptions = [
+  { value: "back", label: "Costas" },
+  { value: "biceps", label: "Bíceps" },
+  { value: "calves", label: "Panturrilhas" },
+  { value: "chest", label: "Peitoral" },
+  { value: "core", label: "Core" },
+  { value: "forearms", label: "Antebraços" },
+  { value: "full_body", label: "Corpo inteiro" },
+  { value: "glutes", label: "Glúteos" },
+  { value: "hamstrings", label: "Posteriores de coxa" },
+  { value: "quadriceps", label: "Quadríceps" },
+  { value: "shoulders", label: "Ombros" },
+  { value: "triceps", label: "Tríceps" },
+] as const;
+
+export const exerciseEquipmentOptions = [
+  { value: "barbell", label: "Barra" },
+  { value: "bench", label: "Banco" },
+  { value: "bodyweight", label: "Peso corporal" },
+  { value: "cable", label: "Cabo" },
+  { value: "cardio_machine", label: "Máquina de cardio" },
+  { value: "dumbbell", label: "Halteres" },
+  { value: "kettlebell", label: "Kettlebell" },
+  { value: "machine", label: "Máquina" },
+  { value: "pullup_bar", label: "Barra fixa" },
+  { value: "resistance_band", label: "Faixa elástica" },
+] as const;
+
 export function formatWorkoutDate(value: string | null, fallback = "—") {
   if (!value) return fallback;
   const date = new Date(value);

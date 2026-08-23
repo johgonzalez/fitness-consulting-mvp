@@ -56,9 +56,9 @@ insert into public.exercises(
   primary_muscle_group, secondary_muscle_groups, equipment,
   movement_pattern, instructions, coaching_cues, locale, status
 ) values
-  ('4a400000-0000-4000-8000-000000000001','PPERFIL_LIBRARY','Agachamento goblet','agachamento goblet','agachamento-goblet','Agachamento com carga frontal.',
+  ('4a400000-0000-4000-8000-000000000001','PPERFIL_LIBRARY','Agachamento goblet','agachamento goblet','qa-workout-agachamento-goblet','Agachamento com carga frontal.',
    'quadriceps',array['glutes'],array['dumbbell'],'squat','Mantenha o tronco estável.',array['Joelhos acompanham os pés.'],'pt-BR','ACTIVE'),
-  ('4a400000-0000-4000-8000-000000000002','PPERFIL_LIBRARY','Remada baixa','remada baixa','remada-baixa','Remada sentada no cabo.',
+  ('4a400000-0000-4000-8000-000000000002','PPERFIL_LIBRARY','Remada baixa','remada baixa','qa-workout-remada-baixa','Remada sentada no cabo.',
    'back',array['biceps'],array['cable'],'pull','Puxe mantendo a coluna neutra.',array['Controle o retorno.'],'pt-BR','ACTIVE');
 insert into public.exercise_media(
   id, exercise_id, media_type, url_or_storage_path, provider, source_url,

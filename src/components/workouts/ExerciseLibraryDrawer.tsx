@@ -1,10 +1,11 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
 import { Check, ChevronLeft, Dumbbell, Filter, Plus, Search, X } from "lucide-react";
-import { createCustomExerciseAction } from "@/app/actions/workouts";
+import { createCustomExerciseAction, searchExerciseLibraryAction } from "@/app/actions/workouts";
 import { ExerciseMedia } from "@/components/workouts/ExerciseMedia";
 import type { Exercise } from "@/lib/domain/workouts";
+import { exerciseEquipmentOptions, exerciseMuscleGroupOptions } from "@/lib/workouts/presentation";
 import styles from "./workouts.module.css";
 
 export function ExerciseLibraryDrawer({
@@ -37,18 +38,41 @@ export function ExerciseLibraryDrawer({
   const [customEquipment, setCustomEquipment] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const muscles = useMemo(() => [...new Set(exercises.map((exercise) => exercise.primaryMuscleGroup))].toSorted(), [exercises]);
-  const equipmentOptions = useMemo(() => [...new Set(exercises.flatMap((exercise) => exercise.equipment))].toSorted(), [exercises]);
+  const [searchResult, setSearchResult] = useState<{ signature: string; exercises: Exercise[]; message: string | null }>({
+    signature: "",
+    exercises: [],
+    message: null,
+  });
+  const [searchPending, startSearchTransition] = useTransition();
+  const normalizedQuery = deferredQuery.trim();
+  const remoteSearch = normalizedQuery.length > 0 || muscle !== "all" || equipment !== "all";
+  const searchSignature = `${normalizedQuery}\u0000${muscle}\u0000${equipment}\u0000${source}`;
+  const catalogExercises = useMemo(() => remoteSearch
+    ? searchResult.signature === searchSignature ? searchResult.exercises : []
+    : exercises, [exercises, remoteSearch, searchResult, searchSignature]);
+
+  useEffect(() => {
+    if (!remoteSearch) return;
+    let ignore = false;
+    startSearchTransition(async () => {
+      const result = await searchExerciseLibraryAction({ query: normalizedQuery, muscle, equipment, source });
+      if (!ignore) {
+        setSearchResult({ signature: searchSignature, exercises: result.exercises, message: result.message });
+      }
+    });
+    return () => { ignore = true; };
+  }, [equipment, muscle, normalizedQuery, remoteSearch, searchSignature, source]);
+
   const filtered = useMemo(() => {
-    const normalized = deferredQuery.trim().toLocaleLowerCase("pt-BR");
-    return exercises.filter((exercise) => {
+    const normalized = normalizedQuery.toLocaleLowerCase("pt-BR");
+    return catalogExercises.filter((exercise) => {
       const matchesQuery = !normalized || `${exercise.name} ${exercise.primaryMuscleGroup} ${exercise.equipment.join(" ")}`.toLocaleLowerCase("pt-BR").includes(normalized);
       return matchesQuery
         && (muscle === "all" || exercise.primaryMuscleGroup === muscle)
         && (equipment === "all" || exercise.equipment.includes(equipment))
         && (source === "all" || exercise.sourceType === source);
     });
-  }, [deferredQuery, equipment, exercises, muscle, source]);
+  }, [catalogExercises, equipment, muscle, normalizedQuery, source]);
   const selected = filtered.find((exercise) => exercise.id === selectedId) ?? filtered[0] ?? null;
 
   function createCustom() {
@@ -96,7 +120,8 @@ export function ExerciseLibraryDrawer({
     <aside className={styles.libraryDrawer} role="dialog" aria-modal="true" aria-labelledby="exercise-library-title">
       <header className={styles.libraryHeader}><div><span><Dumbbell aria-hidden="true" /></span><div><h2 id="exercise-library-title">Biblioteca de exercícios</h2><p>{mode === "ADD" ? "Escolha o próximo exercício" : "Substitua sem perder a prescrição"}</p></div></div><button type="button" className="pp-icon-button" onClick={onClose} aria-label="Fechar biblioteca"><X aria-hidden="true" /></button></header>
       <div className={styles.librarySearch}><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar exercício" aria-label="Buscar exercício" /></div>
-      <div className={styles.libraryFilters}><Filter aria-hidden="true" /><select value={muscle} onChange={(event) => setMuscle(event.target.value)} aria-label="Filtrar por grupo muscular"><option value="all">Todos os músculos</option>{muscles.map((item) => <option key={item}>{item}</option>)}</select><select value={equipment} onChange={(event) => setEquipment(event.target.value)} aria-label="Filtrar por equipamento"><option value="all">Todos os equipamentos</option>{equipmentOptions.map((item) => <option key={item}>{item}</option>)}</select><select value={source} onChange={(event) => setSource(event.target.value)} aria-label="Filtrar por origem"><option value="all">Sistema + meus</option><option value="PPERFIL_LIBRARY">PPerfil</option><option value="TRAINER_CUSTOM">Meus exercícios</option></select></div>
+      <div className={styles.libraryFilters}><Filter aria-hidden="true" /><select value={muscle} onChange={(event) => setMuscle(event.target.value)} aria-label="Filtrar por grupo muscular"><option value="all">Todos os músculos</option>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={equipment} onChange={(event) => setEquipment(event.target.value)} aria-label="Filtrar por equipamento"><option value="all">Todos os equipamentos</option>{exerciseEquipmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={source} onChange={(event) => setSource(event.target.value)} aria-label="Filtrar por origem"><option value="all">Sistema + meus</option><option value="PPERFIL_LIBRARY">PPerfil</option><option value="TRAINER_CUSTOM">Meus exercícios</option></select></div>
+      <p className={styles.librarySearchStatus} role="status" aria-live="polite">{searchPending ? "Consultando catálogo…" : remoteSearch ? searchResult.signature === searchSignature ? searchResult.message : "Consultando catálogo…" : `${exercises.length} exercícios carregados. Use a busca para consultar todo o catálogo.`}</p>
 
       <div className={styles.libraryContent}>
         <div className={styles.libraryList}>
@@ -104,11 +129,11 @@ export function ExerciseLibraryDrawer({
             <ExerciseMedia exercise={exercise} demoMode={demoMode} />
             <span><strong>{exercise.name}</strong><small>{exercise.primaryMuscleGroup}</small><em>{exercise.equipment.join(" · ") || "Sem equipamento"}</em></span>
             {selected?.id === exercise.id ? <Check aria-hidden="true" /> : null}
-          </button>) : <div className={styles.libraryEmpty}><Dumbbell aria-hidden="true" /><strong>Nenhum exercício encontrado</strong><p>Limpe um filtro ou crie um exercício personalizado.</p></div>}
+          </button>) : <div className={styles.libraryEmpty}><Dumbbell aria-hidden="true" /><strong>{searchPending ? "Consultando exercícios" : "Nenhum exercício encontrado"}</strong><p>{searchPending ? "Aguarde um instante." : "Limpe um filtro ou crie um exercício personalizado."}</p></div>}
           <button type="button" className={styles.createExerciseButton} onClick={() => setCreating(true)}><Plus aria-hidden="true" />Criar exercício personalizado</button>
         </div>
         <div className={styles.exercisePreview}>
-          {creating ? <div className={styles.customExerciseForm}><button type="button" onClick={() => setCreating(false)}><ChevronLeft aria-hidden="true" />Voltar à biblioteca</button><h3>Novo exercício</h3><label>Nome<input value={customName} onChange={(event) => setCustomName(event.target.value)} maxLength={160} /></label><label>Grupo muscular<select value={customMuscle} onChange={(event) => setCustomMuscle(event.target.value)}><option value="full_body">Corpo inteiro</option><option value="quadriceps">Quadríceps</option><option value="glutes">Glúteos</option><option value="back">Costas</option><option value="chest">Peitoral</option><option value="core">Core</option></select></label><label>Equipamentos<input value={customEquipment} onChange={(event) => setCustomEquipment(event.target.value)} placeholder="dumbbells, bench" /></label><label>Instruções<textarea value={customInstructions} onChange={(event) => setCustomInstructions(event.target.value)} maxLength={5000} /></label>{message ? <p role="status">{message}</p> : null}<button type="button" className="pp-button pp-button--primary" disabled={pending || customName.trim().length < 2 || customInstructions.trim().length < 2} onClick={createCustom}>Criar exercício</button></div> : selected ? <>
+          {creating ? <div className={styles.customExerciseForm}><button type="button" onClick={() => setCreating(false)}><ChevronLeft aria-hidden="true" />Voltar à biblioteca</button><h3>Novo exercício</h3><label>Nome<input value={customName} onChange={(event) => setCustomName(event.target.value)} maxLength={160} /></label><label>Grupo muscular<select value={customMuscle} onChange={(event) => setCustomMuscle(event.target.value)}>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><label>Equipamentos<input value={customEquipment} onChange={(event) => setCustomEquipment(event.target.value)} placeholder="dumbbell, bench" /></label><label>Instruções<textarea value={customInstructions} onChange={(event) => setCustomInstructions(event.target.value)} maxLength={5000} /></label>{message ? <p role="status">{message}</p> : null}<button type="button" className="pp-button pp-button--primary" disabled={pending || customName.trim().length < 2 || customInstructions.trim().length < 2} onClick={createCustom}>Criar exercício</button></div> : selected ? <>
             <ExerciseMedia exercise={selected} demoMode={demoMode} priority />
             <div className={styles.previewIdentity}><small>{selected.sourceType === "PPERFIL_LIBRARY" ? "Biblioteca PPerfil" : "Meu exercício"}</small><h3>{selected.name}</h3><p>{selected.primaryMuscleGroup} · {selected.equipment.join(" · ") || "Sem equipamento"}</p></div>
             <section><h4>Instruções</h4><p>{selected.instructions}</p></section>

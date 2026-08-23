@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "exercise-catalog:build": "node scripts/exercises/build-catalog-v1.mjs",
+    "exercise-catalog:validate": "node scripts/exercises/import-catalog-v1.mjs --mode validate"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
