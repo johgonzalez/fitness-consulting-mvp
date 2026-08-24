@@ -77,6 +77,30 @@ assert.equal(defaultSiteTemplateLayouts.template_03[0].enabled, true, "default r
 assert.equal(getTemplateDefinition("template_01").renderer, "Template01");
 assert.equal(getTemplateDefinition("template_02").renderer, "Template02");
 assert.equal(getTemplateDefinition("template_03").renderer, "Template03");
-assert.equal(getTemplateDefinition("template_03").availability.production, false, "Conversion remains preview-only in the current product gate");
+assert.equal(getTemplateDefinition("template_03").availability.production, true, "Conversion must remain available in the integrated catalog");
+
+const atelier = getTemplateDefinition("template_04");
+assert.equal(atelier.renderer, "AtelierTemplate");
+assert.equal(atelier.entitlement, "can_use_template_04");
+assert.equal(atelier.availability.production, true, "Atelier must be selectable outside Template Lab");
+assert.deepEqual(
+  atelier.sections.map(({ id }) => id),
+  ["hero", "specialties", "digital_experience", "methodology", "services", "final_cta"],
+  "Atelier organizer must expose only sections supported by the approved renderer",
+);
+assert.equal(atelier.sections[0].locked, "FIRST");
+assert.equal(atelier.sections.at(-1).locked, "LAST");
+
+const atelierLayout = normalizeSectionLayout([
+  { id: "hero", enabled: false },
+  { id: "services", enabled: false },
+  { id: "digital_experience", enabled: true },
+  { id: "final_cta", enabled: false },
+], "template_04");
+const withAtelierPreference = { ...normalized, template_04: atelierLayout };
+assert.equal(withAtelierPreference.template_04.find(({ id }) => id === "services")?.enabled, false);
+assert.deepEqual(withAtelierPreference.template_01, normalized.template_01, "saving Atelier must preserve Essential preferences");
+assert.deepEqual(withAtelierPreference.template_02, normalized.template_02, "saving Atelier must preserve Motion preferences");
+assert.deepEqual(withAtelierPreference.template_03, normalized.template_03, "saving Atelier must preserve Conversion preferences");
 
 console.log("Template Foundation V1A registry/layout assertions passed.");

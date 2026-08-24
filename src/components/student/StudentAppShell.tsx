@@ -25,7 +25,7 @@ export function StudentAppShell({ children, demoMode }: { children: React.ReactN
     <header className="pp-student-app__bar">
       <BrandLogo href="/student/today" />
       <div className="pp-student-app__tools">
-        {demoMode ? <span className="pp-student-demo-indicator"><i aria-hidden="true" />Demo aluno</span> : null}
+        {demoMode ? <Link href="/demo?next=/dashboard" className="pp-student-demo-indicator" title="Voltar ao portal demo do Personal"><i aria-hidden="true" />Demo aluno · Ver como Personal</Link> : null}
         <ThemeToggle />
       </div>
     </header>

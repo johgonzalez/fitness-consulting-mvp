@@ -2,8 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { IconButton } from "@/components/ui/PPerfilPrimitives";
-
-const storageKey = "pperfil-theme";
+import { themeCookieName, themeStorageKey } from "@/lib/theme";
 
 export function ThemeToggle() {
   function toggleTheme() {
@@ -11,7 +10,8 @@ export function ThemeToggle() {
     const nextTheme = root.dataset.theme === "light" ? "dark" : "light";
     root.dataset.theme = nextTheme;
     root.style.colorScheme = nextTheme;
-    localStorage.setItem(storageKey, nextTheme);
+    localStorage.setItem(themeStorageKey, nextTheme);
+    document.cookie = `${themeCookieName}=${nextTheme}; Path=/; Max-Age=31536000; SameSite=Lax`;
   }
 
   return <IconButton label="Alternar entre tema claro e escuro" className="theme-toggle" onClick={toggleTheme}>

@@ -1,9 +1,21 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { BillingType, PriceVisibility, ProfileStatusSemanticTone, ServiceConversionMode, ServiceMode, TemplateId } from "@/lib/domain/trainer";
-import { normalizeSectionLayout, normalizeSiteTemplateLayouts } from "@/lib/domain/template-registry";
-import { rejectDemoMutation } from "@/lib/demo/workspace";
+import type { BillingType, PriceVisibility, ProfileStatusSemanticTone, ServiceConversionMode, ServiceMode, TemplateId, Testimonial, TrainerMethodologyItem, TrainerService } from "@/lib/domain/trainer";
+import { isTemplateId, normalizeSectionLayout, normalizeSiteTemplateLayouts } from "@/lib/domain/template-registry";
+import { demoWorkspaceFixture } from "@/lib/demo/fixture";
+import {
+  deleteDemoMethodologyItem,
+  deleteDemoService,
+  deleteDemoTestimonial,
+  setDemoSiteLayout,
+  setDemoSiteTemplate,
+  updateDemoSiteProfile,
+  upsertDemoMethodologyItem,
+  upsertDemoService,
+  upsertDemoTestimonial,
+} from "@/lib/demo/site-workspace";
+import { isDemoWorkspaceRequest, rejectDemoMutation } from "@/lib/demo/workspace";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,9 +44,6 @@ function refreshSite(slug?: string) {
 }
 
 export async function savePresentation(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const display_name = String(formData.get("display_name") ?? "").trim();
   const headline = String(formData.get("headline") ?? "").trim();
   const bio = String(formData.get("bio") ?? "").trim();
@@ -51,33 +60,53 @@ export async function savePresentation(_state: SiteActionState, formData: FormDa
   if (display_name.length < 2 || display_name.length > 100 || headline.length < 2 || headline.length > 180 || bio.length > 2000 || specialty.length < 2 || specialty.length > 120 || city.length > 120 || cref.length > 60 || methodology_description.length > 1000 || testimonials_intro.length > 500 || profile_status_text.length > 40 || (profile_status_semantic_tone !== null && !profileStatusTones.has(profile_status_semantic_tone)) || (profile_status_enabled && (!profile_status_text || !profile_status_semantic_tone)) || !modes.has(service_mode)) {
     return { message: "Revise os campos de apresentacao." };
   }
-  const { error } = await context.supabase.from("trainer_profiles").update({ display_name, headline, bio, specialty, city: city || null, cref: cref || null, methodology_description: methodology_description || null, testimonials_intro: testimonials_intro || null, profile_status_enabled, profile_status_text: profile_status_text || null, profile_status_semantic_tone, service_mode }).eq("id", context.profile.id);
+  const payload = { display_name, headline, bio, specialty, city: city || null, cref: cref || null, methodology_description: methodology_description || null, testimonials_intro: testimonials_intro || null, profile_status_enabled, profile_status_text: profile_status_text || null, profile_status_semantic_tone, service_mode };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await updateDemoSiteProfile(payload))) return { message: "Nao foi possivel salvar a apresentacao neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Apresentacao salva neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  const { error } = await context.supabase.from("trainer_profiles").update(payload).eq("id", context.profile.id);
   if (error) return { message: "Nao foi possivel salvar a apresentacao." };
   refreshSite(context.profile.slug);
   return { ok: true, message: "Apresentacao salva." };
 }
 
 export async function saveContact(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const whatsapp = String(formData.get("whatsapp") ?? "").replace(/\D/g, "");
   const rawHandle = String(formData.get("instagram_handle") ?? formData.get("instagram") ?? "").trim();
   const rawUrl = String(formData.get("instagram_url") ?? "").trim();
   const instagram = normalizeInstagramIdentity(rawHandle, rawUrl);
   if (whatsapp.length < 10 || whatsapp.length > 15 || ((rawHandle || rawUrl) && !instagram.handle)) return { message: "Revise o WhatsApp e o Instagram informados." };
-  const { error } = await context.supabase.from("trainer_profiles").update({ whatsapp, instagram: instagram.handle, instagram_handle: instagram.handle, instagram_url: instagram.url }).eq("id", context.profile.id);
+  const payload = { whatsapp, instagram: instagram.handle, instagram_handle: instagram.handle, instagram_url: instagram.url };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await updateDemoSiteProfile(payload))) return { message: "Nao foi possivel salvar o contato neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Contato salvo neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  const { error } = await context.supabase.from("trainer_profiles").update(payload).eq("id", context.profile.id);
   if (error) return { message: "Nao foi possivel salvar o contato." };
   refreshSite(context.profile.slug);
   return { ok: true, message: "Contato salvo." };
 }
 
 export async function saveIdentity(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
+  const primary_color = String(formData.get("primary_color") ?? "").trim();
+  if (!/^#[0-9a-fA-F]{6}$/.test(primary_color)) return { message: "Escolha uma cor valida." };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await updateDemoSiteProfile({ primary_color }))) return { message: "Nao foi possivel salvar a identidade neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Identidade salva neste demo local." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
-  const primary_color = String(formData.get("primary_color") ?? "").trim();
-  if (!/^#[0-9a-fA-F]{6}$/.test(primary_color)) return { message: "Escolha uma cor valida." };
   const { error } = await context.supabase.from("trainer_profiles").update({ primary_color }).eq("id", context.profile.id);
   if (error) return { message: "Nao foi possivel salvar a identidade." };
   refreshSite(context.profile.slug);
@@ -86,6 +115,12 @@ export async function saveIdentity(_state: SiteActionState, formData: FormData):
 
 export async function selectTemplate(template: TemplateId, state: SiteActionState): Promise<SiteActionState> {
   void state;
+  if (!isTemplateId(template)) return { message: "Template invalido." };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await setDemoSiteTemplate(template))) return { message: "Nao foi possivel salvar o template neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Template atualizado neste demo local." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
@@ -97,14 +132,20 @@ export async function selectTemplate(template: TemplateId, state: SiteActionStat
 }
 
 export async function saveSectionLayout(template: TemplateId, _state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  if (!isTemplateId(template)) return { message: "A organizacao da pagina e invalida." };
   const raw = String(formData.get("layout") ?? "");
   if (!raw || raw.length > 5000) return { message: "A organizacao da pagina e invalida." };
   let parsed: unknown;
   try { parsed = JSON.parse(raw); } catch { return { message: "A organizacao da pagina e invalida." }; }
   const nextLayout = normalizeSectionLayout(parsed, template);
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await setDemoSiteLayout(template, nextLayout))) return { message: "Nao foi possivel salvar a organizacao neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Organizacao salva neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const current = normalizeSiteTemplateLayouts(context.profile.site_layouts);
   const site_layouts = { ...current, [template]: nextLayout };
   const { error } = await context.supabase.from("trainer_profiles").update({ site_layouts }).eq("id", context.profile.id);
@@ -115,6 +156,11 @@ export async function saveSectionLayout(template: TemplateId, _state: SiteAction
 
 export async function setPublication(published: boolean, state: SiteActionState): Promise<SiteActionState> {
   void state;
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await updateDemoSiteProfile({ published }))) return { message: "Nao foi possivel alterar a publicacao neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: published ? "Site demo publicado." : "Site demo retirado do ar." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
@@ -127,9 +173,6 @@ export async function setPublication(published: boolean, state: SiteActionState)
 }
 
 export async function saveService(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -144,7 +187,17 @@ export async function saveService(_state: SiteActionState, formData: FormData): 
   const conversion_mode = conversionRaw || null;
   if (title.length < 2 || title.length > 120 || description.length > 1000 || benefits.length > 12 || benefits.some((benefit) => benefit.length > 160) || (conversion_mode !== null && !conversionModes.has(conversion_mode)) || !modes.has(service_mode) || (billingRaw && !billingTypes.has(billingRaw)) || !priceVisibilities.has(visibilityRaw) || (price !== null && (!Number.isFinite(price) || price < 0))) return { message: "Revise os dados do servico." };
   if (visibilityRaw === "public" && price === null) return { message: "Informe o preco para mostra-lo publicamente." };
-  const payload = { trainer_id: context.profile.id, title, description, service_mode, price, currency: "BRL", billing_type: billingRaw || null, price_visibility: visibilityRaw, price_visible: visibilityRaw === "public", active, benefits, conversion_mode };
+  const sharedPayload = { title, description, service_mode, price, currency: "BRL" as const, billing_type: billingRaw || null, price_visibility: visibilityRaw, price_visible: visibilityRaw === "public", active, benefits, conversion_mode };
+  if (await isDemoWorkspaceRequest()) {
+    const service: TrainerService = { id: id || crypto.randomUUID(), trainer_id: demoWorkspaceFixture.profile.id, ...sharedPayload };
+    if (!(await upsertDemoService(service))) return { message: "Nao foi possivel salvar o servico neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Servico salvo neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  const payload = { trainer_id: context.profile.id, ...sharedPayload };
   const query = id ? context.supabase.from("services").update(payload).eq("id", id).eq("trainer_id", context.profile.id) : context.supabase.from("services").insert(payload);
   const { error } = await query;
   if (error) return { message: "Nao foi possivel salvar o servico." };
@@ -153,9 +206,6 @@ export async function saveService(_state: SiteActionState, formData: FormData): 
 }
 
 export async function saveMethodologyItem(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const id = String(formData.get("id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -163,6 +213,15 @@ export async function saveMethodologyItem(_state: SiteActionState, formData: For
   if (title.length < 2 || title.length > 120 || description.length < 2 || description.length > 1000 || !Number.isInteger(position) || position < 0 || position > 999) {
     return { message: "Revise os dados da etapa." };
   }
+  if (await isDemoWorkspaceRequest()) {
+    const item: TrainerMethodologyItem = { id: id || crypto.randomUUID(), trainer_id: demoWorkspaceFixture.profile.id, title, description, position };
+    if (!(await upsertDemoMethodologyItem(item))) return { message: "Nao foi possivel salvar a etapa neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Etapa salva neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const payload = { trainer_id: context.profile.id, title, description, position, updated_at: new Date().toISOString() };
   const query = id
     ? context.supabase.from("trainer_methodology_items").update(payload).eq("id", id).eq("trainer_id", context.profile.id)
@@ -175,6 +234,12 @@ export async function saveMethodologyItem(_state: SiteActionState, formData: For
 
 export async function deleteMethodologyItem(id: string, state: SiteActionState): Promise<SiteActionState> {
   void state;
+  if (!id) return { message: "Etapa invalida." };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await deleteDemoMethodologyItem(id))) return { message: "Nao foi possivel remover a etapa neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Etapa removida neste demo local." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
@@ -186,6 +251,12 @@ export async function deleteMethodologyItem(id: string, state: SiteActionState):
 
 export async function deleteService(id: string, state: SiteActionState): Promise<SiteActionState> {
   void state;
+  if (!id) return { message: "Servico invalido." };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await deleteDemoService(id))) return { message: "Nao foi possivel remover o servico neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Servico removido neste demo local." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
@@ -244,9 +315,6 @@ export async function uploadIdentityImage(kind: "profile" | "hero" | "logo", _st
 }
 
 export async function saveTestimonial(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
-  const demo = await rejectDemoMutation(); if (demo) return demo;
-  const context = await ownerContext();
-  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const id = String(formData.get("id") ?? "");
   const student_name = String(formData.get("student_name") ?? "").trim();
   const content = String(formData.get("content") ?? "").trim();
@@ -260,6 +328,28 @@ export async function saveTestimonial(_state: SiteActionState, formData: FormDat
   let image_url: string | null | undefined;
   let uploadedPath: string | null = null;
   const file = formData.get("image");
+  if (await isDemoWorkspaceRequest()) {
+    if (file instanceof File && file.size > 0) return { message: "Uploads permanecem desativados no demo local para evitar escrita remota." };
+    const testimonial: Testimonial = {
+      id: id || crypto.randomUUID(),
+      trainer_id: demoWorkspaceFixture.profile.id,
+      student_name,
+      content,
+      image_url: null,
+      before_image_url: null,
+      after_image_url: null,
+      result_context: result_context || null,
+      instagram_handle: instagram.handle,
+      instagram_url: instagram.url,
+      published,
+    };
+    if (!(await upsertDemoTestimonial(testimonial))) return { message: "Nao foi possivel salvar o depoimento neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Depoimento salvo neste demo local." };
+  }
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   if (file instanceof File && file.size > 0) {
     if (file.size > 5 * 1024 * 1024) return { message: "A foto deve ter ate 5 MB." };
     const buffer = new Uint8Array(await file.arrayBuffer());
@@ -284,6 +374,12 @@ export async function saveTestimonial(_state: SiteActionState, formData: FormDat
 
 export async function deleteTestimonial(id: string, state: SiteActionState): Promise<SiteActionState> {
   void state;
+  if (!id) return { message: "Depoimento invalido." };
+  if (await isDemoWorkspaceRequest()) {
+    if (!(await deleteDemoTestimonial(id))) return { message: "Nao foi possivel remover o depoimento neste demo." };
+    refreshSite(demoWorkspaceFixture.profile.slug);
+    return { ok: true, message: "Depoimento removido neste demo local." };
+  }
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };

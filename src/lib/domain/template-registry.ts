@@ -1,4 +1,4 @@
-import type { TemplateId } from "@/lib/domain/trainer";
+import type { TemplateId, TrainerEntitlements } from "@/lib/domain/trainer";
 import type { TrainerMediaSlot } from "@/lib/domain/trainer-media";
 import {
   siteSectionCatalog,
@@ -6,7 +6,8 @@ import {
   type SiteSectionPreference,
 } from "@/lib/domain/site-sections";
 
-export type TemplateRendererId = "Template01" | "Template02" | "Template03";
+export type TemplateRendererId = "Template01" | "Template02" | "Template03" | "AtelierTemplate";
+export type TemplateEntitlementKey = Extract<keyof TrainerEntitlements, `can_use_template_${string}`>;
 
 export interface TemplateSectionDefinition {
   id: SiteSectionId;
@@ -22,6 +23,7 @@ export interface TemplateDefinition {
   name: string;
   description: string;
   renderer: TemplateRendererId;
+  entitlement: TemplateEntitlementKey;
   sections: readonly TemplateSectionDefinition[];
   semanticMediaSlots: readonly TrainerMediaSlot[];
   availability: {
@@ -50,12 +52,27 @@ function sections(defaultOrder: SiteSectionId[]): TemplateSectionDefinition[] {
   ];
 }
 
+function supportedSections(defaultOrder: SiteSectionId[]): TemplateSectionDefinition[] {
+  return defaultOrder.map((id) => {
+    const locked = id === "hero" ? "FIRST" : id === "final_cta" ? "LAST" : undefined;
+    return {
+      id,
+      required: Boolean(locked),
+      reorderable: !locked,
+      visibilityEditable: !locked,
+      ...(locked ? { locked } : {}),
+      defaultEnabled: true,
+    };
+  });
+}
+
 export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition>> = {
   template_01: {
     id: "template_01",
     name: "Essential Editorial",
     description: "Presença sofisticada, editorial e centrada na marca do Personal.",
     renderer: "Template01",
+    entitlement: "can_use_template_01",
     sections: sections(["hero", "about", "specialties", "services", "instagram", "digital_experience", "methodology", "testimonials", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
@@ -65,6 +82,7 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
     name: "Motion",
     description: "Direção atlética, luminosa e cinética para movimento e acompanhamento.",
     renderer: "Template02",
+    entitlement: "can_use_template_02",
     sections: sections(["hero", "positioning", "specialties", "methodology", "digital_experience", "results", "services", "instagram", "testimonials", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "coaching", "movement_primary", "movement_secondary", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
@@ -74,13 +92,29 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
     name: "Conversion",
     description: "Serviços, preço real quando público e uma jornada clara de interesse.",
     renderer: "Template03",
+    entitlement: "can_use_template_03",
     sections: sections(["hero", "services", "methodology", "digital_experience", "testimonials", "instagram", "positioning", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "services", "student_experience"],
-    availability: { enabled: true, lab: true, production: false },
+    availability: { enabled: true, lab: true, production: true },
+  },
+  template_04: {
+    id: "template_04",
+    name: "Atelier",
+    description: "Composição premium e precisa para apresentar acompanhamento, método e experiência digital.",
+    renderer: "AtelierTemplate",
+    entitlement: "can_use_template_04",
+    sections: supportedSections(["hero", "specialties", "digital_experience", "methodology", "services", "final_cta"]),
+    semanticMediaSlots: ["hero", "student_experience", "movement_secondary"],
+    availability: { enabled: true, lab: true, production: true },
   },
 };
 
-const templateIds = Object.keys(templateDefinitions) as TemplateId[];
+export const templateIds = Object.keys(templateDefinitions) as TemplateId[];
+export const templateCatalog = templateIds.map((templateId) => templateDefinitions[templateId]);
+
+export function isTemplateId(value: unknown): value is TemplateId {
+  return typeof value === "string" && Object.prototype.hasOwnProperty.call(templateDefinitions, value);
+}
 
 export const defaultSiteTemplateLayouts = Object.fromEntries(
   templateIds.map((templateId) => [

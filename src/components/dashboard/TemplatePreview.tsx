@@ -12,5 +12,6 @@ export function TemplatePreview({ profile, templateId, compact = false }: { prof
     {templateId === "template_01" ? <div className="template-preview-v2__essential"><small>{profile.display_name}</small><strong>{profile.headline}</strong><span>Quero treinar com {firstName}</span></div> : null}
     {templateId === "template_02" ? <div className="template-preview-v2__performance"><small>{profile.display_name}</small><strong>{profile.headline}</strong><span>Começar acompanhamento</span></div> : null}
     {templateId === "template_03" ? <div className="template-preview-v2__conversion"><small>{profile.display_name}</small><strong>{profile.headline}</strong><div><span>Serviços</span><b>Experiência digital</b></div></div> : null}
+    {templateId === "template_04" ? <div className="template-preview-v2__atelier"><small>Atelier · {profile.display_name}</small><strong>{profile.headline}</strong><span>Experiência premium</span></div> : null}
   </div>;
 }

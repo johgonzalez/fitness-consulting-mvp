@@ -5,9 +5,25 @@ import { Avatar, EmptyState } from "@/components/ui/PPerfilPrimitives";
 import { OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { formatWorkoutDate } from "@/lib/workouts/presentation";
 import { getWorkoutIndex } from "@/lib/workouts/workspace";
+import { getStudentDetail } from "@/lib/supabase/students";
 import styles from "@/components/workouts/workouts.module.css";
 
 type WorkoutFilter = "all" | "draft" | "published" | "archived";
+type WorkoutsSearchParams = { status?: string | string[]; student?: string | string[] };
+
+const relationshipIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function safeRelationshipId(value: string | string[] | undefined) {
+  return typeof value === "string" && relationshipIdPattern.test(value) ? value : null;
+}
+
+function filterHref(filter: WorkoutFilter, relationshipId: string | null) {
+  const params = new URLSearchParams();
+  if (filter !== "all") params.set("status", filter);
+  if (relationshipId) params.set("student", relationshipId);
+  const query = params.toString();
+  return `/dashboard/workouts${query ? `?${query}` : ""}`;
+}
 
 function accepts(status: string, filter: WorkoutFilter) {
   if (filter === "all") return true;
@@ -16,26 +32,34 @@ function accepts(status: string, filter: WorkoutFilter) {
   return status === "ARCHIVED";
 }
 
-export default async function WorkoutsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const [query, workspace] = await Promise.all([searchParams, getWorkoutIndex()]);
-  const filter: WorkoutFilter = ["draft", "published", "archived"].includes(query.status ?? "") ? query.status as WorkoutFilter : "all";
-  const visible = workspace.items
+export default async function WorkoutsPage({ searchParams }: { searchParams: Promise<WorkoutsSearchParams> }) {
+  const query = await searchParams;
+  const requestedRelationshipId = safeRelationshipId(query.student);
+  const [workspace, selectedStudent] = await Promise.all([
+    getWorkoutIndex(),
+    requestedRelationshipId ? getStudentDetail(requestedRelationshipId) : Promise.resolve(null),
+  ]);
+  const relationshipId = selectedStudent?.id === requestedRelationshipId ? requestedRelationshipId : null;
+  const status = typeof query.status === "string" ? query.status : "";
+  const filter: WorkoutFilter = ["draft", "published", "archived"].includes(status) ? status as WorkoutFilter : "all";
+  const scopedItems = workspace.items.filter((item) => !relationshipId || item.plan.trainerStudentRelationshipId === relationshipId);
+  const visible = scopedItems
     .filter((item) => accepts(item.currentVersion.status, filter))
     .toSorted((left, right) => Date.parse(right.plan.updatedAt) - Date.parse(left.plan.updatedAt));
-  const count = (key: WorkoutFilter) => workspace.items.filter((item) => accepts(item.currentVersion.status, key)).length;
-  const attentionCount = workspace.items.filter((item) => item.currentVersion.status === "DRAFT" || item.currentVersion.status === "APPROVED").length;
+  const count = (key: WorkoutFilter) => scopedItems.filter((item) => accepts(item.currentVersion.status, key)).length;
+  const attentionCount = scopedItems.filter((item) => item.currentVersion.status === "DRAFT" || item.currentVersion.status === "APPROVED").length;
 
   return <main className={`dashboard-main pp-workspace ${styles.workspace}`}>
     <header className="pp-page-header">
-      <div><p className="pp-page-context">Programação</p><h1>Treinos</h1><p>Planeje, revise e publique experiências de treino com contexto e precisão.</p></div>
+      <div><p className="pp-page-context">{selectedStudent ? `Programação · ${selectedStudent.name}` : "Programação"}</p><h1>{selectedStudent ? `Treinos de ${selectedStudent.name}` : "Treinos"}</h1><p>{selectedStudent ? <>Exibindo somente os treinos deste aluno. <Link href="/dashboard/workouts">Ver todos os alunos</Link></> : "Planeje, revise e publique experiências de treino com contexto e precisão."}</p></div>
     </header>
 
     <OperationalToolbar
       filters={[
-        { label: "Todos", href: "/dashboard/workouts", count: count("all"), active: filter === "all" },
-        { label: "Drafts", href: "/dashboard/workouts?status=draft", count: count("draft"), active: filter === "draft" },
-        { label: "Publicados", href: "/dashboard/workouts?status=published", count: count("published"), active: filter === "published" },
-        { label: "Arquivados", href: "/dashboard/workouts?status=archived", count: count("archived"), active: filter === "archived" },
+        { label: "Todos", href: filterHref("all", relationshipId), count: count("all"), active: filter === "all" },
+        { label: "Drafts", href: filterHref("draft", relationshipId), count: count("draft"), active: filter === "draft" },
+        { label: "Publicados", href: filterHref("published", relationshipId), count: count("published"), active: filter === "published" },
+        { label: "Arquivados", href: filterHref("archived", relationshipId), count: count("archived"), active: filter === "archived" },
       ]}
       note={<><Sparkles aria-hidden="true" />{attentionCount} treino(s) pedem atenção</>}
       action={<Link href="/dashboard/workouts/new" className="pp-button pp-button--primary"><Plus aria-hidden="true" />Criar treino</Link>}

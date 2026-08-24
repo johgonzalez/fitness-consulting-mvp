@@ -51,7 +51,7 @@ import type {
   TrainerProfile,
   TrainerService,
 } from "@/lib/domain/trainer";
-import { getTemplateDefinition } from "@/lib/domain/template-registry";
+import { getTemplateDefinition, templateCatalog, type TemplateDefinition } from "@/lib/domain/template-registry";
 
 const initialState: SiteActionState = {};
 
@@ -121,83 +121,60 @@ function UploadForm({ kind, label }: { kind: "profile" | "hero" | "logo"; label:
   );
 }
 
-function TemplateSelector({
+function TemplateCatalogTile({
+  definition,
   profile,
   entitlements,
   onCustomize,
 }: {
+  definition: TemplateDefinition;
   profile: TrainerProfile;
   entitlements: TrainerEntitlements;
   onCustomize: () => void;
 }) {
-  const [freeState, freeAction, freePending] = useActionState(selectTemplate.bind(null, "template_01"), initialState);
-  const [premiumState, premiumAction, premiumPending] = useActionState(selectTemplate.bind(null, "template_02"), initialState);
-  const essential = getTemplateDefinition("template_01");
-  const motion = getTemplateDefinition("template_02");
-  const conversion = getTemplateDefinition("template_03");
-  const templates = [
-    {
-      id: "template_01" as const,
-      name: essential.name,
-      description: essential.description,
-      state: freeState,
-      action: freeAction,
-      pending: freePending,
-      allowed: entitlements.can_use_template_01,
-      available: essential.availability.production,
-    },
-    {
-      id: "template_02" as const,
-      name: motion.name,
-      description: motion.description,
-      state: premiumState,
-      action: premiumAction,
-      pending: premiumPending,
-      allowed: entitlements.can_use_template_02,
-      available: motion.availability.production,
-    },
-    {
-      id: "template_03" as const,
-      name: conversion.name,
-      description: conversion.description,
-      state: initialState,
-      action: null,
-      pending: false,
-      allowed: entitlements.can_use_template_03,
-      available: conversion.availability.production,
-    },
-  ];
+  const [state, action, pending] = useActionState(selectTemplate.bind(null, definition.id), initialState);
+  const selected = profile.template_id === definition.id;
+  const allowed = entitlements[definition.entitlement];
+  const available = definition.availability.production;
+  const availabilityLabel = !available
+    ? "Em preparação"
+    : allowed
+      ? "Disponível no seu plano"
+      : "Não disponível no seu plano";
 
   return (
+    <article className={`pp-template-tile${selected ? " is-selected" : ""}`}>
+      <div className="pp-template-tile-preview">
+        <TemplatePreview profile={profile} templateId={definition.id} compact />
+        {selected ? <span className="pp-template-selected"><Check aria-hidden="true" /> Em uso</span> : null}
+      </div>
+      <div className="pp-template-tile-copy">
+        <div><h3>{definition.name}</h3><span>{availabilityLabel}</span></div>
+        <p>{definition.description}</p>
+      </div>
+      <div className="pp-template-tile-actions">
+        <Link href={`/dashboard/preview?template=${definition.id}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>
+        {selected ? (
+          <button type="button" className="pp-template-edit" onClick={onCustomize}>
+            <Pencil aria-hidden="true" /> Editar
+          </button>
+        ) : available && allowed ? (
+          <form action={action}>
+            <button className="builder-secondary" disabled={pending}>{pending ? "Selecionando..." : "Usar template"}</button>
+          </form>
+        ) : <button type="button" className="builder-secondary" disabled title={available ? "Seu plano atual não libera este template." : "Este template ainda está em preparação."}>{available ? "Indisponível no plano" : "Em preparação"}</button>}
+      </div>
+      <ActionMessage state={state} />
+    </article>
+  );
+}
+
+function TemplateSelector({ profile, entitlements, onCustomize }: { profile: TrainerProfile; entitlements: TrainerEntitlements; onCustomize: () => void }) {
+  return (
     <div className="pp-template-grid">
-      {templates.map((template) => {
-        const selected = profile.template_id === template.id;
-        return (
-          <article className={`pp-template-tile${selected ? " is-selected" : ""}`} key={template.id}>
-            <div className="pp-template-tile-preview">
-              <TemplatePreview profile={profile} templateId={template.id} compact />
-              {selected ? <span className="pp-template-selected"><Check aria-hidden="true" /> Em uso</span> : null}
-            </div>
-            <div className="pp-template-tile-copy">
-              <div><h3>{template.name}</h3><span>Incluído no PPerfil</span></div>
-              <p>{template.description}</p>
-            </div>
-            <div className="pp-template-tile-actions">
-              <Link href={`/dashboard/preview?template=${template.id}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>
-              {selected ? (
-                <button type="button" className="pp-template-edit" onClick={onCustomize}>
-                  <Pencil aria-hidden="true" /> Editar
-                </button>
-              ) : template.available && template.action ? (
-                <form action={template.action}>
-                  <button className="builder-secondary" disabled={template.pending || !template.allowed}>Usar template</button>
-                </form>
-              ) : <button type="button" className="builder-secondary" disabled>Em preparação</button>}
-            </div>
-            <ActionMessage state={template.state} />
-          </article>
-        );
-      })}
+      {templateCatalog.filter(({ availability }) => availability.enabled).map((definition) => (
+        <TemplateCatalogTile key={definition.id} definition={definition} profile={profile} entitlements={entitlements} onCustomize={onCustomize} />
+      ))}
     </div>
   );
 }
@@ -306,7 +283,7 @@ export function SiteBuilder({
   const [showPaywall, setShowPaywall] = useState(false);
   const publicPath = `/p/${profile.slug}/`;
   const offerPrice = offer ? offer.price.toLocaleString("pt-BR", { style: "currency", currency: offer.currency, maximumFractionDigits: 0 }) : null;
-  const selectedTemplate = profile.template_id === "template_01" ? "Essential Editorial" : profile.template_id === "template_02" ? "Motion" : "Conversion";
+  const selectedTemplate = getTemplateDefinition(profile.template_id).name;
   const instagram = normalizeInstagramIdentity(profile.instagram_handle ?? profile.instagram, profile.instagram_url);
 
   function openEditor(next: PersonalizationSection = "identity") {
@@ -322,7 +299,7 @@ export function SiteBuilder({
   }
 
   return (
-    <div className="pp-site-product">
+    <div className="pp-site-product" data-demo-workspace={demoMode || undefined}>
       <nav className="pp-site-navigation" aria-label="Seções do Meu site">
         {siteNavigation.map((item) => {
           const Icon = item.icon;
@@ -368,7 +345,7 @@ export function SiteBuilder({
         <section className="pp-site-view" aria-labelledby="site-templates-title">
           <SectionHeader title="Templates" description="Escolha a estrutura do seu site. Seus dados permanecem e você pode revisar a opção antes de trocar." />
           <TemplateSelector profile={profile} entitlements={entitlements} onCustomize={() => openEditor()} />
-          <aside className="pp-site-inline-note"><LockKeyhole aria-hidden="true" /><div><strong>Templates são opções visuais do seu PPerfil</strong><p>Você pode montar, personalizar e visualizar qualquer opção. A liberação comercial acontece somente ao publicar.</p></div></aside>
+          <aside className="pp-site-inline-note"><LockKeyhole aria-hidden="true" /><div><strong>Templates são opções visuais do seu PPerfil</strong><p>Você pode visualizar todas as opções. A seleção depende da disponibilidade no seu plano, e a liberação comercial para publicação continua separada.</p></div></aside>
         </section>
       ) : null}
 
@@ -398,7 +375,7 @@ export function SiteBuilder({
 
           {personalizationTab === "appearance" ? <div className="pp-site-editor-panel pp-site-editor-panel--standalone"><header><Settings2 aria-hidden="true" /><div><h2>Aparência</h2><p>Atualize as imagens e a cor aplicada ao template.</p></div></header><div className="pp-upload-stack"><UploadForm kind="profile" label="Foto de perfil" /><UploadForm kind="hero" label="Imagem principal" /><UploadForm kind="logo" label="Logo opcional" /></div><form action={identityAction} className="builder-form pp-color-form"><label>Cor da marca<input type="color" name="primary_color" defaultValue={profile.primary_color} /></label><p className="section-help">A cor é aplicada como acento; a composição original do template permanece protegida.</p><Submit pending={identityPending}>Salvar aparência</Submit><ActionMessage state={identityState} /></form></div> : null}
 
-          {personalizationTab === "organize" ? <SiteSectionOrganizer profile={profile} demoMode={demoMode} /> : null}
+          {personalizationTab === "organize" ? <SiteSectionOrganizer key={profile.template_id} profile={profile} /> : null}
         </section>
       ) : null}
 

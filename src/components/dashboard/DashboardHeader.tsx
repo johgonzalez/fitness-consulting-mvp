@@ -6,7 +6,7 @@ import { ThemeToggle } from "./ThemeToggle";
 export function DashboardHeader({ name, imageUrl, demoMode = false }: { name: string; imageUrl?: string | null; demoMode?: boolean }) {
   return <header className="dashboard-header"><div>
     <BrandLogo inverse />
-    {demoMode ? <Link href="/demo/exit" className="pp-demo-indicator" title="Sair do workspace demo"><span aria-hidden="true" />Demo workspace</Link> : null}
+    {demoMode ? <Link href="/demo?next=/student/today" className="pp-demo-indicator" title="Abrir portal demo do aluno"><span aria-hidden="true" />Demo workspace · Ver como aluno</Link> : null}
     <div className="dashboard-user-row">
       <Link href="/dashboard/profile" className="dashboard-identity" aria-label="Abrir perfil e configurações">
         <TrainerAvatar name={name} imageUrl={imageUrl} />

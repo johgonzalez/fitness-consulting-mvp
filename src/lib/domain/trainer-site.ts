@@ -138,9 +138,10 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
       semanticTone: profile.profile_status_semantic_tone ?? null,
     },
     media,
-    specialties: demoContent?.specialties ?? specialties,
-    methodology: demoContent?.methodology ?? [...(data.methodology ?? [])]
-      .sort((left, right) => left.position - right.position || left.id.localeCompare(right.id))
+    specialties: specialties.length > 0 ? specialties : demoContent?.specialties ?? [],
+    methodology: (data.methodology.length > 0
+      ? data.methodology.toSorted((left, right) => left.position - right.position || left.id.localeCompare(right.id))
+      : demoContent?.methodology ?? [])
       .map((item) => ({ id: item.id, title: item.title, description: item.description })),
     methodologyDescription: profile.methodology_description?.trim() || "",
     services: data.services
@@ -168,7 +169,7 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
         instagramUrl: normalizeInstagramIdentity(testimonial.instagram_handle, testimonial.instagram_url).url,
       })),
     testimonialsIntro: profile.testimonials_intro?.trim() || "Relatos publicados por alunos sobre a experiência com o acompanhamento.",
-    results: demoContent?.results ?? data.testimonials
+    results: (data.testimonials.some((testimonial) => testimonial.published && testimonial.result_context) ? data.testimonials
       .filter((testimonial) => testimonial.published && testimonial.result_context)
       .slice(0, 2)
       .map((testimonial) => ({
@@ -176,7 +177,7 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
         title: "Evolução acompanhada",
         description: testimonial.result_context as string,
         image: testimonial.after_image_url ?? testimonial.before_image_url,
-      })),
+      })) : demoContent?.results ?? []),
     studentExperience: {
       title: "Seu treino. Seu progresso. Seu Personal.",
       description: "Ao treinar comigo, você terá acesso a uma experiência digital de acompanhamento organizada em um único lugar.",

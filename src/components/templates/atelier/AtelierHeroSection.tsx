@@ -13,15 +13,19 @@ export function AtelierHeroSection({ site }: { site: TrainerSiteData }) {
   const heroMedia = site.media.hero;
   const status = site.profileStatus.enabled && site.profileStatus.text ? ` · ${site.profileStatus.text}` : "";
   const longHeadline = site.hero.headline.length > 48;
+  const visible = new Set(site.sections.map(({ id }) => id));
+  const hasExperience = visible.has("digital_experience");
+  const hasMethodology = visible.has("methodology") && site.methodology.length > 0;
+  const hasServices = visible.has("services") && site.services.length > 0;
 
   return (
     <>
       <nav className={styles.nav} aria-label="Navegação principal">
         <a className={styles.navBrand} href="#atelier-hero">{site.studentExperience.programName}</a>
         <div className={styles.navLinks}>
-          <a href="#atelier-experience">Experiência</a>
-          {site.methodology.length > 0 ? <a href="#atelier-method">Método</a> : null}
-          {site.services.length > 0 ? <a href="#atelier-services">Planos</a> : null}
+          {hasExperience ? <a href="#atelier-experience">Experiência</a> : null}
+          {hasMethodology ? <a href="#atelier-method">Método</a> : null}
+          {hasServices ? <a href="#atelier-services">Planos</a> : null}
           <TemplateAction contact={site.contact} event="click_whatsapp_hero" className={styles.navCta}>Começar</TemplateAction>
         </div>
         <TemplateAction contact={site.contact} event="click_whatsapp_hero" className={styles.navCta}>Começar</TemplateAction>
@@ -38,8 +42,8 @@ export function AtelierHeroSection({ site }: { site: TrainerSiteData }) {
             <h1 className={longHeadline ? styles.heroLongTitle : undefined}>{site.hero.headline}</h1>
             <p className={styles.heroDescription}>{site.hero.description}</p>
             <div className={styles.actions}>
-              <a className={`${styles.button} ${styles.buttonPrimary}`} href={site.services.length > 0 ? "#atelier-services" : "#atelier-final-cta"}>Ver acompanhamento</a>
-              <a className={styles.button} href={site.methodology.length > 0 ? "#atelier-method" : "#atelier-experience"}>Como funciona</a>
+              <a className={`${styles.button} ${styles.buttonPrimary}`} href={hasServices ? "#atelier-services" : "#atelier-final-cta"}>Ver acompanhamento</a>
+              <a className={styles.button} href={hasMethodology ? "#atelier-method" : hasExperience ? "#atelier-experience" : "#atelier-final-cta"}>Como funciona</a>
             </div>
           </div>
         </div>

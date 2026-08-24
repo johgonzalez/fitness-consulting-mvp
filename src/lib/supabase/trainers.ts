@@ -3,6 +3,7 @@ import type { CommercialOffer, CustomSiteRequest, DashboardMetrics, LeadMatch, L
 import type { TrainerRepository } from "@/lib/domain/trainer-repository";
 import { isDemoModeAvailable } from "@/lib/demo/config";
 import { demoWorkspaceFixture } from "@/lib/demo/fixture";
+import { readDemoSiteState } from "@/lib/demo/site-workspace";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { productConfig } from "@/config/site";
@@ -12,21 +13,42 @@ const legacyPublicProfileColumns = "id,slug,display_name,headline,bio,specialty,
 const publicProfileColumns = `${legacyPublicProfileColumns},profile_status_enabled,profile_status_text,profile_status_semantic_tone`;
 const testimonialColumns = "id,trainer_id,student_name,content,image_url,before_image_url,after_image_url,result_context,instagram_handle,instagram_url,published";
 const legacyEntitlementColumns = "trainer_id,can_build_site,can_preview_site,can_use_template_01,can_use_template_02,can_use_free_template,can_use_premium_templates,can_publish_site,can_receive_leads,can_use_matching";
-const entitlementColumns = `${legacyEntitlementColumns},can_use_template_03`;
+const templateFoundationEntitlementColumns = `${legacyEntitlementColumns},can_use_template_03`;
+const entitlementColumns = `${templateFoundationEntitlementColumns},can_use_template_04`;
 
 function isMissingTemplateFoundation(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return ["42703", "42P01", "PGRST202", "PGRST204", "PGRST205"].includes(error.code ?? "")
-    || /profile_status_|can_use_template_03|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
+    || /profile_status_|can_use_template_0[34]|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
 }
 
 async function selectTrainerEntitlements(supabase: Awaited<ReturnType<typeof createClient>>, trainerId: string) {
   const result = await supabase.from("trainer_entitlements").select(entitlementColumns).eq("trainer_id", trainerId).single();
   if (result.error && isMissingTemplateFoundation(result.error)) {
+    const foundation = await supabase.from("trainer_entitlements").select(templateFoundationEntitlementColumns).eq("trainer_id", trainerId).single();
+    if (!foundation.error) return { ...foundation, data: { ...foundation.data, can_use_template_04: false } };
     const legacy = await supabase.from("trainer_entitlements").select(legacyEntitlementColumns).eq("trainer_id", trainerId).single();
-    return legacy.data ? { ...legacy, data: { ...legacy.data, can_use_template_03: false } } : legacy;
+    return legacy.data ? { ...legacy, data: { ...legacy.data, can_use_template_03: false, can_use_template_04: false } } : legacy;
   }
   return result;
+}
+
+async function resolveDemoTrainerPage(): Promise<TrainerPageData> {
+  const state = await readDemoSiteState();
+  if (!state) return demoWorkspaceFixture.trainerPage;
+  const { user_id: _userId, ...profile } = state.profile;
+  void _userId;
+  return {
+    profile,
+    services: state.services,
+    testimonials: state.testimonials,
+    methodology: state.methodology,
+  };
+}
+
+async function resolveDemoTrainerProfile(): Promise<TrainerProfile> {
+  const state = await readDemoSiteState();
+  return state?.profile ?? demoWorkspaceFixture.profile;
 }
 
 function findPublishedMock(slug: string) {
@@ -36,7 +58,8 @@ function findPublishedMock(slug: string) {
 export const trainerRepository: TrainerRepository = {
   async findPublishedBySlug(slug) {
     if (isDemoModeAvailable() && slug === demoWorkspaceFixture.profile.slug) {
-      return demoWorkspaceFixture.trainerPage;
+      const page = await resolveDemoTrainerPage();
+      return page.profile.published ? page : null;
     }
     if (!getSupabaseConfig().configured) {
       return findPublishedMock(slug);
@@ -88,7 +111,7 @@ export const trainerRepository: TrainerRepository = {
 };
 
 export async function findOwnerProfile(): Promise<TrainerProfile | null> {
-  if (await isDemoWorkspaceRequest()) return demoWorkspaceFixture.profile;
+  if (await isDemoWorkspaceRequest()) return resolveDemoTrainerProfile();
   if (!getSupabaseConfig().configured) return null;
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -100,7 +123,7 @@ export async function findOwnerProfile(): Promise<TrainerProfile | null> {
 }
 
 export async function findOwnerPreview(): Promise<TrainerPageData | null> {
-  if (await isDemoWorkspaceRequest()) return demoWorkspaceFixture.trainerPage;
+  if (await isDemoWorkspaceRequest()) return resolveDemoTrainerPage();
   const profile = await findOwnerProfile();
   if (!profile) return null;
   const supabase = await createClient();
@@ -117,7 +140,17 @@ export async function findOwnerPreview(): Promise<TrainerPageData | null> {
 }
 
 export async function findSiteBuilderData() {
-  if (await isDemoWorkspaceRequest()) return demoWorkspaceFixture.siteBuilder;
+  if (await isDemoWorkspaceRequest()) {
+    const state = await readDemoSiteState();
+    const trainerPage = state ? await resolveDemoTrainerPage() : demoWorkspaceFixture.trainerPage;
+    return {
+      ...demoWorkspaceFixture.siteBuilder,
+      profile: state?.profile ?? { ...trainerPage.profile, user_id: demoWorkspaceFixture.profile.user_id },
+      services: trainerPage.services,
+      testimonials: trainerPage.testimonials,
+      methodology: trainerPage.methodology,
+    };
+  }
   const profile = await findOwnerProfile();
   if (!profile) return null;
   const supabase = await createClient();

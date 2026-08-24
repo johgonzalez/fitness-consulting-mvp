@@ -17,8 +17,8 @@ export function StudentRecordChrome({ student, active }: { student: ManagedStude
     </header>
     <nav className="pp-record-tabs pp-record-tabs--student" aria-label="Seções do aluno">
       <Link href={`/dashboard/students/${student.id}`} aria-current={active === "overview" ? "page" : undefined}>Visão geral</Link>
-      <button type="button" disabled title="Módulo futuro">Treino<small>Em breve</small></button>
-      <button type="button" disabled title="Módulo futuro">Avaliações<small>Em breve</small></button>
+      <Link href={{ pathname: "/dashboard/workouts", query: { student: student.id } }}>Treinos</Link>
+      <Link href={{ pathname: "/dashboard/assessments", query: { student: student.id } }}>Avaliações</Link>
       <Link href={`/dashboard/students/${student.id}/progress`} aria-current={active === "progress" ? "page" : undefined}>Progresso</Link>
       {["Financeiro", "Histórico"].map((tab) => <button type="button" disabled key={tab} title="Módulo futuro">{tab}<small>Em breve</small></button>)}
     </nav>

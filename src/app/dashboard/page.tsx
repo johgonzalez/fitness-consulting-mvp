@@ -20,6 +20,7 @@ import {
 import { Avatar, EmptyState, Status } from "@/components/ui/PPerfilPrimitives";
 import { getLeadsWorkspace } from "@/lib/supabase/leads";
 import { getStudentsWorkspace } from "@/lib/supabase/students";
+import { getTemplateDefinition } from "@/lib/domain/template-registry";
 import {
   findDashboardMetrics,
   findOwnerEntitlements,
@@ -65,12 +66,7 @@ export default async function DashboardPage() {
     1,
   );
 
-  const templateName =
-    profile.template_id === "template_01"
-      ? "Essential Editorial"
-      : profile.template_id === "template_02"
-        ? "Motion"
-        : "Conversion";
+  const templateName = getTemplateDefinition(profile.template_id).name;
 
   const activity = [
     ...students.map((student) => ({
