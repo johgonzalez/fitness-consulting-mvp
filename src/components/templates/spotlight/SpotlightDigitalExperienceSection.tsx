@@ -48,7 +48,14 @@ export function SpotlightDigitalExperienceSection({ site }: { site: TrainerSiteD
               ))}
             </div>
 
-            <div id={`spotlight-panel-${mode}`} role="tabpanel" aria-labelledby={`spotlight-tab-${mode}`}>
+            <div
+              className={styles.appPanel}
+              id={`spotlight-panel-${mode}`}
+              key={mode}
+              role="tabpanel"
+              aria-labelledby={`spotlight-tab-${mode}`}
+              aria-live="polite"
+            >
               {mode === "today" ? (
                 <div className={styles.workoutPreview}>
                   <span>SEU ACOMPANHAMENTO</span>

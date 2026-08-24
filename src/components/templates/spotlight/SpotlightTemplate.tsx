@@ -5,8 +5,8 @@ import { spotlightServiceContact } from "./spotlight-contact";
 import { SpotlightDigitalExperienceSection } from "./SpotlightDigitalExperienceSection";
 import { SpotlightFinalCTASection } from "./SpotlightFinalCTASection";
 import { SpotlightIdentitySection } from "./SpotlightIdentitySection";
+import { SpotlightMotionController } from "./SpotlightMotionController";
 import { SpotlightProofSection } from "./SpotlightProofSection";
-import { SpotlightStickyController } from "./SpotlightStickyController";
 import { SpotlightStorefrontSection } from "./SpotlightStorefrontSection";
 import styles from "./spotlight.module.css";
 
@@ -21,7 +21,7 @@ export function SpotlightTemplate({ site }: { site: TrainerSiteData }) {
       className={styles.root}
       style={{ "--spotlight-accent": site.site.accent } as CSSProperties}
     >
-      <SpotlightStickyController rootId={spotlightRootId} />
+      <SpotlightMotionController rootId={spotlightRootId} />
       <div className={styles.page}>
         <SpotlightIdentitySection site={site} />
         <SpotlightStorefrontSection site={site} />

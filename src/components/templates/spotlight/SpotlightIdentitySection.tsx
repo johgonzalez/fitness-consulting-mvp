@@ -65,7 +65,7 @@ export function SpotlightIdentitySection({ site }: { site: TrainerSiteData }) {
                 src={profileMedia?.url ?? "/images/saas/default-trainer-avatar.webp"}
                 alt={profileMedia?.alt ?? "Avatar padrão PPerfil para perfil sem foto do treinador"}
                 fill
-                priority
+                loading="eager"
                 sizes="(max-width: 767px) 148px, 170px"
               />
             </div>
