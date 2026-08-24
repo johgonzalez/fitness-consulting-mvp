@@ -24,10 +24,8 @@ import {
 import {
   completeStudentWorkoutAction,
   getPreviousExercisePerformanceAction,
-  pauseStudentWorkoutAction,
   recordStudentWorkoutFeedbackAction,
   refreshStudentWorkoutAction,
-  resumeStudentWorkoutAction,
   startStudentWorkoutAction,
   syncStudentWorkoutAction,
 } from "@/app/actions/workout-executions";
@@ -43,6 +41,23 @@ import type {
   WorkoutSetActuals,
   WorkoutSetExecutionProjection,
 } from "@/lib/domain/workout-executions";
+import {
+  WORKOUT_SYNC_BATCH_SIZE,
+  advanceWorkoutRecoveryQueue,
+  applyWorkoutMutationOptimistically,
+  applyWorkoutMutationsOptimistically,
+  canSafelyRebaseWorkoutMutations,
+  createWorkoutRecovery,
+  deleteWorkoutRecovery,
+  markWorkoutRecoveryLoaded,
+  markWorkoutSyncAttempt,
+  queueWorkoutMutation,
+  readWorkoutRecovery,
+  shouldRetainWorkoutRecovery,
+  withWorkoutRecoveryRestDeadline,
+  writeWorkoutRecovery,
+  type WorkoutRecoveryRecord,
+} from "@/lib/workouts/offline-recovery";
 import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
 
 type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "completed" | "offline";
@@ -54,10 +69,7 @@ type SequenceItem = {
   round: number;
 };
 
-type PendingRetry = {
-  mutation: WorkoutExecutionMutation;
-  message: string;
-};
+type SyncState = "ONLINE" | "OFFLINE" | "SYNCING" | "SYNC_FAILED" | "RECOVERED" | "SYNCED";
 
 const feedbackOptions: Array<{ value: WorkoutDifficulty; label: string }> = [
   { value: "EASY", label: "Fácil" },
@@ -247,13 +259,18 @@ export function WorkoutExecutionExperience({
 }) {
   const router = useRouter();
   const startAttempted = useRef(false);
+  const recoveryLoadedFor = useRef<string | null>(null);
+  const recoveryRef = useRef<WorkoutRecoveryRecord | null>(null);
+  const syncInFlight = useRef(false);
   const [snapshot, setSnapshot] = useState(() => initialSnapshot ? demoMode ? prepareDemoView(initialSnapshot, initialView) : initialSnapshot : null);
   const [starting, setStarting] = useState(autoStart && !initialSnapshot);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [pendingRetry, setPendingRetry] = useState<PendingRetry | null>(null);
   const [forcedOffline, setForcedOffline] = useState(initialView === "offline");
   const [online, setOnline] = useState(initialView !== "offline");
+  const [recoveryReady, setRecoveryReady] = useState(false);
+  const [recovery, setRecovery] = useState<WorkoutRecoveryRecord | null>(null);
+  const [syncState, setSyncState] = useState<SyncState>(initialView === "offline" ? "OFFLINE" : "ONLINE");
   const [restDeadline, setRestDeadline] = useState<number | null>(() => initialView === "rest" ? Date.now() + 75_000 : null);
   const [secondsRemaining, setSecondsRemaining] = useState(initialView === "rest" ? 75 : 0);
   const [detailOpen, setDetailOpen] = useState(initialView === "detail");
@@ -280,10 +297,51 @@ export function WorkoutExecutionExperience({
     });
   }
 
+  const persistRecovery = useCallback(async (nextRecovery: WorkoutRecoveryRecord | null) => {
+    if (!nextRecovery) {
+      recoveryRef.current = null;
+      setRecovery(null);
+      return;
+    }
+    if (shouldRetainWorkoutRecovery(nextRecovery)) {
+      await writeWorkoutRecovery(nextRecovery);
+      recoveryRef.current = nextRecovery;
+      setRecovery(nextRecovery);
+    } else {
+      await deleteWorkoutRecovery(nextRecovery.executionId);
+      recoveryRef.current = null;
+      setRecovery(null);
+    }
+  }, []);
+
+  const clearRecovery = useCallback(async (executionId: string) => {
+    try { await deleteWorkoutRecovery(executionId); } catch { /* Terminal state remains authoritative if browser storage is unavailable. */ }
+    recoveryRef.current = null;
+    setRecovery(null);
+  }, []);
+
+  const persistRestDeadline = useCallback(async (deadline: number | null, sourceSnapshot: WorkoutExecutionSnapshot) => {
+    setRestDeadline(deadline);
+    const base = recoveryRef.current ?? createWorkoutRecovery({
+      executionId: sourceSnapshot.execution.id,
+      workoutSessionId: sourceSnapshot.execution.workoutSessionId,
+      expectedServerRevision: sourceSnapshot.execution.serverRevision,
+    });
+    try {
+      await persistRecovery(withWorkoutRecoveryRestDeadline(base, deadline));
+    } catch {
+      setSyncState("SYNC_FAILED");
+      setMessage("Não foi possível proteger o descanso neste dispositivo.");
+    }
+  }, [persistRecovery]);
+
   useEffect(() => {
     function updateOnline() {
       if (forcedOffline) return;
-      setOnline(navigator.onLine);
+      const nextOnline = navigator.onLine;
+      setOnline(nextOnline);
+      if (!nextOnline) setSyncState("OFFLINE");
+      else if (!recoveryRef.current?.queuedMutations.length) setSyncState((current) => current === "SYNCED" ? current : "ONLINE");
     }
     updateOnline();
     window.addEventListener("online", updateOnline);
@@ -294,17 +352,74 @@ export function WorkoutExecutionExperience({
     };
   }, [forcedOffline]);
 
+  const recoveryExecutionId = snapshot?.execution.id ?? null;
+  const recoveryWorkoutSessionId = snapshot?.execution.workoutSessionId ?? null;
+  const recoveryExecutionStatus = snapshot?.execution.status ?? null;
+  useEffect(() => {
+    if (!recoveryExecutionId || !recoveryWorkoutSessionId || !recoveryExecutionStatus || recoveryLoadedFor.current === recoveryExecutionId) return;
+    recoveryLoadedFor.current = recoveryExecutionId;
+    let active = true;
+    readWorkoutRecovery(recoveryExecutionId, recoveryWorkoutSessionId)
+      .then(async (stored) => {
+        if (!active) return;
+        if (!stored) {
+          setRecoveryReady(true);
+          return;
+        }
+        if (["COMPLETED", "ABANDONED"].includes(recoveryExecutionStatus)) {
+          if (stored.queuedMutations.length) {
+            recoveryRef.current = stored;
+            setRecovery(stored);
+            setSyncState("SYNC_FAILED");
+            setMessage("Há alterações salvas neste dispositivo que não podem ser aplicadas a um treino encerrado.");
+          } else await clearRecovery(recoveryExecutionId);
+          setRecoveryReady(true);
+          return;
+        }
+        const recovered = markWorkoutRecoveryLoaded(stored);
+        recoveryRef.current = recovered;
+        setRecovery(recovered);
+        if (recovered.queuedMutations.length) {
+          setSnapshot((authoritative) => authoritative
+            ? applyWorkoutMutationsOptimistically(authoritative, recovered.queuedMutations)
+            : authoritative);
+          setSyncState("RECOVERED");
+          setMessage("Treino recuperado. Suas alterações continuam salvas neste dispositivo.");
+        }
+        if (recovered.restDeadline && recovered.restDeadline > Date.now()) {
+          setRestDeadline(recovered.restDeadline);
+          setSecondsRemaining(Math.max(0, Math.ceil((recovered.restDeadline - Date.now()) / 1000)));
+          if (!recovered.queuedMutations.length) setSyncState("RECOVERED");
+        }
+        await writeWorkoutRecovery(recovered);
+        if (active) setRecoveryReady(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setRecoveryReady(true);
+        setSyncState("SYNC_FAILED");
+        setMessage("O armazenamento seguro deste dispositivo não está disponível. Mantenha esta tela aberta.");
+      });
+    return () => { active = false; };
+  }, [clearRecovery, recoveryExecutionId, recoveryExecutionStatus, recoveryWorkoutSessionId]);
+
   useEffect(() => {
     if (!restDeadline) return;
     const update = () => {
       const remaining = Math.max(0, Math.ceil((restDeadline - Date.now()) / 1000));
       setSecondsRemaining(remaining);
-      if (remaining === 0) setRestDeadline(null);
+      if (remaining === 0 && snapshot) void persistRestDeadline(null, snapshot);
     };
     update();
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
-  }, [restDeadline]);
+  }, [persistRestDeadline, restDeadline, snapshot]);
+
+  useEffect(() => {
+    if (syncState !== "SYNCED") return;
+    const timeout = window.setTimeout(() => setSyncState("ONLINE"), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [syncState]);
 
   useEffect(() => {
     if (!autoStart || snapshot || startAttempted.current) return;
@@ -323,125 +438,201 @@ export function WorkoutExecutionExperience({
     if (!executionId || !currentExerciseId) return;
     let active = true;
     getPreviousExercisePerformanceAction({ exerciseId: currentExerciseId, beforeExecutionId: executionId })
-      .then((result) => { if (active) setPrevious(result); });
+      .then((result) => { if (active) setPrevious(result); })
+      .catch(() => { if (active) setPrevious(null); });
     return () => { active = false; };
   }, [currentExerciseId, executionId]);
 
   const nextMediaUrl = useMemo(() => next ? resolveStudentWorkoutMedia(next.exercise.exercise.id, next.exercise.media, demoMode) : null, [demoMode, next]);
   useEffect(() => {
-    if (!nextMediaUrl) return;
+    if (!nextMediaUrl || !online) return;
     const image = new window.Image();
     image.src = nextMediaUrl;
-  }, [nextMediaUrl]);
+  }, [nextMediaUrl, online]);
 
   const reconcile = useCallback(async (executionId: string) => {
     const refreshed = await refreshStudentWorkoutAction(executionId);
     if (refreshed.ok) {
       setSnapshot(refreshed.snapshot);
       setMessage("Treino atualizado com o estado mais recente.");
-      setPendingRetry(null);
     } else setMessage(refreshed.message);
   }, []);
 
+  const flushRecovery = useCallback(async (candidate: WorkoutRecoveryRecord) => {
+    if (!online || syncInFlight.current || candidate.queuedMutations.length === 0) return null;
+    syncInFlight.current = true;
+    setBusy(true);
+    setSyncState("SYNCING");
+    let working = candidate;
+    let latestSnapshot: WorkoutExecutionSnapshot | null = null;
+    try {
+      while (working.queuedMutations.length) {
+        const batch = working.queuedMutations.slice(0, WORKOUT_SYNC_BATCH_SIZE);
+        working = markWorkoutSyncAttempt(working, false);
+        await persistRecovery(working);
+
+        if (demoMode) {
+          working = advanceWorkoutRecoveryQueue(
+            working,
+            batch.length,
+            working.expectedServerRevision + batch.length,
+          );
+          await persistRecovery(working);
+          continue;
+        }
+
+        let result = await syncStudentWorkoutAction({
+          executionId: working.executionId,
+          expectedServerRevision: working.expectedServerRevision,
+          mutations: batch.map((item) => item.mutation),
+        });
+
+        if (!result.ok && result.code === "STALE") {
+          const refreshed = await refreshStudentWorkoutAction(working.executionId);
+          if (!refreshed.ok) {
+            working = markWorkoutSyncAttempt(working, true);
+            await persistRecovery(working);
+            setSyncState("SYNC_FAILED");
+            setMessage(refreshed.message);
+            return null;
+          }
+          latestSnapshot = refreshed.snapshot;
+          setSnapshot(refreshed.snapshot);
+          const terminal = ["COMPLETED", "ABANDONED"].includes(refreshed.snapshot.execution.status);
+          if (terminal || !canSafelyRebaseWorkoutMutations(refreshed.snapshot, batch)) {
+            working = markWorkoutSyncAttempt(working, true);
+            await persistRecovery(working);
+            setSyncState("SYNC_FAILED");
+            setMessage("Conflito de sincronização: o treino mudou em outro dispositivo. Seus valores locais foram preservados para revisão.");
+            return null;
+          }
+          working = {
+            ...working,
+            expectedServerRevision: refreshed.snapshot.execution.serverRevision,
+            updatedAt: new Date().toISOString(),
+          };
+          await persistRecovery(working);
+          result = await syncStudentWorkoutAction({
+            executionId: working.executionId,
+            expectedServerRevision: working.expectedServerRevision,
+            mutations: batch.map((item) => item.mutation),
+          });
+        }
+
+        if (!result.ok) {
+          working = markWorkoutSyncAttempt(working, true);
+          await persistRecovery(working);
+          setSyncState("SYNC_FAILED");
+          setMessage(result.message);
+          return null;
+        }
+
+        latestSnapshot = result.snapshot;
+        working = advanceWorkoutRecoveryQueue(
+          working,
+          batch.length,
+          result.snapshot.execution.serverRevision,
+        );
+        await persistRecovery(working);
+      }
+
+      if (latestSnapshot) setSnapshot(latestSnapshot);
+      setActualsDraft(null);
+      setSyncState("SYNCED");
+      setMessage("Sincronizado com segurança.");
+      return latestSnapshot;
+    } catch {
+      const failed = markWorkoutSyncAttempt(working, true);
+      try { await persistRecovery(failed); } catch { /* IndexedDB failure is already represented by the durable warning. */ }
+      setSyncState("SYNC_FAILED");
+      setMessage("Falha ao sincronizar. Seus valores continuam salvos neste dispositivo.");
+      return null;
+    } finally {
+      setBusy(false);
+      syncInFlight.current = false;
+    }
+  }, [demoMode, online, persistRecovery]);
+
+  useEffect(() => {
+    if (!recoveryReady || !online || !recovery?.queuedMutations.length || ["SYNCING", "SYNC_FAILED"].includes(syncState)) return;
+    void flushRecovery(recovery);
+  }, [flushRecovery, online, recovery, recoveryReady, syncState]);
+
   const runMutation = useCallback(async (mutation: WorkoutExecutionMutation) => {
-    if (!snapshot) return null;
-    if (!online) {
-      setPendingRetry({ mutation, message: "Aguardando conexão para concluir esta série." });
-      setMessage("Sem conexão. Seus valores permanecem nesta tela.");
+    if (!snapshot || !recoveryReady) return null;
+    const base = recoveryRef.current ?? createWorkoutRecovery({
+      executionId: snapshot.execution.id,
+      workoutSessionId: snapshot.execution.workoutSessionId,
+      expectedServerRevision: snapshot.execution.serverRevision,
+      restDeadline,
+    });
+    let queued: WorkoutRecoveryRecord;
+    try {
+      queued = queueWorkoutMutation(base, mutation);
+      await persistRecovery(queued);
+    } catch {
+      setSyncState("SYNC_FAILED");
+      setMessage("Não foi possível salvar esta alteração no dispositivo. Tente novamente antes de sair.");
       return null;
     }
-    if (demoMode) {
-      if (mutation.operation === "complete_set") {
-        const updated = applyDemoSetCompletion(snapshot, mutation.workoutSetExecutionId, mutation.actuals);
-        setSnapshot(updated);
-        setPendingRetry(null);
-        setMessage(null);
-        return updated;
-      }
-      return snapshot;
-    }
-    setBusy(true);
-    const result = await syncStudentWorkoutAction({
-      executionId: snapshot.execution.id,
-      expectedServerRevision: snapshot.execution.serverRevision,
-      mutations: [mutation],
-    });
-    setBusy(false);
-    if (result.ok) {
-      setSnapshot(result.snapshot);
-      setPendingRetry(null);
-      setMessage(null);
-      return result.snapshot;
-    }
-    if (result.code === "STALE") await reconcile(snapshot.execution.id);
-    else {
-      setMessage(result.message);
-      if (result.code === "NETWORK") setPendingRetry({ mutation, message: result.message });
-    }
-    return null;
-  }, [demoMode, online, reconcile, snapshot]);
+    const updated = demoMode && mutation.operation === "complete_set"
+      ? applyDemoSetCompletion(snapshot, mutation.workoutSetExecutionId, mutation.actuals)
+      : applyWorkoutMutationOptimistically(snapshot, mutation);
+    setSnapshot(updated);
+    setActualsDraft(null);
+    setSyncState(online ? "SYNCING" : "OFFLINE");
+    setMessage(online ? "Sincronizando…" : "Salvo neste dispositivo. Sincronizaremos quando a conexão voltar.");
+    return { snapshot: updated, recovery: queued };
+  }, [demoMode, online, persistRecovery, recoveryReady, restDeadline, snapshot]);
 
   async function completeSet() {
     if (!current || !actuals) return;
-    const mutation: WorkoutExecutionMutation = pendingRetry?.mutation.operation === "complete_set"
-      ? pendingRetry.mutation
-      : {
-        operation: "complete_set",
-        clientMutationId: uuid(),
-        workoutSetExecutionId: current.set.execution.id,
-        actuals,
-      };
-    const updated = await runMutation(mutation);
-    if (!updated) return;
-    const updatedSequence = buildSequence(updated);
+    const mutation: WorkoutExecutionMutation = {
+      operation: "complete_set",
+      clientMutationId: uuid(),
+      workoutSetExecutionId: current.set.execution.id,
+      actuals,
+    };
+    const queued = await runMutation(mutation);
+    if (!queued) return;
+    const updatedSequence = buildSequence(queued.snapshot);
     const nextPending = updatedSequence[firstPendingIndex(updatedSequence)];
     if (shouldOpenRest(current, nextPending)) {
       const completedSet = updatedSequence.find((item) => item.set.execution.id === current.set.execution.id)?.set;
       const deadline = completedSet?.execution.restEndsAt ? new Date(completedSet.execution.restEndsAt).getTime() : Date.now() + (current.set.restSeconds ?? 0) * 1000;
-      if (deadline > Date.now()) setRestDeadline(deadline);
+      if (deadline > Date.now()) {
+        const withDeadline = withWorkoutRecoveryRestDeadline(queued.recovery, deadline);
+        await persistRecovery(withDeadline);
+        setRestDeadline(deadline);
+      }
     }
+    if (online) void flushRecovery(recoveryRef.current ?? queued.recovery);
   }
 
   async function pauseWorkout() {
     if (!snapshot) return;
-    if (demoMode) {
-      const nextSnapshot = structuredClone(snapshot);
-      nextSnapshot.execution.status = "PAUSED";
-      nextSnapshot.execution.pausedAt = new Date().toISOString();
-      nextSnapshot.execution.serverRevision += 1;
-      setSnapshot(nextSnapshot);
-      setExitOpen(false);
-      return;
-    }
-    setBusy(true);
-    const result = await pauseStudentWorkoutAction({ executionId: snapshot.execution.id, clientMutationId: uuid(), expectedServerRevision: snapshot.execution.serverRevision });
-    setBusy(false);
-    if (result.ok) { setSnapshot(result.snapshot); setExitOpen(false); }
-    else if (result.code === "STALE") await reconcile(snapshot.execution.id);
-    else setMessage(result.message);
+    const queued = await runMutation({ operation: "pause", clientMutationId: uuid() });
+    if (!queued) return;
+    setExitOpen(false);
+    if (online) void flushRecovery(queued.recovery);
   }
 
   async function resumeWorkout() {
     if (!snapshot) return;
-    if (demoMode) {
-      const nextSnapshot = structuredClone(snapshot);
-      nextSnapshot.execution.status = "IN_PROGRESS";
-      nextSnapshot.execution.pausedAt = null;
-      nextSnapshot.execution.serverRevision += 1;
-      setSnapshot(nextSnapshot);
-      setMessage("Treino retomado do ponto salvo.");
-      return;
-    }
-    setBusy(true);
-    const result = await resumeStudentWorkoutAction({ executionId: snapshot.execution.id, clientMutationId: uuid(), expectedServerRevision: snapshot.execution.serverRevision });
-    setBusy(false);
-    if (result.ok) { setSnapshot(result.snapshot); setMessage("Treino retomado do ponto salvo."); }
-    else if (result.code === "STALE") await reconcile(snapshot.execution.id);
-    else setMessage(result.message);
+    const queued = await runMutation({ operation: "resume", clientMutationId: uuid() });
+    if (!queued) return;
+    setMessage(online ? "Retomando e sincronizando…" : "Treino retomado e salvo neste dispositivo.");
+    if (online) void flushRecovery(queued.recovery);
   }
 
   async function finishWorkout() {
     if (!snapshot) return;
+    if (!online || recoveryRef.current?.queuedMutations.length) {
+      setSyncState(online ? "SYNCING" : "OFFLINE");
+      setMessage("Sincronize as séries salvas neste dispositivo antes de finalizar o treino.");
+      if (online && recoveryRef.current) void flushRecovery(recoveryRef.current);
+      return;
+    }
     if (demoMode) {
       const nextSnapshot = structuredClone(snapshot);
       nextSnapshot.execution.status = "COMPLETED";
@@ -449,12 +640,16 @@ export function WorkoutExecutionExperience({
       nextSnapshot.execution.serverRevision += 1;
       nextSnapshot.metrics.activeDurationSeconds = Math.max(nextSnapshot.metrics.activeDurationSeconds, 2520);
       setSnapshot(nextSnapshot);
+      await clearRecovery(nextSnapshot.execution.id);
       return;
     }
     setBusy(true);
     const result = await completeStudentWorkoutAction({ executionId: snapshot.execution.id, clientMutationId: uuid(), expectedServerRevision: snapshot.execution.serverRevision });
     setBusy(false);
-    if (result.ok) setSnapshot(result.snapshot);
+    if (result.ok) {
+      setSnapshot(result.snapshot);
+      await clearRecovery(result.snapshot.execution.id);
+    }
     else if (result.code === "STALE") await reconcile(snapshot.execution.id);
     else setMessage(result.message);
   }
@@ -491,6 +686,7 @@ export function WorkoutExecutionExperience({
 
   if (snapshot.execution.status === "PAUSED") {
     return <section className="pp-paused-screen">
+      <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} />
       <header><Link href="/student/today" aria-label="Voltar para Hoje"><X aria-hidden="true" /></Link></header>
       <div className="pp-paused-screen__mark"><Pause aria-hidden="true" /></div>
       <span>{snapshot.metrics.completedExercises} exercícios concluídos · {activeMinutes(snapshot)} min</span>
@@ -519,21 +715,24 @@ export function WorkoutExecutionExperience({
 
   if (!current) {
     return <section className="pp-ready-to-finish">
+      <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined} />
       <header><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair do treino"><X aria-hidden="true" /></button></header>
       <div><Check aria-hidden="true" /></div><span>Última série concluída</span><h1>Você chegou ao fim.</h1><p>Revise o resultado real da sessão e finalize quando estiver pronta.</p>
       <dl><div><strong>{snapshot.metrics.completedExercises}</strong><small>exercícios</small></div><div><strong>{snapshot.metrics.completedSets}</strong><small>séries</small></div><div><strong>{activeMinutes(snapshot)}</strong><small>min</small></div></dl>
-      <button className="pp-workout-primary" type="button" onClick={finishWorkout} disabled={busy}>Finalizar treino <ChevronRight aria-hidden="true" /></button>
+      {message ? <p className="pp-ready-sync-message" role="status">{message}</p> : null}
+      <button className="pp-workout-primary" type="button" onClick={finishWorkout} disabled={busy || !online || Boolean(recovery?.queuedMutations.length)}>Finalizar treino <ChevronRight aria-hidden="true" /></button>
     </section>;
   }
 
   if (restDeadline) {
     const progress = current.set.restSeconds ? Math.max(0, Math.min(1, secondsRemaining / current.set.restSeconds)) : 0;
     return <section className="pp-rest-screen" aria-live="polite">
-      <header><button type="button" onClick={() => setRestDeadline(null)} aria-label="Fechar descanso"><X aria-hidden="true" /></button><span>Descanso</span><i /></header>
+      <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined} />
+      <header><button type="button" onClick={() => { void persistRestDeadline(null, snapshot); }} aria-label="Fechar descanso"><X aria-hidden="true" /></button><span>Descanso</span><i /></header>
       <p>Recupere a respiração</p>
       <div className="pp-rest-clock" role="timer" aria-label={`${secondsRemaining} segundos restantes`} style={{ "--rest-progress": progress } as React.CSSProperties}><strong>{formatClock(secondsRemaining)}</strong><span>até a próxima série</span></div>
       <div className="pp-rest-next"><small>Próxima</small><strong>{current.exercise.exercise.name}</strong><span>Série {current.set.setNumber} · {targetReps(current.set) ?? current.set.durationSeconds ?? "—"}{targetReps(current.set) ? " reps" : current.set.durationSeconds ? "s" : ""}</span></div>
-      <div className="pp-rest-controls"><button type="button" onClick={() => setRestDeadline((value) => Math.max(Date.now(), (value ?? Date.now()) - 15_000))}>−15 s</button><button type="button" onClick={() => setRestDeadline(null)}>Pular descanso</button><button type="button" onClick={() => setRestDeadline((value) => (value ?? Date.now()) + 15_000)}>+15 s</button></div>
+      <div className="pp-rest-controls"><button type="button" onClick={() => { void persistRestDeadline(Math.max(Date.now(), restDeadline - 15_000), snapshot); }}>−15 s</button><button type="button" onClick={() => { void persistRestDeadline(null, snapshot); }}>Pular descanso</button><button type="button" onClick={() => { void persistRestDeadline(restDeadline + 15_000, snapshot); }}>+15 s</button></div>
     </section>;
   }
 
@@ -545,7 +744,12 @@ export function WorkoutExecutionExperience({
   const supersetExercises = current.section.sectionType === "SUPERSET" ? current.section.exercises : [];
 
   return <section className="pp-active-execution">
-    {!online ? <div className="pp-connectivity-banner" role="status"><CloudOff aria-hidden="true" /><span><strong>Sem conexão</strong> · seu treino continua nesta tela</span>{forcedOffline ? <button type="button" onClick={() => { setForcedOffline(false); setOnline(true); }}>Reconectar</button> : null}</div> : pendingRetry ? <div className="pp-connectivity-banner pp-connectivity-banner--sync" role="status"><Signal aria-hidden="true" /><span>Reconectando e sincronizando…</span></div> : null}
+    <WorkoutSyncStatus
+      state={syncState}
+      localOnly={demoMode}
+      onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined}
+      onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined}
+    />
     <header className="pp-execution-header"><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair ou pausar treino"><X aria-hidden="true" /></button><span>{exercisePosition} de {uniqueExercises.length}</span><button type="button" onClick={() => setDetailOpen(true)} aria-label="Abrir detalhes do exercício"><Info aria-hidden="true" /></button><div role="progressbar" aria-label="Progresso do treino" aria-valuemin={0} aria-valuemax={snapshot.metrics.totalSets} aria-valuenow={snapshot.metrics.completedSets}><i style={{ width: `${progress * 100}%` }} /></div></header>
 
     <StudentWorkoutMedia exerciseId={initialView === "fallback" ? null : current.exercise.exercise.id} exerciseName={current.exercise.exercise.name} media={exerciseMedia} demoMode={demoMode} priority className="pp-execution-media" />
@@ -573,13 +777,42 @@ export function WorkoutExecutionExperience({
       {previousText ? <button type="button" className="pp-previous-performance" onClick={() => setDetailOpen(true)}><RotateCcw aria-hidden="true" /><span>{previousText}</span><ChevronRight aria-hidden="true" /></button> : null}
     </div>
 
-    {message ? <div className={`pp-execution-message${pendingRetry ? " pp-execution-message--warning" : ""}`} role="status"><CircleAlert aria-hidden="true" /><span>{message}</span></div> : null}
-    <div className="pp-execution-action"><button className="pp-workout-primary" type="button" onClick={completeSet} disabled={busy || !actuals}>{busy ? "Sincronizando…" : pendingRetry ? "Tentar sincronizar" : "Concluir série"}<Check aria-hidden="true" /></button></div>
+    {message ? <div className={`pp-execution-message${syncState === "OFFLINE" || syncState === "SYNC_FAILED" ? " pp-execution-message--warning" : ""}`} role="status"><CircleAlert aria-hidden="true" /><span>{message}</span></div> : null}
+    <div className="pp-execution-action"><button className="pp-workout-primary" type="button" onClick={completeSet} disabled={busy || !actuals || !recoveryReady}>{busy ? "Sincronizando…" : "Concluir série"}<Check aria-hidden="true" /></button></div>
 
     {detailOpen ? <div className="pp-bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="exercise-detail-title"><button className="pp-bottom-sheet__backdrop" type="button" onClick={() => setDetailOpen(false)} aria-label="Fechar detalhes" /><div><header><span>Detalhes do exercício</span><button type="button" onClick={() => setDetailOpen(false)} aria-label="Fechar"><X aria-hidden="true" /></button></header><StudentWorkoutMedia exerciseId={current.exercise.exercise.id} exerciseName={current.exercise.exercise.name} media={current.exercise.media} demoMode={demoMode} /><h2 id="exercise-detail-title">{current.exercise.exercise.name}</h2><p>{current.exercise.exercise.instructions}</p>{current.exercise.exercise.coachingCues.length ? <ul>{current.exercise.exercise.coachingCues.map((cue) => <li key={cue}><Check aria-hidden="true" />{cue}</li>)}</ul> : null}{current.exercise.studentInstruction ? <aside><TrainerPresence {...identity.trainer} compact /><p>{current.exercise.studentInstruction}</p></aside> : null}</div></div> : null}
 
     {exitOpen ? <div className="pp-bottom-sheet pp-exit-sheet" role="dialog" aria-modal="true" aria-labelledby="exit-title"><button className="pp-bottom-sheet__backdrop" type="button" onClick={() => setExitOpen(false)} aria-label="Continuar treino" /><div><header><span id="exit-title">Seu progresso está protegido</span><button type="button" onClick={() => setExitOpen(false)} aria-label="Fechar"><X aria-hidden="true" /></button></header><p>Você pode continuar agora ou pausar e retomar do estado autoritativo salvo.</p><button className="pp-workout-primary" type="button" onClick={() => setExitOpen(false)}><Play aria-hidden="true" />Continuar treino</button><button type="button" onClick={pauseWorkout} disabled={busy}><Pause aria-hidden="true" />Pausar treino</button><Link href="/student/today"><ArrowLeft aria-hidden="true" />Voltar para Hoje</Link></div></div> : null}
   </section>;
+}
+
+function WorkoutSyncStatus({
+  state,
+  localOnly = false,
+  onReconnect,
+  onRetry,
+}: {
+  state: SyncState;
+  localOnly?: boolean;
+  onReconnect?: () => void;
+  onRetry?: () => void;
+}) {
+  const content: Record<SyncState, { label: string; detail: string }> = {
+    ONLINE: { label: "Online", detail: "Pronto para sincronizar" },
+    OFFLINE: { label: "Sem conexão", detail: "Salvo neste dispositivo" },
+    SYNCING: { label: "Sincronizando", detail: "Enviando alterações protegidas" },
+    SYNC_FAILED: { label: "Falha na sincronização", detail: "Alterações preservadas neste dispositivo" },
+    RECOVERED: { label: "Treino recuperado", detail: "Salvo neste dispositivo" },
+    SYNCED: { label: "Sincronizado", detail: localOnly ? "Workspace demo atualizado" : "Servidor atualizado" },
+  };
+  const status = content[state];
+  const Icon = state === "OFFLINE" ? CloudOff : state === "SYNCED" ? Check : state === "SYNC_FAILED" ? CircleAlert : state === "RECOVERED" ? RotateCcw : Signal;
+  return <div className={`pp-connectivity-banner pp-connectivity-banner--${state.toLowerCase().replace("_", "-")}`} role="status">
+    <Icon aria-hidden="true" />
+    <span><strong>{status.label}</strong> · {status.detail}</span>
+    {onReconnect && (state === "OFFLINE" || state === "RECOVERED") ? <button type="button" onClick={onReconnect}>Reconectar</button> : null}
+    {onRetry && state === "SYNC_FAILED" ? <button type="button" onClick={onRetry}>Tentar novamente</button> : null}
+  </div>;
 }
 
 function NumericControl({

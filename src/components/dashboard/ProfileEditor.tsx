@@ -1,10 +1,10 @@
 "use client";
 
-import { Bell, Camera, ChevronRight, CreditCard, Database, LogOut, Mail, Palette, Plug, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import { Bell, Camera, ChevronRight, CreditCard, Database, Mail, Palette, Plug, ShieldCheck, Trash2, UserRound } from "lucide-react";
 import { useActionState, useState } from "react";
-import { logout } from "@/app/actions/auth";
 import { removeProfilePhoto, requestEmailChange, saveProfileBasics } from "@/app/actions/profile";
 import { uploadIdentityImage, type SiteActionState } from "@/app/actions/site-builder";
+import { SecureLogoutForm } from "@/components/auth/SecureLogoutForm";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { TrainerAvatar } from "@/components/dashboard/TrainerAvatar";
 import type { TrainerProfile } from "@/lib/domain/trainer";
@@ -111,7 +111,7 @@ export function ProfileEditor({ profile, email }: { profile: TrainerProfile; ema
         <aside className="pp-settings-security-note"><Mail aria-hidden="true" /><p>Verificação de telefone por OTP e proteção adicional para mudanças sensíveis ainda não estão disponíveis.</p></aside>
         <section className="pp-settings-signout" aria-labelledby="settings-signout-title">
           <div><h3 id="settings-signout-title">Sessão atual</h3><p>Encerre com segurança o acesso neste dispositivo.</p></div>
-          <form action={logout}><button type="submit"><LogOut aria-hidden="true" />Sair da conta</button></form>
+          <SecureLogoutForm />
         </section>
       </section> : null}
 
