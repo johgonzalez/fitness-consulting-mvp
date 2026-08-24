@@ -157,20 +157,21 @@ function demoWorkouts(): StudentWorkoutCard[] {
 export async function getStudentTodayWorkspace(): Promise<StudentTodayWorkspace> {
   const demoMode = await isDemoWorkspaceRequest();
   if (demoMode) {
+    const demoHistoryDates = ["2026-08-24T10:05:00.000Z", "2026-08-21T12:52:00.000Z", "2026-08-19T12:52:00.000Z", "2026-08-16T12:52:00.000Z"];
     return {
       identity: demoIdentity(),
       workouts: demoWorkouts(),
-      history: [{
-        id: workoutExecutionDemoCompleted.execution.id,
+      history: demoHistoryDates.map((completedAt, index) => ({
+        id: index === 0 ? workoutExecutionDemoCompleted.execution.id : `5b510000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`,
         status: "COMPLETED",
-        startedAt: workoutExecutionDemoCompleted.execution.startedAt,
-        completedAt: workoutExecutionDemoCompleted.execution.completedAt,
+        startedAt: new Date(Date.parse(completedAt) - (2_700 + index * 180) * 1000).toISOString(),
+        completedAt,
         abandonedAt: null,
-        difficulty: workoutExecutionDemoCompleted.execution.difficulty,
+        difficulty: index % 2 === 0 ? "GOOD" : "CHALLENGING",
         planName: workoutExecutionDemoCompleted.plan.name,
-        sessionName: workoutExecutionDemoCompleted.session.name,
-        activeDurationSeconds: workoutExecutionDemoCompleted.metrics.activeDurationSeconds,
-      }],
+        sessionName: index % 2 === 0 ? "Inferiores" : "Superiores",
+        activeDurationSeconds: 2_700 + index * 180,
+      })),
       demoMode,
     };
   }

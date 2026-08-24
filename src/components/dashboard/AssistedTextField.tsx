@@ -2,6 +2,7 @@
 
 import { Check, Plus, Sparkles, WandSparkles, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
+import { AIAssistButton } from "@/components/dashboard/AIAssistButton";
 
 function sentenceCase(value: string) {
   const cleaned = value
@@ -56,7 +57,8 @@ export function AssistedTextField({
       <label htmlFor={id}>{label} personalizada</label>
       <textarea id={id} name={name} required={required} maxLength={maxLength} rows={rows} value={value} onChange={(event) => setValue(event.target.value)} />
       <div className="pp-content-assistant__footer">
-        <button type="button" onClick={professionalize}><WandSparkles aria-hidden="true" />Aprimorar texto</button>
+        <button type="button" onClick={professionalize}><WandSparkles aria-hidden="true" />Organizar texto</button>
+        <AIAssistButton compact />
         <small>{value.length}/{maxLength}</small>
       </div>
     </fieldset>
@@ -96,7 +98,7 @@ export function SpecialtyAssistant({ initialValue, suggestions }: { initialValue
       {selected.length ? <div className="pp-specialty-assistant__selected" aria-label="Especialidades selecionadas">{selected.map((item) => <button key={item} type="button" onClick={() => toggle(item)}>{item}<X aria-hidden="true" /></button>)}</div> : null}
       <div className="pp-specialty-assistant__custom"><input aria-label="Outra especialidade" value={custom} maxLength={60} onChange={(event) => setCustom(event.target.value)} placeholder="Adicionar outra especialidade" /><button type="button" onClick={addCustom}>Adicionar</button></div>
       <input type="hidden" name="specialty" value={value} />
-      <div className="pp-content-assistant__footer"><button type="button" onClick={professionalizeSpecialties}><WandSparkles aria-hidden="true" />Organizar especialidades</button><small>{value.length}/120</small></div>
+      <div className="pp-content-assistant__footer"><button type="button" onClick={professionalizeSpecialties}><WandSparkles aria-hidden="true" />Organizar especialidades</button><AIAssistButton compact /><small>{value.length}/120</small></div>
     </fieldset>
   );
 }

@@ -13,6 +13,6 @@ export function TrainerPresence({
 }) {
   return <div className={`pp-trainer-presence${compact ? " pp-trainer-presence--compact" : ""}`}>
     <Avatar name={name} imageUrl={imageUrl} size={compact ? "small" : "medium"} />
-    <span><small>Treino por</small><strong>{name}</strong>{!compact && credential ? <em>{credential}</em> : null}</span>
+    <span><small>Seu Personal</small><strong>{name}</strong>{credential ? <em>{credential}</em> : null}</span>
   </div>;
 }

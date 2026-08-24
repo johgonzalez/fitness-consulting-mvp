@@ -62,7 +62,7 @@ import {
 } from "@/lib/workouts/offline-recovery";
 import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
 
-type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
+type DemoView = "default" | "superset" | "rest" | "ready" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
 
 type SequenceItem = {
   section: WorkoutExecutionSection;
@@ -168,7 +168,7 @@ function prepareDemoView(snapshot: WorkoutExecutionSnapshot, view: DemoView) {
     next.execution.startedAt = new Date(now - (activeSeconds + next.execution.pausedSeconds) * 1000).toISOString();
     if (next.execution.status === "PAUSED") next.execution.pausedAt = new Date(now).toISOString();
   }
-  if (["default", "superset", "rest", "detail", "fallback", "offline"].includes(view)) {
+  if (["default", "superset", "rest", "ready", "detail", "fallback", "offline"].includes(view)) {
     const superset = buildSequence(next).filter((item) => item.section.sectionType === "SUPERSET");
     if (superset.length) {
       superset.forEach((item, index) => {
@@ -316,7 +316,7 @@ export function WorkoutExecutionExperience({
   const [recoveryReady, setRecoveryReady] = useState(false);
   const [recovery, setRecovery] = useState<WorkoutRecoveryRecord | null>(null);
   const [syncState, setSyncState] = useState<SyncState>(initialView === "offline" ? "OFFLINE" : "ONLINE");
-  const [restDeadline, setRestDeadline] = useState<number | null>(() => initialView === "rest" ? Date.now() + 75_000 : null);
+  const [restDeadline, setRestDeadline] = useState<number | null>(() => initialView === "rest" ? Date.now() + 75_000 : initialView === "ready" ? Date.now() - 1_000 : null);
   const [secondsRemaining, setSecondsRemaining] = useState(initialView === "rest" ? 75 : 0);
   const [timedExercise, setTimedExercise] = useState<WorkoutRecoveryRecord["timedExercise"]>(null);
   const [transitionAction, setTransitionAction] = useState<TransitionAction>(null);
@@ -717,6 +717,13 @@ export function WorkoutExecutionExperience({
     setTransitionAction(null);
   }
 
+  async function extendRest(seconds: number) {
+    if (!snapshot || !restDeadline) return;
+    const nextDeadline = Math.max(Date.now(), restDeadline) + seconds * 1000;
+    setSecondsRemaining(Math.max(0, Math.ceil((nextDeadline - Date.now()) / 1000)));
+    await persistRestDeadline(nextDeadline, snapshot);
+  }
+
   async function finishWorkout() {
     if (!snapshot) return;
     if (!online || recoveryRef.current?.queuedMutations.length) {
@@ -826,10 +833,11 @@ export function WorkoutExecutionExperience({
     return <section className="pp-rest-screen" aria-live="polite">
       <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined} />
       <header><button type="button" onClick={() => { void beginAfterRest(); }} aria-label="Pular descanso"><X aria-hidden="true" /></button><span>Descanso · treino {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span><i /></header>
-      <p>{secondsRemaining > 0 ? "Descanso em andamento" : "Descanso concluído"}</p>
+      <p>{secondsRemaining > 0 ? "Descanso" : "PRONTO"}</p>
       <div className="pp-rest-clock" role="timer" aria-label={`${secondsRemaining} segundos restantes`} style={{ "--rest-progress": progress } as React.CSSProperties}><strong>{formatClock(secondsRemaining)}</strong><span>até a próxima série</span></div>
-      <div className="pp-rest-next"><small>Próxima</small><strong>{current.exercise.exercise.name}</strong><span>Série {current.set.setNumber} · {targetReps(current.set) ?? current.set.durationSeconds ?? "—"}{targetReps(current.set) ? " reps" : current.set.durationSeconds ? "s" : ""}</span></div>
-      {secondsRemaining > 0 ? <div className="pp-rest-controls"><button type="button" onClick={() => { void beginAfterRest(); }}>Pular descanso</button></div> : <button className="pp-workout-primary pp-rest-next-action" type="button" onClick={() => { void beginAfterRest(); }}>{current.set.setNumber > 1 ? "Iniciar próxima série" : "Iniciar próximo exercício"}<ChevronRight aria-hidden="true" /></button>}
+      <div className="pp-rest-next"><small>Próxima</small><strong>{current.exercise.exercise.name}</strong><span>Série {current.set.setNumber} · {nextSetSummary(current.set)}</span></div>
+      <div className="pp-rest-controls"><button type="button" onClick={() => { void extendRest(15); }}>+15s</button><button type="button" onClick={() => { void beginAfterRest(); }}>Pular</button></div>
+      <button className="pp-workout-primary pp-rest-next-action" type="button" onClick={() => { void beginAfterRest(); }}>{current.set.setNumber > 1 ? "Começar próxima série" : "Começar próximo exercício"}<ChevronRight aria-hidden="true" /></button>
     </section>;
   }
 
@@ -850,7 +858,9 @@ export function WorkoutExecutionExperience({
       onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined}
       onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined}
     />
-    <header className="pp-execution-header"><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair ou pausar treino"><X aria-hidden="true" /></button><span>{exercisePosition} de {uniqueExercises.length} · {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span><button type="button" onClick={() => setDetailOpen(true)} aria-label="Abrir detalhes do exercício"><Info aria-hidden="true" /></button><div role="progressbar" aria-label="Progresso do treino" aria-valuemin={0} aria-valuemax={snapshot.metrics.totalSets} aria-valuenow={snapshot.metrics.completedSets}><i style={{ width: `${progress * 100}%` }} /></div></header>
+    <header className="pp-execution-header"><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair ou pausar treino"><X aria-hidden="true" /></button><span>Tempo de treino · {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span><button type="button" onClick={() => setDetailOpen(true)} aria-label="Abrir detalhes do exercício"><Info aria-hidden="true" /></button><div role="progressbar" aria-label="Progresso do treino" aria-valuemin={0} aria-valuemax={snapshot.metrics.totalSets} aria-valuenow={snapshot.metrics.completedSets}><i style={{ width: `${progress * 100}%` }} /></div></header>
+
+    <div className="pp-execution-coach"><TrainerPresence {...identity.trainer} compact /><span><small>Tempo de treino</small><strong>{formatClock(workoutElapsedSeconds(snapshot, clockNow))}</strong></span></div>
 
     <StudentWorkoutMedia exerciseId={initialView === "fallback" ? null : current.exercise.exercise.id} exerciseName={current.exercise.exercise.name} media={exerciseMedia} demoMode={demoMode} priority className="pp-execution-media" />
 
@@ -860,7 +870,7 @@ export function WorkoutExecutionExperience({
     </div> : null}
 
     <div className="pp-exercise-focus">
-      <div><span>{muscleLabel(current.exercise.exercise.primaryMuscleGroup)} · Série {current.set.setNumber} de {current.exercise.sets.length}</span><h1>{current.exercise.exercise.name}</h1></div>
+      <div><span>Exercício {exercisePosition} de {uniqueExercises.length} · {muscleLabel(current.exercise.exercise.primaryMuscleGroup)}</span><h1>{current.exercise.exercise.name}</h1><SetProgressDots sets={current.exercise.sets} currentSetId={current.set.execution.id} /></div>
       <button type="button" onClick={() => setDetailOpen(true)} aria-label="Ver instruções"><Info aria-hidden="true" /></button>
       <p>{current.exercise.studentInstruction ?? current.exercise.exercise.instructions}</p>
     </div>
@@ -877,6 +887,8 @@ export function WorkoutExecutionExperience({
       {current.set.durationSeconds != null ? <div className="pp-timed-exercise" role="timer" aria-label={timedSecondsRemaining === null ? "Cronômetro ainda não iniciado" : `${timedSecondsRemaining} segundos restantes`}><Clock3 aria-hidden="true" /><span><small>Tempo da série</small><strong>{timedSecondsRemaining === null ? formatClock(current.set.durationSeconds) : formatClock(timedSecondsRemaining)}</strong></span></div> : null}
       {previousText ? <button type="button" className="pp-previous-performance" onClick={() => setDetailOpen(true)}><RotateCcw aria-hidden="true" /><span>{previousText}</span><ChevronRight aria-hidden="true" /></button> : null}
     </div>
+
+    <div className="pp-next-context"><small>Depois</small><strong>{current.set.restSeconds ? `Descanso · ${current.set.restSeconds}s` : next ? next.exercise.id === current.exercise.id ? "Próxima série" : `Próximo exercício · ${next.exercise.exercise.name}` : "Finalizar treino"}</strong></div>
 
     {message ? <div className={`pp-execution-message${syncState === "OFFLINE" || syncState === "SYNC_FAILED" ? " pp-execution-message--warning" : ""}`} role="status"><CircleAlert aria-hidden="true" /><span>{message}</span></div> : null}
     <div className="pp-execution-action"><button className="pp-workout-primary" type="button" onClick={waitingForTransition ? () => setTransitionAction(null) : current.set.durationSeconds != null && timedSecondsRemaining === null ? startTimedExercise : completeSet} disabled={busy || !actuals || !recoveryReady || (timedSecondsRemaining !== null && timedSecondsRemaining > 0)}>{busy ? "Sincronizando…" : waitingForTransition ? transitionLabel : current.set.durationSeconds != null && timedSecondsRemaining === null ? "Iniciar cronômetro" : timedSecondsRemaining !== null && timedSecondsRemaining > 0 ? `Tempo ${formatClock(timedSecondsRemaining)}` : "Concluir série"}{waitingForTransition || (current.set.durationSeconds != null && timedSecondsRemaining === null) ? <Play aria-hidden="true" /> : <Check aria-hidden="true" />}</button></div>
@@ -932,4 +944,19 @@ function NumericControl({
   onChange: (value: number) => void;
 }) {
   return <label className="pp-numeric-control"><span>{label}<small>Alvo {target}</small></span><div><button type="button" onClick={() => onChange(value - step)} aria-label={`Diminuir ${label.toLowerCase()}`}><Minus aria-hidden="true" /></button><span><input aria-label={label} type="number" inputMode="decimal" min={0} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} /><small>{suffix}</small></span><button type="button" onClick={() => onChange(value + step)} aria-label={`Aumentar ${label.toLowerCase()}`}><Plus aria-hidden="true" /></button></div></label>;
+}
+
+function nextSetSummary(set: WorkoutSetExecutionProjection) {
+  const reps = targetReps(set);
+  if (set.targetLoad !== null && reps !== null) return `${set.targetLoad} ${set.loadUnit ?? "kg"} × ${reps}`;
+  if (reps !== null) return `${reps} repetições`;
+  if (set.durationSeconds !== null) return `${set.durationSeconds}s`;
+  if (set.distanceValue !== null) return `${set.distanceValue} ${set.distanceUnit ?? ""}`.trim();
+  return "orientação do Personal";
+}
+
+function SetProgressDots({ sets, currentSetId }: { sets: WorkoutSetExecutionProjection[]; currentSetId: string }) {
+  return <div className="pp-set-progress" aria-label={`Séries: ${sets.map((set) => set.execution.status === "COMPLETED" ? "concluída" : set.execution.id === currentSetId ? "atual" : "a fazer").join(", ")}`}>
+    {sets.map((set) => <span key={set.execution.id} data-state={set.execution.status === "COMPLETED" ? "done" : set.execution.id === currentSetId ? "current" : "upcoming"} aria-hidden="true">{set.execution.status === "COMPLETED" ? <Check /> : null}</span>)}
+  </div>;
 }

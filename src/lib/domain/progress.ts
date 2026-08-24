@@ -36,8 +36,20 @@ export type ProgressAssessmentItem = {
   happenedAt: string;
 };
 
+export type ProgressExerciseSeries = {
+  exerciseId: string;
+  exerciseName: string;
+  metric: "load";
+  unit: string;
+  first: { value: number; happenedAt: string };
+  latest: { value: number; happenedAt: string };
+  delta: number;
+  recordCount: number;
+};
+
 export type ProgressPhoto = StudentPrivateMediaMetadata & {
   signedUrl: string | null;
+  demoSimulation?: boolean;
 };
 
 export type ProgressWorkspace = {
@@ -53,6 +65,7 @@ export type ProgressWorkspace = {
   } | null;
   measurements: ProgressMeasurementSeries[];
   workouts: ProgressWorkoutItem[];
+  exerciseProgress: ProgressExerciseSeries[];
   assessments: ProgressAssessmentItem[];
   photos: ProgressPhoto[];
   photoUploadAvailable: boolean;

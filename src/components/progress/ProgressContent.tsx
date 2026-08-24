@@ -2,6 +2,7 @@
 import Link from "next/link";
 import {
   Activity,
+  BarChart3,
   CalendarDays,
   Camera,
   CheckCircle2,
@@ -12,10 +13,10 @@ import {
   LockKeyhole,
   Ruler,
   ShieldCheck,
-  TrendingUp,
 } from "lucide-react";
 import type {
   ProgressAssessmentItem,
+  ProgressExerciseSeries,
   ProgressMeasurementSeries,
   ProgressPhoto,
   ProgressView,
@@ -66,6 +67,74 @@ function latestWorkout(workouts: ProgressWorkoutItem[]) {
 
 function latestPhoto(photos: ProgressPhoto[]) {
   return photos[0] ?? null;
+}
+
+function recentCompletedWorkouts(workouts: ProgressWorkoutItem[], days: number) {
+  const cutoff = Date.now() - days * 86_400_000;
+  return workouts.filter((workout) => workout.status === "COMPLETED" && Date.parse(workout.happenedAt) >= cutoff);
+}
+
+function formatTotalDuration(seconds: number) {
+  const hours = Math.floor(seconds / 3_600);
+  const minutes = Math.round((seconds % 3_600) / 60);
+  return hours > 0 ? `${hours}h${String(minutes).padStart(2, "0")}` : `${Math.max(1, minutes)} min`;
+}
+
+function ProgressHeroSummary({ workspace }: { workspace: ProgressWorkspace }) {
+  const recent = recentCompletedWorkouts(workspace.workouts, 30);
+  const duration = recent.reduce((sum, workout) => sum + (workout.activeDurationSeconds ?? 0), 0);
+  const weeklyFrequency = recent.length / (30 / 7);
+  const facts = [
+    { label: "Treinos concluídos", value: String(recent.length), detail: "últimos 30 dias" },
+    ...(duration > 0 ? [{ label: "Tempo em treino", value: formatTotalDuration(duration), detail: "atividade registrada" }] : []),
+    ...(recent.length > 0 ? [{ label: "Frequência", value: `${numberFormatter.format(weeklyFrequency)}x`, detail: "média por semana" }] : []),
+  ];
+  return <section className={styles.progressSummary} aria-label="Resumo dos últimos 30 dias">
+    {facts.map((fact) => <article key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><span>{fact.detail}</span></article>)}
+  </section>;
+}
+
+function startOfWeek(value: Date) {
+  const day = (value.getDay() + 6) % 7;
+  const result = new Date(value);
+  result.setHours(0, 0, 0, 0);
+  result.setDate(result.getDate() - day);
+  return result;
+}
+
+function TrainingFrequency({ workouts }: { workouts: ProgressWorkoutItem[] }) {
+  const currentWeek = startOfWeek(new Date());
+  const weeks = Array.from({ length: 6 }, (_, index) => {
+    const start = new Date(currentWeek);
+    start.setDate(start.getDate() - (5 - index) * 7);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    const count = workouts.filter((workout) => workout.status === "COMPLETED" && Date.parse(workout.happenedAt) >= start.getTime() && Date.parse(workout.happenedAt) < end.getTime()).length;
+    return { start, count };
+  });
+  const max = Math.max(1, ...weeks.map((week) => week.count));
+  return <section className={styles.progressSection} aria-labelledby="progress-frequency-title">
+    <header className={styles.sectionHeading}><div><small>Frequência</small><h2 id="progress-frequency-title">Ritmo das últimas semanas</h2></div><p>Somente sessões efetivamente concluídas.</p></header>
+    {workouts.some((workout) => workout.status === "COMPLETED") ? <div className={styles.frequencyChart} role="img" aria-label={`Treinos concluídos nas últimas seis semanas: ${weeks.map((week) => week.count).join(", ")}`}>
+      {weeks.map((week) => <div key={week.start.toISOString()}><span><i style={{ height: `${Math.max(8, (week.count / max) * 100)}%` }} /></span><strong>{week.count}</strong><small>{shortDateFormatter.format(week.start)}</small></div>)}
+    </div> : <div className={styles.empty}><Activity aria-hidden="true" /><strong>Seu ritmo começa no primeiro treino</strong><p>As semanas aparecerão aqui quando houver sessões concluídas.</p></div>}
+  </section>;
+}
+
+function ExerciseProgression({ series }: { series: ProgressExerciseSeries[] }) {
+  return <section className={styles.progressSection} aria-labelledby="exercise-progress-title">
+    <header className={styles.sectionHeading}><div><small>Exercícios</small><h2 id="exercise-progress-title">Evolução de carga</h2></div><p>Comparações seguras do mesmo exercício e da mesma unidade.</p></header>
+    {series.length ? <div className={styles.exerciseProgressGrid}>{series.slice(0, 4).map((item) => <article key={`${item.exerciseId}-${item.unit}`}>
+      <span><BarChart3 aria-hidden="true" /></span><div><strong>{item.exerciseName}</strong><p>{numberFormatter.format(item.first.value)} {item.unit} <em>→</em> {numberFormatter.format(item.latest.value)} {item.unit}</p><small>{item.delta > 0 ? "+" : ""}{numberFormatter.format(item.delta)} {item.unit} · {item.recordCount} registros comparáveis</small></div>
+    </article>)}</div> : <div className={styles.empty}><Dumbbell aria-hidden="true" /><strong>Ainda não há comparação segura</strong><p>Complete mais sessões do mesmo exercício para visualizar sua evolução.</p></div>}
+  </section>;
+}
+
+function MeasurementProgress({ measurements }: { measurements: ProgressMeasurementSeries[] }) {
+  return <section className={styles.progressSection} aria-labelledby="body-progress-title">
+    <header className={styles.sectionHeading}><div><small>Corpo</small><h2 id="body-progress-title">Medidas corporais</h2></div><Link href="/student/progress?view=measurements">Ver histórico</Link></header>
+    {measurements.length ? <div className={styles.bodyProgressGrid}>{measurements.slice(0, 4).map((series) => <article key={`${series.code}-${series.unit}`}><small>{series.label}</small><strong>{series.previous ? `${numberFormatter.format(series.previous.value)} → ` : ""}{numberFormatter.format(series.latest.value)} <em>{series.unit}</em></strong><span>{formatDate(series.latest.measuredAt)}</span></article>)}</div> : <div className={styles.empty}><Ruler aria-hidden="true" /><strong>Suas medidas aparecerão aqui</strong><p>Quando forem registradas pelo seu acompanhamento, você verá a cronologia sem interpretações automáticas.</p></div>}
+  </section>;
 }
 
 export function StudentProgressTabs({ active }: { active: ProgressView }) {
@@ -130,23 +199,13 @@ function AssessmentHistory({ assessments, limit }: { assessments: ProgressAssess
 
 export function ProgressOverview({ workspace }: { workspace: ProgressWorkspace }) {
   return <div className={styles.contentStack}>
-    <ProgressFacts workspace={workspace} />
-    <div className={styles.split}>
-      <section className={styles.panel}>
-        <header><span><Activity aria-hidden="true" /></span><div><small>Histórico</small><h2>Treinos recentes</h2></div></header>
-        <WorkoutHistory workouts={workspace.workouts} limit={3} />
-      </section>
-      <section className={styles.panel}>
-        <header><span><FileCheck2 aria-hidden="true" /></span><div><small>Contexto</small><h2>Avaliações recentes</h2></div></header>
-        <AssessmentHistory assessments={workspace.assessments} limit={3} />
-      </section>
-    </div>
-    {workspace.measurements.length > 0 ? <section className={styles.panel}>
-      <header><span><TrendingUp aria-hidden="true" /></span><div><small>Registros disponíveis</small><h2>Medidas recentes</h2></div></header>
-      <div className={styles.measurementPreview}>{workspace.measurements.slice(0, 4).map((series) => <article key={`${series.code}-${series.unit}`}>
-        <small>{series.label}</small><strong>{numberFormatter.format(series.latest.value)} <em>{series.unit}</em></strong><span>{formatDate(series.latest.measuredAt)}</span>
-      </article>)}</div>
-    </section> : null}
+    <ProgressHeroSummary workspace={workspace} />
+    <section className={styles.panel}><header><span><Activity aria-hidden="true" /></span><div><small>Atividade</small><h2>Treinos recentes</h2></div></header><WorkoutHistory workouts={workspace.workouts} limit={4} /></section>
+    <TrainingFrequency workouts={workspace.workouts} />
+    <ExerciseProgression series={workspace.exerciseProgress} />
+    <MeasurementProgress measurements={workspace.measurements} />
+    <section className={styles.progressSection}><div className={styles.sectionHeading}><div><small>Registros visuais</small><h2>Fotos de progresso</h2></div><Link href="/student/progress?view=photos">Abrir fotos</Link></div><ProgressPhotos photos={workspace.photos} canUpload={workspace.photoUploadAvailable} /></section>
+    <section className={styles.panel}><header><span><FileCheck2 aria-hidden="true" /></span><div><small>Avaliações</small><h2>Check-ins concluídos</h2></div></header><AssessmentHistory assessments={workspace.assessments} limit={4} /></section>
   </div>;
 }
 
@@ -225,7 +284,7 @@ export function ProgressPhotos({ photos, canUpload = false }: { photos: Progress
         <header><CalendarDays aria-hidden="true" /><h2>{formatDate(`${group.date}T12:00:00`)}</h2><span>{group.photos.length} {group.photos.length === 1 ? "registro" : "registros"}</span></header>
         <div>{group.photos.map((photo) => <figure key={photo.id} className={styles.photoCard}>
           {photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Imagem indisponível</span></div>}
-          <figcaption><strong>{photoViewLabel(photo)}</strong><span>{photo.mediaType === "PROGRESS_PHOTO" ? "Progresso" : "Avaliação"}</span></figcaption>
+          <figcaption><strong>{photoViewLabel(photo)}</strong><span>{photo.demoSimulation ? "Simulação demo" : photo.mediaType === "PROGRESS_PHOTO" ? "Progresso" : "Avaliação"}</span></figcaption>
         </figure>)}</div>
       </section>)}
     </div>}

@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useActionState, useState, type ReactNode } from "react";
+import { useActionState, useRef, useState, type FormHTMLAttributes, type ReactNode } from "react";
 import {
   deleteService,
   deleteMethodologyItem,
@@ -40,6 +40,8 @@ import { HeadlineAssistant } from "@/components/dashboard/HeadlineAssistant";
 import { AssistedTextField, SpecialtyAssistant } from "@/components/dashboard/AssistedTextField";
 import { SiteSectionOrganizer } from "@/components/dashboard/SiteSectionOrganizer";
 import { EmptyState, SectionHeader } from "@/components/ui/PPerfilPrimitives";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import { AIAssistButton } from "@/components/dashboard/AIAssistButton";
 import { bioSuggestions, methodologySuggestions, serviceDescriptionSuggestions, specialtySuggestions, testimonialsIntroSuggestions } from "@/data/site/content-suggestions";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import type {
@@ -54,6 +56,13 @@ import type {
 import { getTemplateDefinition, templateCatalog, type TemplateDefinition } from "@/lib/domain/template-registry";
 
 const initialState: SiteActionState = {};
+
+const templatePositioning: Record<TrainerProfile["template_id"], { traits: string; fit: string }> = {
+  template_01: { traits: "Limpo · Direto", fit: "Para uma presença profissional sem excesso." },
+  template_02: { traits: "Visual · Dinâmico", fit: "Para quem vende energia e transformação." },
+  template_03: { traits: "Comercial · Objetivo", fit: "Para destacar serviços e chamadas para ação." },
+  template_04: { traits: "Editorial · Premium", fit: "Para construir uma marca pessoal sofisticada." },
+};
 
 type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance";
 type PersonalizationSection = "identity" | "presentation" | "methodology" | "services" | "testimonials" | "organize";
@@ -81,6 +90,19 @@ function Submit({ pending, children }: { pending: boolean; children: ReactNode }
       {pending ? "Salvando..." : children}
     </button>
   );
+}
+
+function DestructiveAction({ action, pending, state, label, title, description }: {
+  action: NonNullable<FormHTMLAttributes<HTMLFormElement>["action"]>;
+  pending: boolean;
+  state: SiteActionState;
+  label: string;
+  title: string;
+  description: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
+  return <><form ref={form} action={action}><button type="button" className="danger-link" disabled={pending} onClick={() => setOpen(true)}><Trash2 aria-hidden="true" /> {pending ? "Removendo..." : label}</button><ActionMessage state={state} /></form><ConfirmationDialog open={open} title={title} description={description} confirmLabel="Remover" pending={pending} onCancel={() => setOpen(false)} onConfirm={() => { setOpen(false); form.current?.requestSubmit(); }} /></>;
 }
 
 function PublicationStatus({ published }: { published: boolean }) {
@@ -143,14 +165,15 @@ function TemplateCatalogTile({
       : "Não disponível no seu plano";
 
   return (
-    <article className={`pp-template-tile${selected ? " is-selected" : ""}`}>
+    <article className={`pp-template-tile${selected ? " is-selected" : ""}`} data-template={definition.id}>
       <div className="pp-template-tile-preview">
         <TemplatePreview profile={profile} templateId={definition.id} compact />
         {selected ? <span className="pp-template-selected"><Check aria-hidden="true" /> Em uso</span> : null}
       </div>
       <div className="pp-template-tile-copy">
         <div><h3>{definition.name}</h3><span>{availabilityLabel}</span></div>
-        <p>{definition.description}</p>
+        <strong className="pp-template-positioning">{templatePositioning[definition.id].traits}</strong>
+        <p>{templatePositioning[definition.id].fit}</p>
       </div>
       <div className="pp-template-tile-actions">
         <Link href={`/dashboard/preview?template=${definition.id}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>
@@ -202,7 +225,7 @@ function ServiceForm({ service }: { service?: TrainerService }) {
         <Submit pending={pending}>{service ? "Salvar serviço" : "Adicionar serviço"}</Submit>
         <ActionMessage state={state} />
       </form>
-      {service ? <form action={deleteAction}><button className="danger-link" disabled={deletePending}><Trash2 aria-hidden="true" /> {deletePending ? "Removendo..." : "Remover serviço"}</button><ActionMessage state={deleteState} /></form> : null}
+      {service ? <DestructiveAction action={deleteAction} pending={deletePending} state={deleteState} label="Remover serviço" title="Remover este serviço?" description="O serviço deixará de aparecer no editor e no site publicado. Esta ação não pode ser desfeita." /> : null}
     </div>
   );
 }
@@ -215,12 +238,12 @@ function MethodologyItemForm({ item, defaultPosition }: { item?: TrainerMethodol
       <form action={action} className="builder-form">
         {item ? <input type="hidden" name="id" value={item.id} /> : null}
         <label>Título da etapa<input name="title" required minLength={2} maxLength={120} defaultValue={item?.title} placeholder="Avaliação inicial" /></label>
-        <label>Descrição<textarea name="description" required minLength={2} maxLength={1000} defaultValue={item?.description} rows={4} /></label>
+        <label>Descrição<textarea name="description" required minLength={2} maxLength={1000} defaultValue={item?.description} rows={4} /></label><AIAssistButton compact />
         <label>Ordem<input name="position" type="number" min={0} max={999} step={1} defaultValue={item?.position ?? defaultPosition} /></label>
         <Submit pending={pending}>{item ? "Salvar etapa" : "Adicionar etapa"}</Submit>
         <ActionMessage state={state} />
       </form>
-      {item ? <form action={deleteAction}><button className="danger-link" disabled={deletePending}><Trash2 aria-hidden="true" /> {deletePending ? "Removendo..." : "Remover etapa"}</button><ActionMessage state={deleteState} /></form> : null}
+      {item ? <DestructiveAction action={deleteAction} pending={deletePending} state={deleteState} label="Remover etapa" title="Remover esta etapa?" description="A etapa será removida da metodologia apresentada no seu site. Esta ação não pode ser desfeita." /> : null}
     </div>
   );
 }
@@ -244,7 +267,7 @@ function TestimonialForm({ testimonial }: { testimonial?: Testimonial }) {
         <Submit pending={pending}>{testimonial ? "Salvar depoimento" : "Adicionar depoimento"}</Submit>
         <ActionMessage state={state} />
       </form>
-      {testimonial ? <form action={deleteAction}><button className="danger-link" disabled={deletePending}><Trash2 aria-hidden="true" /> {deletePending ? "Removendo..." : "Remover depoimento"}</button><ActionMessage state={deleteState} /></form> : null}
+      {testimonial ? <DestructiveAction action={deleteAction} pending={deletePending} state={deleteState} label="Remover depoimento" title="Remover este depoimento?" description="O relato será removido do editor e do site publicado. Esta ação não pode ser desfeita." /> : null}
     </div>
   );
 }

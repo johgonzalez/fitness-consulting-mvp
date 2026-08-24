@@ -5,8 +5,8 @@ import { getStudentWorkoutRecord } from "@/lib/workouts/student-workspace";
 
 export const dynamic = "force-dynamic";
 
-const demoViews = new Set(["default", "superset", "rest", "detail", "fallback", "paused", "last", "timed", "completed", "offline"] as const);
-type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
+const demoViews = new Set(["default", "superset", "rest", "ready", "detail", "fallback", "paused", "last", "timed", "completed", "offline"] as const);
+type DemoView = "default" | "superset" | "rest" | "ready" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
 
 export default async function StudentWorkoutExecutionPage({
   params,

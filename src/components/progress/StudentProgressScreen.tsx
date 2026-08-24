@@ -10,10 +10,9 @@ import {
 import styles from "./progress.module.css";
 
 export function StudentProgressScreen({ workspace, view }: { workspace: ProgressWorkspace; view: ProgressView }) {
-  const firstName = workspace.relationship?.studentName.split(" ")[0] ?? "seu";
   return <div className={`pp-student-page ${styles.studentPage}`}>
     <header className={styles.studentHero}>
-      <div><span><Activity aria-hidden="true" />Seu histórico</span><h1>Progresso de {firstName}</h1><p>Medidas, treinos, avaliações e fotos registradas ao longo do acompanhamento.</p></div>
+      <div><span><Activity aria-hidden="true" />Seu histórico</span><h1>Sua evolução</h1><p>O que seus treinos e registros mostram até aqui.</p></div>
       {workspace.relationship ? <TrainerPresence
         name={workspace.relationship.trainerName}
         imageUrl={workspace.relationship.trainerImageUrl}

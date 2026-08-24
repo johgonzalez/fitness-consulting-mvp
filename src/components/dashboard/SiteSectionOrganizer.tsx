@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useActionState, useMemo, useState, type DragEvent } from "react";
 import { saveSectionLayout, type SiteActionState } from "@/app/actions/site-builder";
+import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import type { TrainerProfile } from "@/lib/domain/trainer";
 import {
   getSectionMeta,
@@ -44,6 +45,7 @@ export function SiteSectionOrganizer({ profile }: { profile: TrainerProfile }) {
   const templateId = profile.template_id;
   const [layouts, setLayouts] = useState<SiteTemplateLayouts>(() => normalizeSiteTemplateLayouts(profile.site_layouts));
   const [dragged, setDragged] = useState<SiteSectionId | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
   const [saveState, saveAction, savePending] = useActionState(saveSectionLayout.bind(null, templateId), initialState);
   const current = layouts[templateId];
 
@@ -115,11 +117,13 @@ export function SiteSectionOrganizer({ profile }: { profile: TrainerProfile }) {
         </div>
 
         <div className="pp-section-organizer__actions">
-          <button type="button" className="builder-secondary" onClick={() => updateCurrent(defaultSiteTemplateLayouts[templateId].map((item) => ({ ...item })))}><RotateCcw aria-hidden="true" />Restaurar ordem original</button>
+          <button type="button" className="builder-secondary" onClick={() => setResetOpen(true)}><RotateCcw aria-hidden="true" />Restaurar ordem original</button>
           <form action={saveAction}><input type="hidden" name="layout" value={JSON.stringify(current)} /><button className="builder-primary" disabled={savePending}><Save aria-hidden="true" />{savePending ? "Salvando..." : "Salvar organização"}</button></form>
         </div>
         {saveState.message ? <p className={`builder-message ${saveState.ok ? "success" : "error"}`} role="status">{saveState.message}</p> : null}
       </section>
+
+      <ConfirmationDialog open={resetOpen} title="Restaurar ordem original?" description="Sua organização atual será substituída pela ordem padrão deste template." confirmLabel="Restaurar" tone="neutral" onCancel={() => setResetOpen(false)} onConfirm={() => { updateCurrent(defaultSiteTemplateLayouts[templateId].map((item) => ({ ...item }))); setResetOpen(false); }} />
 
       <aside className="pp-live-site-preview" aria-labelledby="live-preview-title">
         <header><span><MonitorUp aria-hidden="true" /><strong id="live-preview-title">Preview ao vivo</strong></span><small>Atualiza enquanto você organiza</small></header>

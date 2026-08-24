@@ -20,12 +20,12 @@ export function StudentWorkoutsScreen({ workspace }: { workspace: StudentTodayWo
 
     <section className="pp-workout-library" aria-labelledby="available-workouts">
       <header><h2 id="available-workouts">Disponíveis</h2><span>{workspace.workouts.length} sessões</span></header>
-      <div>{workspace.workouts.map((item) => {
+      <div>{workspace.workouts.map((item, index) => {
         const exercise = firstExercise(item);
         const state = item.overview.activeExecution?.status === "PAUSED" ? "Pausado" : item.overview.activeExecution ? "Em andamento" : "Disponível";
         const href = item.overview.activeExecution ? `/student/workouts/${item.session.id}/execute` : `/student/workouts/${item.session.id}`;
         return <Link href={href} className="pp-workout-library-card" key={item.session.id}>
-          <StudentWorkoutMedia exerciseId={exercise?.exercise.id ?? null} exerciseName={exercise?.exercise.name ?? item.session.name} media={exercise?.exercise.media ?? []} demoMode={workspace.demoMode} />
+          <StudentWorkoutMedia exerciseId={exercise?.exercise.id ?? null} exerciseName={exercise?.exercise.name ?? item.session.name} media={exercise?.exercise.media ?? []} demoMode={workspace.demoMode} priority={index === 0} />
           <div><span>{state}</span><h3>{item.session.name}</h3><p>{item.session.description}</p><dl><div><Clock3 aria-hidden="true" /><dd>{item.session.estimatedDurationMinutes ?? "—"} min</dd></div><div><Dumbbell aria-hidden="true" /><dd>{item.overview.session.exerciseCount} exercícios</dd></div></dl></div>
           <ArrowRight aria-hidden="true" />
         </Link>;
@@ -42,7 +42,7 @@ export function StudentWorkoutsScreen({ workspace }: { workspace: StudentTodayWo
       <p>Atalhos locais. Nenhum dado é enviado ao Supabase.</p>
       <div>
         {[
-          ["Execução", "default"], ["Superset", "superset"], ["Descanso", "rest"], ["Detalhe", "detail"], ["Fallback", "fallback"], ["Último exercício", "last"], ["Concluído", "completed"], ["Offline", "offline"],
+          ["Execução", "default"], ["Superset", "superset"], ["Descanso", "rest"], ["Pronto", "ready"], ["Exercício por tempo", "timed"], ["Detalhe", "detail"], ["Fallback", "fallback"], ["Último exercício", "last"], ["Concluído", "completed"], ["Offline", "offline"],
         ].map(([label, view]) => <Link key={view} href={`/student/workouts/${activeDemo.session.id}/execute?view=${view}`}>{label}</Link>)}
         {pausedDemo ? <Link href={`/student/workouts/${pausedDemo.session.id}/execute?view=paused`}>Pausado</Link> : null}
       </div>

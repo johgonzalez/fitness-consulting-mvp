@@ -12,8 +12,10 @@ function progressView(value: string | string[] | undefined): ProgressView {
 export default async function StudentProgressPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string | string[] }>;
+  searchParams: Promise<{ view?: string | string[]; state?: string | string[] }>;
 }) {
-  const view = progressView((await searchParams).view);
-  return <StudentProgressScreen workspace={await getStudentProgressWorkspace()} view={view} />;
+  const query = await searchParams;
+  const view = progressView(query.view);
+  const demoVariant = query.state === "sparse" ? "sparse" : query.state === "no-photos" ? "no-photos" : "rich";
+  return <StudentProgressScreen workspace={await getStudentProgressWorkspace(demoVariant)} view={view} />;
 }

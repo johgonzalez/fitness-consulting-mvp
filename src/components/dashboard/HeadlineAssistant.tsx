@@ -4,6 +4,7 @@ import { Check, Sparkles, WandSparkles } from "lucide-react";
 import { useId, useState } from "react";
 import { curatedHeadlineSuggestions } from "@/data/site/headline-suggestions";
 import { professionalizeText } from "@/components/dashboard/AssistedTextField";
+import { AIAssistButton } from "@/components/dashboard/AIAssistButton";
 
 export function HeadlineAssistant({ initialValue }: { initialValue: string }) {
   const fieldId = useId();
@@ -47,7 +48,8 @@ export function HeadlineAssistant({ initialValue }: { initialValue: string }) {
         onChange={(event) => setHeadline(event.target.value)}
       />
       <div className="pp-content-assistant__footer">
-        <button type="button" onClick={() => setHeadline(professionalizeText(headline || curatedHeadlineSuggestions[0]?.text || "").slice(0, 180))}><WandSparkles aria-hidden="true" />Aprimorar texto</button>
+        <button type="button" onClick={() => setHeadline(professionalizeText(headline || curatedHeadlineSuggestions[0]?.text || "").slice(0, 180))}><WandSparkles aria-hidden="true" />Organizar texto</button>
+        <AIAssistButton compact />
         <small className="pp-headline-assistant__count">{headline.length}/180</small>
       </div>
     </fieldset>
