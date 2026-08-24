@@ -135,7 +135,7 @@ function ExerciseCard({
   </article>;
 }
 
-export function WorkoutBuilder({ record, initialView = "builder" }: { record: TrainerWorkoutRecord; initialView?: "builder" | "review" | "history" | "library" }) {
+export function WorkoutBuilder({ record, initialView = "builder", backHref = "/dashboard/workouts" }: { record: TrainerWorkoutRecord; initialView?: "builder" | "review" | "history" | "library"; backHref?: string }) {
   const router = useRouter();
   const [projection, setProjection] = useState(record.projection);
   const projectionRef = useRef(projection);
@@ -357,7 +357,7 @@ export function WorkoutBuilder({ record, initialView = "builder" }: { record: Tr
 
   return <main className={`${styles.builderPage}${reviewMode ? ` ${styles.reviewPage}` : ""}`}>
     <header className={styles.builderTopbar}>
-      <Link href="/dashboard/workouts" aria-label="Voltar para treinos"><ArrowLeft aria-hidden="true" /></Link>
+      <Link href={backHref} aria-label="Voltar para treinos"><ArrowLeft aria-hidden="true" /></Link>
       <div className={styles.builderTitle}><span><strong>{projection.plan.name}</strong><small>{record.studentContext?.student.name ?? "Aluno"} · v{projection.version.versionNumber}</small></span></div>
       <div className={styles.saveState} data-state={saveState}>{saveState === "saving" ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : saveState === "error" ? <X aria-hidden="true" /> : <Check aria-hidden="true" />}<span>{saveState === "saving" ? "Salvando" : saveState === "error" ? "Falha ao salvar" : "Salvo"}</span>{saveState === "error" ? <button type="button" onClick={retryFailed}>Tentar de novo</button> : null}</div>
       <WorkoutStatusBadge status={projection.version.status} />

@@ -5,8 +5,8 @@ import { getStudentWorkoutRecord } from "@/lib/workouts/student-workspace";
 
 export const dynamic = "force-dynamic";
 
-const demoViews = new Set(["default", "superset", "rest", "detail", "fallback", "paused", "last", "completed", "offline"] as const);
-type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "completed" | "offline";
+const demoViews = new Set(["default", "superset", "rest", "detail", "fallback", "paused", "last", "timed", "completed", "offline"] as const);
+type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
 
 export default async function StudentWorkoutExecutionPage({
   params,
@@ -23,6 +23,9 @@ export default async function StudentWorkoutExecutionPage({
   const initialSnapshot = record.demoMode && initialView === "completed"
     ? structuredClone(workoutExecutionDemoCompleted)
     : record.activeSnapshot;
+  if (record.demoMode && initialView === "timed" && initialSnapshot) {
+    initialSnapshot.execution.id = "5b500000-0000-4000-8000-000000000009";
+  }
   return <WorkoutExecutionExperience
     sessionId={record.session.id}
     identity={record.identity}

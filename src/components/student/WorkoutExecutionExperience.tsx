@@ -55,12 +55,14 @@ import {
   readWorkoutRecovery,
   shouldRetainWorkoutRecovery,
   withWorkoutRecoveryRestDeadline,
+  withWorkoutRecoveryLocalSnapshot,
+  withWorkoutRecoveryTimedExercise,
   writeWorkoutRecovery,
   type WorkoutRecoveryRecord,
 } from "@/lib/workouts/offline-recovery";
 import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
 
-type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "completed" | "offline";
+type DemoView = "default" | "superset" | "rest" | "detail" | "fallback" | "paused" | "last" | "timed" | "completed" | "offline";
 
 type SequenceItem = {
   section: WorkoutExecutionSection;
@@ -70,6 +72,7 @@ type SequenceItem = {
 };
 
 type SyncState = "ONLINE" | "OFFLINE" | "SYNCING" | "SYNC_FAILED" | "RECOVERED" | "SYNCED";
+type TransitionAction = { setExecutionId: string; kind: "next_set" | "next_exercise" } | null;
 
 const feedbackOptions: Array<{ value: WorkoutDifficulty; label: string }> = [
   { value: "EASY", label: "Fácil" },
@@ -159,6 +162,12 @@ function applyDemoSetCompletion(snapshot: WorkoutExecutionSnapshot, setId: strin
 
 function prepareDemoView(snapshot: WorkoutExecutionSnapshot, view: DemoView) {
   const next = structuredClone(snapshot);
+  if (next.execution.status === "IN_PROGRESS" || next.execution.status === "PAUSED") {
+    const now = Date.now();
+    const activeSeconds = Math.max(next.metrics.activeDurationSeconds, 60);
+    next.execution.startedAt = new Date(now - (activeSeconds + next.execution.pausedSeconds) * 1000).toISOString();
+    if (next.execution.status === "PAUSED") next.execution.pausedAt = new Date(now).toISOString();
+  }
   if (["default", "superset", "rest", "detail", "fallback", "offline"].includes(view)) {
     const superset = buildSequence(next).filter((item) => item.section.sectionType === "SUPERSET");
     if (superset.length) {
@@ -191,6 +200,24 @@ function prepareDemoView(snapshot: WorkoutExecutionSnapshot, view: DemoView) {
     });
     updateMetrics(next);
   }
+  if (view === "timed") {
+    const sequence = buildSequence(next);
+    const timedIndex = sequence.findIndex((item) => (item.set.durationSeconds ?? 0) > 0);
+    if (timedIndex >= 0) {
+      sequence.forEach((item, index) => {
+        const completed = index < timedIndex;
+        item.set.execution.status = completed ? "COMPLETED" : "PENDING";
+        item.set.execution.actualReps = completed ? targetReps(item.set) : null;
+        item.set.execution.actualLoad = completed ? item.set.targetLoad : null;
+        item.set.execution.loadUnit = completed ? item.set.loadUnit : null;
+        item.set.execution.actualDurationSeconds = completed ? item.set.durationSeconds : null;
+        item.set.execution.completedAt = completed ? new Date(Date.now() - 60_000).toISOString() : null;
+        item.set.execution.restStartedAt = null;
+        item.set.execution.restEndsAt = null;
+      });
+      updateMetrics(next);
+    }
+  }
   return next;
 }
 
@@ -201,6 +228,24 @@ function formatClock(totalSeconds: number) {
 
 function activeMinutes(snapshot: WorkoutExecutionSnapshot) {
   return Math.max(1, Math.round(snapshot.metrics.activeDurationSeconds / 60));
+}
+
+function workoutElapsedSeconds(snapshot: WorkoutExecutionSnapshot, now = Date.now()) {
+  const startedAt = Date.parse(snapshot.execution.startedAt);
+  const stoppedAt = snapshot.execution.completedAt
+    ? Date.parse(snapshot.execution.completedAt)
+    : snapshot.execution.status === "PAUSED" && snapshot.execution.pausedAt
+      ? Date.parse(snapshot.execution.pausedAt)
+      : now;
+  return Math.max(0, Math.floor((stoppedAt - startedAt) / 1000) - snapshot.execution.pausedSeconds);
+}
+
+function transitionAfter(current: SequenceItem, next: SequenceItem | undefined): TransitionAction {
+  if (!next) return null;
+  return {
+    setExecutionId: next.set.execution.id,
+    kind: next.exercise.id === current.exercise.id ? "next_set" : "next_exercise",
+  };
 }
 
 function muscleLabel(value: string) {
@@ -273,6 +318,9 @@ export function WorkoutExecutionExperience({
   const [syncState, setSyncState] = useState<SyncState>(initialView === "offline" ? "OFFLINE" : "ONLINE");
   const [restDeadline, setRestDeadline] = useState<number | null>(() => initialView === "rest" ? Date.now() + 75_000 : null);
   const [secondsRemaining, setSecondsRemaining] = useState(initialView === "rest" ? 75 : 0);
+  const [timedExercise, setTimedExercise] = useState<WorkoutRecoveryRecord["timedExercise"]>(null);
+  const [transitionAction, setTransitionAction] = useState<TransitionAction>(null);
+  const [clockNow, setClockNow] = useState(() => Date.now());
   const [detailOpen, setDetailOpen] = useState(initialView === "detail");
   const [exitOpen, setExitOpen] = useState(false);
   const [previous, setPrevious] = useState<PreviousExercisePerformance>(null);
@@ -377,12 +425,15 @@ export function WorkoutExecutionExperience({
           return;
         }
         const recovered = markWorkoutRecoveryLoaded(stored);
+        setRecoveryReady(true);
         recoveryRef.current = recovered;
         setRecovery(recovered);
-        if (recovered.queuedMutations.length) {
-          setSnapshot((authoritative) => authoritative
-            ? applyWorkoutMutationsOptimistically(authoritative, recovered.queuedMutations)
-            : authoritative);
+        if (recovered.localSnapshot && demoMode) {
+          setSnapshot(recovered.localSnapshot);
+          setSyncState("RECOVERED");
+          setMessage("Treino demo recuperado neste dispositivo.");
+        } else if (recovered.queuedMutations.length) {
+          setSnapshot((authoritative) => authoritative ? applyWorkoutMutationsOptimistically(authoritative, recovered.queuedMutations) : authoritative);
           setSyncState("RECOVERED");
           setMessage("Treino recuperado. Suas alterações continuam salvas neste dispositivo.");
         }
@@ -391,6 +442,7 @@ export function WorkoutExecutionExperience({
           setSecondsRemaining(Math.max(0, Math.ceil((recovered.restDeadline - Date.now()) / 1000)));
           if (!recovered.queuedMutations.length) setSyncState("RECOVERED");
         }
+        if (recovered.timedExercise) setTimedExercise(recovered.timedExercise);
         await writeWorkoutRecovery(recovered);
         if (active) setRecoveryReady(true);
       })
@@ -401,19 +453,26 @@ export function WorkoutExecutionExperience({
         setMessage("O armazenamento seguro deste dispositivo não está disponível. Mantenha esta tela aberta.");
       });
     return () => { active = false; };
-  }, [clearRecovery, recoveryExecutionId, recoveryExecutionStatus, recoveryWorkoutSessionId]);
+  }, [clearRecovery, demoMode, recoveryExecutionId, recoveryExecutionStatus, recoveryWorkoutSessionId]);
 
   useEffect(() => {
     if (!restDeadline) return;
     const update = () => {
       const remaining = Math.max(0, Math.ceil((restDeadline - Date.now()) / 1000));
       setSecondsRemaining(remaining);
-      if (remaining === 0 && snapshot) void persistRestDeadline(null, snapshot);
     };
     update();
     const interval = window.setInterval(update, 1000);
     return () => window.clearInterval(interval);
   }, [persistRestDeadline, restDeadline, snapshot]);
+
+  useEffect(() => {
+    if (!snapshot || snapshot.execution.status !== "IN_PROGRESS") return;
+    const update = () => setClockNow(Date.now());
+    update();
+    const interval = window.setInterval(update, 1000);
+    return () => window.clearInterval(interval);
+  }, [snapshot]);
 
   useEffect(() => {
     if (syncState !== "SYNCED") return;
@@ -426,11 +485,11 @@ export function WorkoutExecutionExperience({
     startAttempted.current = true;
     startTransition(async () => {
       const result = await startStudentWorkoutAction(sessionId);
-      if (result.ok) setSnapshot(result.snapshot);
+      if (result.ok) setSnapshot(demoMode ? prepareDemoView(result.snapshot, initialView) : result.snapshot);
       else setMessage(result.message);
       setStarting(false);
     });
-  }, [autoStart, sessionId, snapshot]);
+  }, [autoStart, demoMode, initialView, sessionId, snapshot]);
 
   const executionId = snapshot?.execution.id ?? null;
   const currentExerciseId = current?.exercise.exercise.id ?? null;
@@ -569,7 +628,6 @@ export function WorkoutExecutionExperience({
     let queued: WorkoutRecoveryRecord;
     try {
       queued = queueWorkoutMutation(base, mutation);
-      await persistRecovery(queued);
     } catch {
       setSyncState("SYNC_FAILED");
       setMessage("Não foi possível salvar esta alteração no dispositivo. Tente novamente antes de sair.");
@@ -578,6 +636,14 @@ export function WorkoutExecutionExperience({
     const updated = demoMode && mutation.operation === "complete_set"
       ? applyDemoSetCompletion(snapshot, mutation.workoutSetExecutionId, mutation.actuals)
       : applyWorkoutMutationOptimistically(snapshot, mutation);
+    if (demoMode) queued = withWorkoutRecoveryLocalSnapshot(queued, updated);
+    try {
+      await persistRecovery(queued);
+    } catch {
+      setSyncState("SYNC_FAILED");
+      setMessage("Não foi possível proteger esta alteração no dispositivo.");
+      return null;
+    }
     setSnapshot(updated);
     setActualsDraft(null);
     setSyncState(online ? "SYNCING" : "OFFLINE");
@@ -595,18 +661,24 @@ export function WorkoutExecutionExperience({
     };
     const queued = await runMutation(mutation);
     if (!queued) return;
+    let completionRecovery = queued.recovery;
     const updatedSequence = buildSequence(queued.snapshot);
     const nextPending = updatedSequence[firstPendingIndex(updatedSequence)];
+    if (timedExercise?.setExecutionId === current.set.execution.id) {
+      setTimedExercise(null);
+      completionRecovery = withWorkoutRecoveryTimedExercise(completionRecovery, null);
+      await persistRecovery(completionRecovery);
+    }
     if (shouldOpenRest(current, nextPending)) {
       const completedSet = updatedSequence.find((item) => item.set.execution.id === current.set.execution.id)?.set;
       const deadline = completedSet?.execution.restEndsAt ? new Date(completedSet.execution.restEndsAt).getTime() : Date.now() + (current.set.restSeconds ?? 0) * 1000;
       if (deadline > Date.now()) {
-        const withDeadline = withWorkoutRecoveryRestDeadline(queued.recovery, deadline);
+        const withDeadline = withWorkoutRecoveryRestDeadline(completionRecovery, deadline);
         await persistRecovery(withDeadline);
         setRestDeadline(deadline);
       }
-    }
-    if (online) void flushRecovery(recoveryRef.current ?? queued.recovery);
+    } else setTransitionAction(transitionAfter(current, nextPending));
+    if (online) void flushRecovery(recoveryRef.current ?? completionRecovery);
   }
 
   async function pauseWorkout() {
@@ -625,6 +697,26 @@ export function WorkoutExecutionExperience({
     if (online) void flushRecovery(queued.recovery);
   }
 
+  async function startTimedExercise() {
+    if (!snapshot || !current?.set.durationSeconds) return;
+    const value = { setExecutionId: current.set.execution.id, deadline: Date.now() + current.set.durationSeconds * 1000 };
+    setTimedExercise(value);
+    setClockNow(Date.now());
+    const base = recoveryRef.current ?? createWorkoutRecovery({
+      executionId: snapshot.execution.id,
+      workoutSessionId: snapshot.execution.workoutSessionId,
+      expectedServerRevision: snapshot.execution.serverRevision,
+      restDeadline,
+    });
+    await persistRecovery(withWorkoutRecoveryTimedExercise(base, value));
+  }
+
+  async function beginAfterRest() {
+    if (!snapshot) return;
+    await persistRestDeadline(null, snapshot);
+    setTransitionAction(null);
+  }
+
   async function finishWorkout() {
     if (!snapshot) return;
     if (!online || recoveryRef.current?.queuedMutations.length) {
@@ -640,7 +732,8 @@ export function WorkoutExecutionExperience({
       nextSnapshot.execution.serverRevision += 1;
       nextSnapshot.metrics.activeDurationSeconds = Math.max(nextSnapshot.metrics.activeDurationSeconds, 2520);
       setSnapshot(nextSnapshot);
-      await clearRecovery(nextSnapshot.execution.id);
+      const base = recoveryRef.current ?? createWorkoutRecovery({ executionId: nextSnapshot.execution.id, workoutSessionId: nextSnapshot.execution.workoutSessionId, expectedServerRevision: nextSnapshot.execution.serverRevision });
+      await persistRecovery(withWorkoutRecoveryLocalSnapshot(base, nextSnapshot));
       return;
     }
     setBusy(true);
@@ -664,6 +757,8 @@ export function WorkoutExecutionExperience({
       nextSnapshot.execution.serverRevision += 1;
       setSnapshot(nextSnapshot);
       setFeedbackSent(true);
+      const base = recoveryRef.current ?? createWorkoutRecovery({ executionId: nextSnapshot.execution.id, workoutSessionId: nextSnapshot.execution.workoutSessionId, expectedServerRevision: nextSnapshot.execution.serverRevision });
+      await persistRecovery(withWorkoutRecoveryLocalSnapshot(base, nextSnapshot));
       return;
     }
     setBusy(true);
@@ -689,7 +784,7 @@ export function WorkoutExecutionExperience({
       <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} />
       <header><Link href="/student/today" aria-label="Voltar para Hoje"><X aria-hidden="true" /></Link></header>
       <div className="pp-paused-screen__mark"><Pause aria-hidden="true" /></div>
-      <span>{snapshot.metrics.completedExercises} exercícios concluídos · {activeMinutes(snapshot)} min</span>
+      <span>{snapshot.metrics.completedExercises} exercícios concluídos · {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span>
       <h1>Treino pausado</h1>
       <p>Fique tranquila: tudo que você concluiu já está salvo. Retome quando estiver pronta.</p>
       <TrainerPresence {...identity.trainer} compact />
@@ -718,21 +813,23 @@ export function WorkoutExecutionExperience({
       <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined} />
       <header><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair do treino"><X aria-hidden="true" /></button></header>
       <div><Check aria-hidden="true" /></div><span>Última série concluída</span><h1>Você chegou ao fim.</h1><p>Revise o resultado real da sessão e finalize quando estiver pronta.</p>
-      <dl><div><strong>{snapshot.metrics.completedExercises}</strong><small>exercícios</small></div><div><strong>{snapshot.metrics.completedSets}</strong><small>séries</small></div><div><strong>{activeMinutes(snapshot)}</strong><small>min</small></div></dl>
+      <dl><div><strong>{snapshot.metrics.completedExercises}</strong><small>exercícios</small></div><div><strong>{snapshot.metrics.completedSets}</strong><small>séries</small></div><div><strong>{formatClock(workoutElapsedSeconds(snapshot, clockNow))}</strong><small>tempo</small></div></dl>
       {message ? <p className="pp-ready-sync-message" role="status">{message}</p> : null}
       <button className="pp-workout-primary" type="button" onClick={finishWorkout} disabled={busy || !online || Boolean(recovery?.queuedMutations.length)}>Finalizar treino <ChevronRight aria-hidden="true" /></button>
     </section>;
   }
 
   if (restDeadline) {
-    const progress = current.set.restSeconds ? Math.max(0, Math.min(1, secondsRemaining / current.set.restSeconds)) : 0;
+    const restingSet = sequence.find((item) => item.set.execution.restEndsAt && new Date(item.set.execution.restEndsAt).getTime() === restDeadline)?.set;
+    const prescribedRestSeconds = restingSet?.restSeconds ?? Math.max(secondsRemaining, 1);
+    const progress = Math.max(0, Math.min(1, secondsRemaining / prescribedRestSeconds));
     return <section className="pp-rest-screen" aria-live="polite">
       <WorkoutSyncStatus state={syncState} localOnly={demoMode} onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined} onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined} />
-      <header><button type="button" onClick={() => { void persistRestDeadline(null, snapshot); }} aria-label="Fechar descanso"><X aria-hidden="true" /></button><span>Descanso</span><i /></header>
-      <p>Recupere a respiração</p>
+      <header><button type="button" onClick={() => { void beginAfterRest(); }} aria-label="Pular descanso"><X aria-hidden="true" /></button><span>Descanso · treino {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span><i /></header>
+      <p>{secondsRemaining > 0 ? "Descanso em andamento" : "Descanso concluído"}</p>
       <div className="pp-rest-clock" role="timer" aria-label={`${secondsRemaining} segundos restantes`} style={{ "--rest-progress": progress } as React.CSSProperties}><strong>{formatClock(secondsRemaining)}</strong><span>até a próxima série</span></div>
       <div className="pp-rest-next"><small>Próxima</small><strong>{current.exercise.exercise.name}</strong><span>Série {current.set.setNumber} · {targetReps(current.set) ?? current.set.durationSeconds ?? "—"}{targetReps(current.set) ? " reps" : current.set.durationSeconds ? "s" : ""}</span></div>
-      <div className="pp-rest-controls"><button type="button" onClick={() => { void persistRestDeadline(Math.max(Date.now(), restDeadline - 15_000), snapshot); }}>−15 s</button><button type="button" onClick={() => { void persistRestDeadline(null, snapshot); }}>Pular descanso</button><button type="button" onClick={() => { void persistRestDeadline(restDeadline + 15_000, snapshot); }}>+15 s</button></div>
+      {secondsRemaining > 0 ? <div className="pp-rest-controls"><button type="button" onClick={() => { void beginAfterRest(); }}>Pular descanso</button></div> : <button className="pp-workout-primary pp-rest-next-action" type="button" onClick={() => { void beginAfterRest(); }}>{current.set.setNumber > 1 ? "Iniciar próxima série" : "Iniciar próximo exercício"}<ChevronRight aria-hidden="true" /></button>}
     </section>;
   }
 
@@ -742,6 +839,9 @@ export function WorkoutExecutionExperience({
   const exerciseMedia = initialView === "fallback" ? [] : current.exercise.media;
   const previousText = previousSummary(previous, current.set.setNumber);
   const supersetExercises = current.section.sectionType === "SUPERSET" ? current.section.exercises : [];
+  const timedSecondsRemaining = timedExercise?.setExecutionId === current.set.execution.id ? Math.max(0, Math.ceil((timedExercise.deadline - clockNow) / 1000)) : null;
+  const waitingForTransition = transitionAction?.setExecutionId === current.set.execution.id;
+  const transitionLabel = transitionAction?.kind === "next_exercise" ? "Iniciar próximo exercício" : "Iniciar próxima série";
 
   return <section className="pp-active-execution">
     <WorkoutSyncStatus
@@ -750,7 +850,7 @@ export function WorkoutExecutionExperience({
       onReconnect={forcedOffline ? () => { setForcedOffline(false); setOnline(true); } : undefined}
       onRetry={online && recovery ? () => { void flushRecovery(recovery); } : undefined}
     />
-    <header className="pp-execution-header"><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair ou pausar treino"><X aria-hidden="true" /></button><span>{exercisePosition} de {uniqueExercises.length}</span><button type="button" onClick={() => setDetailOpen(true)} aria-label="Abrir detalhes do exercício"><Info aria-hidden="true" /></button><div role="progressbar" aria-label="Progresso do treino" aria-valuemin={0} aria-valuemax={snapshot.metrics.totalSets} aria-valuenow={snapshot.metrics.completedSets}><i style={{ width: `${progress * 100}%` }} /></div></header>
+    <header className="pp-execution-header"><button type="button" onClick={() => setExitOpen(true)} aria-label="Sair ou pausar treino"><X aria-hidden="true" /></button><span>{exercisePosition} de {uniqueExercises.length} · {formatClock(workoutElapsedSeconds(snapshot, clockNow))}</span><button type="button" onClick={() => setDetailOpen(true)} aria-label="Abrir detalhes do exercício"><Info aria-hidden="true" /></button><div role="progressbar" aria-label="Progresso do treino" aria-valuemin={0} aria-valuemax={snapshot.metrics.totalSets} aria-valuenow={snapshot.metrics.completedSets}><i style={{ width: `${progress * 100}%` }} /></div></header>
 
     <StudentWorkoutMedia exerciseId={initialView === "fallback" ? null : current.exercise.exercise.id} exerciseName={current.exercise.exercise.name} media={exerciseMedia} demoMode={demoMode} priority className="pp-execution-media" />
 
@@ -774,11 +874,12 @@ export function WorkoutExecutionExperience({
         {current.set.distanceValue != null ? <NumericControl label="Distância" value={actuals?.actualDistance ?? 0} step={0.1} suffix={current.set.distanceUnit ?? "m"} target={`${current.set.distanceValue} ${current.set.distanceUnit ?? ""}`} onChange={(value) => updateActuals((values) => ({ ...values, actualDistance: Math.max(0, value), distanceUnit: current.set.distanceUnit }))} /> : null}
       </div>
       {current.set.targetRpe != null ? <div className="pp-rpe-control"><span>Esforço percebido</span><div>{[6, 7, 8, 9, 10].map((value) => <button type="button" key={value} aria-pressed={actuals?.actualRpe === value} onClick={() => updateActuals((values) => ({ ...values, actualRpe: value }))}>{value}</button>)}</div></div> : null}
+      {current.set.durationSeconds != null ? <div className="pp-timed-exercise" role="timer" aria-label={timedSecondsRemaining === null ? "Cronômetro ainda não iniciado" : `${timedSecondsRemaining} segundos restantes`}><Clock3 aria-hidden="true" /><span><small>Tempo da série</small><strong>{timedSecondsRemaining === null ? formatClock(current.set.durationSeconds) : formatClock(timedSecondsRemaining)}</strong></span></div> : null}
       {previousText ? <button type="button" className="pp-previous-performance" onClick={() => setDetailOpen(true)}><RotateCcw aria-hidden="true" /><span>{previousText}</span><ChevronRight aria-hidden="true" /></button> : null}
     </div>
 
     {message ? <div className={`pp-execution-message${syncState === "OFFLINE" || syncState === "SYNC_FAILED" ? " pp-execution-message--warning" : ""}`} role="status"><CircleAlert aria-hidden="true" /><span>{message}</span></div> : null}
-    <div className="pp-execution-action"><button className="pp-workout-primary" type="button" onClick={completeSet} disabled={busy || !actuals || !recoveryReady}>{busy ? "Sincronizando…" : "Concluir série"}<Check aria-hidden="true" /></button></div>
+    <div className="pp-execution-action"><button className="pp-workout-primary" type="button" onClick={waitingForTransition ? () => setTransitionAction(null) : current.set.durationSeconds != null && timedSecondsRemaining === null ? startTimedExercise : completeSet} disabled={busy || !actuals || !recoveryReady || (timedSecondsRemaining !== null && timedSecondsRemaining > 0)}>{busy ? "Sincronizando…" : waitingForTransition ? transitionLabel : current.set.durationSeconds != null && timedSecondsRemaining === null ? "Iniciar cronômetro" : timedSecondsRemaining !== null && timedSecondsRemaining > 0 ? `Tempo ${formatClock(timedSecondsRemaining)}` : "Concluir série"}{waitingForTransition || (current.set.durationSeconds != null && timedSecondsRemaining === null) ? <Play aria-hidden="true" /> : <Check aria-hidden="true" />}</button></div>
 
     {detailOpen ? <div className="pp-bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="exercise-detail-title"><button className="pp-bottom-sheet__backdrop" type="button" onClick={() => setDetailOpen(false)} aria-label="Fechar detalhes" /><div><header><span>Detalhes do exercício</span><button type="button" onClick={() => setDetailOpen(false)} aria-label="Fechar"><X aria-hidden="true" /></button></header><StudentWorkoutMedia exerciseId={current.exercise.exercise.id} exerciseName={current.exercise.exercise.name} media={current.exercise.media} demoMode={demoMode} /><h2 id="exercise-detail-title">{current.exercise.exercise.name}</h2><p>{current.exercise.exercise.instructions}</p>{current.exercise.exercise.coachingCues.length ? <ul>{current.exercise.exercise.coachingCues.map((cue) => <li key={cue}><Check aria-hidden="true" />{cue}</li>)}</ul> : null}{current.exercise.studentInstruction ? <aside><TrainerPresence {...identity.trainer} compact /><p>{current.exercise.studentInstruction}</p></aside> : null}</div></div> : null}
 

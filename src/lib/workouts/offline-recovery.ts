@@ -33,6 +33,8 @@ export type WorkoutRecoveryRecord = {
   expectedServerRevision: number;
   queuedMutations: QueuedWorkoutMutation[];
   restDeadline: number | null;
+  timedExercise: { setExecutionId: string; deadline: number } | null;
+  localSnapshot: WorkoutExecutionSnapshot | null;
   createdAt: string;
   updatedAt: string;
   lastRecoveredAt: string | null;
@@ -102,6 +104,13 @@ function isRecoveryRecord(value: unknown): value is WorkoutRecoveryRecord {
     && record.queuedMutations.length <= WORKOUT_RECOVERY_QUEUE_LIMIT
     && record.queuedMutations.every(isQueuedMutation)
     && (record.restDeadline === null || typeof record.restDeadline === "number")
+    && (record.timedExercise === undefined || record.timedExercise === null || (
+      typeof record.timedExercise === "object"
+      && typeof record.timedExercise.setExecutionId === "string"
+      && UUID.test(record.timedExercise.setExecutionId)
+      && typeof record.timedExercise.deadline === "number"
+    ))
+    && (record.localSnapshot === undefined || record.localSnapshot === null || typeof record.localSnapshot === "object")
     && typeof record.createdAt === "string"
     && typeof record.updatedAt === "string";
 }
@@ -123,7 +132,7 @@ export async function readWorkoutRecovery(executionId: string, workoutSessionId:
       return null;
     }
     await transactionComplete(transaction);
-    return value;
+    return { ...value, timedExercise: value.timedExercise ?? null, localSnapshot: value.localSnapshot ?? null };
   } finally {
     database.close();
   }
@@ -177,6 +186,8 @@ export function createWorkoutRecovery(input: {
     expectedServerRevision: input.expectedServerRevision,
     queuedMutations: [],
     restDeadline: input.restDeadline ?? null,
+    timedExercise: null,
+    localSnapshot: null,
     createdAt: now,
     updatedAt: now,
     lastRecoveredAt: null,
@@ -219,6 +230,22 @@ export function markWorkoutSyncAttempt(record: WorkoutRecoveryRecord, failed: bo
 
 export function withWorkoutRecoveryRestDeadline(record: WorkoutRecoveryRecord, restDeadline: number | null, now = new Date()): WorkoutRecoveryRecord {
   return { ...record, restDeadline, updatedAt: now.toISOString() };
+}
+
+export function withWorkoutRecoveryTimedExercise(
+  record: WorkoutRecoveryRecord,
+  timedExercise: WorkoutRecoveryRecord["timedExercise"],
+  now = new Date(),
+): WorkoutRecoveryRecord {
+  return { ...record, timedExercise, updatedAt: now.toISOString() };
+}
+
+export function withWorkoutRecoveryLocalSnapshot(
+  record: WorkoutRecoveryRecord,
+  localSnapshot: WorkoutExecutionSnapshot | null,
+  now = new Date(),
+): WorkoutRecoveryRecord {
+  return { ...record, localSnapshot, updatedAt: now.toISOString() };
 }
 
 export function advanceWorkoutRecoveryQueue(
@@ -320,6 +347,9 @@ export function applyWorkoutMutationOptimistically(
     next.execution.status = "PAUSED";
     next.execution.pausedAt = now;
   } else if (mutation.operation === "resume") {
+    if (next.execution.pausedAt) {
+      next.execution.pausedSeconds += Math.max(0, Math.floor((nowDate.getTime() - Date.parse(next.execution.pausedAt)) / 1000));
+    }
     next.execution.status = "IN_PROGRESS";
     next.execution.pausedAt = null;
   }
@@ -377,5 +407,8 @@ export function canSafelyRebaseWorkoutMutations(snapshot: WorkoutExecutionSnapsh
 }
 
 export function shouldRetainWorkoutRecovery(record: WorkoutRecoveryRecord, now = Date.now()) {
-  return record.queuedMutations.length > 0 || (record.restDeadline !== null && record.restDeadline > now);
+  return record.queuedMutations.length > 0
+    || (record.restDeadline !== null && record.restDeadline > now)
+    || (record.timedExercise !== null && record.timedExercise.deadline > now)
+    || record.localSnapshot !== null;
 }

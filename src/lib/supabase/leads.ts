@@ -2,6 +2,7 @@ import "server-only";
 import type { LeadSettings, TrainerEntitlements, TrainerService } from "@/lib/domain/trainer";
 import type { CreatedInvitation, LeadLifecycleState, ManagedLead } from "@/lib/domain/students";
 import { demoWorkspaceFixture } from "@/lib/demo/fixture";
+import { convertDemoLead, getDemoLeads, rejectDemoLead } from "@/lib/demo/product-workspace";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { findOwnerProfile } from "@/lib/supabase/trainers";
@@ -11,7 +12,7 @@ type LeadRow = { id:string;first_name:string;whatsapp:string;email:string|null;g
 const stateOf=(row:MatchRow):LeadLifecycleState => row.status === "new" || row.status === "pending" ? (new Date(row.reserved_until).getTime() <= Date.now() ? "expired" : row.status) : row.status;
 
 export async function getLeadsWorkspace(){
-  if(await isDemoWorkspaceRequest())return demoWorkspaceFixture.leads;
+  if(await isDemoWorkspaceRequest())return {...demoWorkspaceFixture.leads,matches:getDemoLeads()};
   const profile=await findOwnerProfile(); if(!profile)return null;
   const supabase=await createClient();
   const [entitlements,settings,services,matches]=await Promise.all([
@@ -29,5 +30,5 @@ export async function getLeadsWorkspace(){
 }
 
 export async function getLead(matchId:string){const data=await getLeadsWorkspace();return data?.matches.find(x=>x.id===matchId)??null}
-export async function rejectLead(matchId:string){if(await isDemoWorkspaceRequest())throw new Error("demo_workspace_read_only");const supabase=await createClient();const{error}=await supabase.rpc("reject_my_lead",{p_match_id:matchId});if(error)throw error}
-export async function convertLead(matchId:string){if(await isDemoWorkspaceRequest())throw new Error("demo_workspace_read_only");const supabase=await createClient();const{data,error}=await supabase.rpc("convert_my_lead",{p_match_id:matchId});if(error||!data)throw error??new Error("Conversion failed");const value=data as {invitation_id:string;token:string;expires_at:string;conversion_id:string};return{invitationId:value.invitation_id,token:value.token,expiresAt:value.expires_at,conversionId:value.conversion_id} satisfies CreatedInvitation}
+export async function rejectLead(matchId:string){if(await isDemoWorkspaceRequest()){rejectDemoLead(matchId);return}const supabase=await createClient();const{error}=await supabase.rpc("reject_my_lead",{p_match_id:matchId});if(error)throw error}
+export async function convertLead(matchId:string){if(await isDemoWorkspaceRequest()){const studentId=convertDemoLead(matchId);return{invitationId:studentId,token:"demo",expiresAt:new Date(Date.now()+7*86_400_000).toISOString(),conversionId:studentId} satisfies CreatedInvitation}const supabase=await createClient();const{data,error}=await supabase.rpc("convert_my_lead",{p_match_id:matchId});if(error||!data)throw error??new Error("Conversion failed");const value=data as {invitation_id:string;token:string;expires_at:string;conversion_id:string};return{invitationId:value.invitation_id,token:value.token,expiresAt:value.expires_at,conversionId:value.conversion_id} satisfies CreatedInvitation}

@@ -21,7 +21,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
     <MasterDetail aside={<ActionGroup title="Ações do relacionamento" description={student.status === "active" ? "A desativação preserva o histórico e a identidade da pessoa." : "Um novo convite reutiliza a mesma identidade e o relacionamento existente."}>
       {student.status === "active" ? <ActionForm action={deactivateStudentAction} fields={{ relationship_id: student.id }} className="deactivate-action"><UserRoundX aria-hidden="true" />Desativar relacionamento</ActionForm> : <InviteStudentForm />}
     </ActionGroup>}>
-      <ContextPanel title="Visão geral" description="Dados reais disponíveis para este relacionamento.">
+      <ContextPanel title="Perfil e visão geral" description="Registro central do aluno e dados reais disponíveis para este relacionamento.">
         <dl className="pp-detail-list pp-detail-list--student">
           <div><dt>Status</dt><dd><Status tone={student.status === "active" ? "success" : "neutral"}>{statusLabels[student.status]}</Status></dd></div>
           <div><dt><Mail aria-hidden="true" />Contato</dt><dd>{student.email ?? "Oculto para relacionamento inativo"}</dd></div>

@@ -11,6 +11,7 @@ import {
 } from "@/lib/assessments/presentation";
 import { getTrainerAssessmentIndex } from "@/lib/assessments/workspace";
 import { getStudentDetail } from "@/lib/supabase/students";
+import { StudentRecordChrome } from "@/components/students/StudentRecordChrome";
 
 type AssessmentFilter = "all" | "draft" | "waiting" | "review" | "completed";
 type AssessmentsSearchParams = { status?: string | string[]; student?: string | string[] };
@@ -53,10 +54,10 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
     .toSorted((a, b) => Date.parse(b.assessment.updatedAt) - Date.parse(a.assessment.updatedAt));
   const count = (key: AssessmentFilter) => scopedItems.filter((item) => acceptsFilter(item.assessment.status, key)).length;
 
-  return <main className="dashboard-main pp-workspace pp-assessments-workspace">
-    <header className="pp-page-header">
-      <div><p className="pp-page-context">{selectedStudent ? `Acompanhamento · ${selectedStudent.name}` : "Acompanhamento"}</p><h1>{selectedStudent ? `Avaliações de ${selectedStudent.name}` : "Avaliações"}</h1><p>{selectedStudent ? <>Exibindo somente as avaliações deste aluno. <Link href="/dashboard/assessments">Ver todos os alunos</Link></> : "Acompanhe cada aplicação do rascunho à devolutiva final, sem perder o contexto do aluno."}</p></div>
-    </header>
+  return <main className={`dashboard-main pp-workspace pp-assessments-workspace${selectedStudent ? " pp-record-page pp-student-record" : ""}`}>
+    {selectedStudent ? <StudentRecordChrome student={selectedStudent} active="assessments" /> : <header className="pp-page-header">
+      <div><p className="pp-page-context">Acompanhamento</p><h1>Avaliações</h1><p>Acompanhe cada aplicação do rascunho à devolutiva final, sem perder o contexto do aluno.</p></div>
+    </header>}
 
     <OperationalToolbar
       filters={[
@@ -67,11 +68,11 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
         { label: "Concluídas", href: filterHref("completed", relationshipId), count: count("completed"), active: filter === "completed" },
       ]}
       note={<><Sparkles aria-hidden="true" />{count("review")} aguardando sua atenção</>}
-      action={<Link href="/dashboard/assessments/new" className="pp-button pp-button--primary"><Plus aria-hidden="true" />Nova avaliação</Link>}
+      action={<Link href={relationshipId ? `/dashboard/assessments/new?student=${relationshipId}` : "/dashboard/assessments/new"} className="pp-button pp-button--primary"><Plus aria-hidden="true" />Nova avaliação</Link>}
     />
 
     {items.length ? <DataList label="Avaliações" columns={["Aluno", "Avaliação", "Status", "Atualizada em", "Prazo", "Próxima ação", ""]} className="pp-assessment-list">
-      {items.map(({ assessment, student, template }) => <DataListRow href={`/dashboard/assessments/${assessment.id}`} key={assessment.id}>
+      {items.map(({ assessment, student, template }) => <DataListRow href={`/dashboard/assessments/${assessment.id}${relationshipId ? `?student=${relationshipId}` : ""}`} key={assessment.id}>
         <IdentityCell name={student?.name ?? "Aluno"} detail={student?.email ?? "Relacionamento protegido"} />
         <span className="pp-data-cell pp-data-cell--stacked pp-assessment-list__title" role="cell"><strong>{assessment.title}</strong><small>{template ? assessmentTypeLabels[template.assessmentType] : "Modelo versionado"}</small></span>
         <span className="pp-data-cell pp-data-cell--status" role="cell"><AssessmentStatusBadge status={assessment.status} /></span>
@@ -80,7 +81,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
         <span className="pp-data-cell pp-assessment-list__action" role="cell">{assessmentNextActions[assessment.status]}</span>
       </DataListRow>)}
     </DataList> : <section className="pp-panel">
-      <EmptyState icon={ClipboardCheck} title="Nenhuma avaliação neste filtro" description={filter === "all" ? "Crie a primeira avaliação para um aluno ativo." : "Os registros aparecem aqui conforme avançam no ciclo."} action={<Link href="/dashboard/assessments/new" className="pp-button pp-button--secondary">Nova avaliação</Link>} />
+      <EmptyState icon={ClipboardCheck} title="Nenhuma avaliação neste filtro" description={filter === "all" ? "Crie a primeira avaliação para um aluno ativo." : "Os registros aparecem aqui conforme avançam no ciclo."} action={<Link href={relationshipId ? `/dashboard/assessments/new?student=${relationshipId}` : "/dashboard/assessments/new"} className="pp-button pp-button--secondary">Nova avaliação</Link>} />
     </section>}
   </main>;
 }

@@ -11,10 +11,10 @@ import { assessmentTypeLabels, estimateAssessmentMinutes } from "@/lib/assessmen
 
 const steps = ["Aluno", "Modelo", "Configuração", "Revisão"];
 
-export function NewAssessmentWizard({ students, templates, demoMode }: { students: ManagedStudent[]; templates: AssessmentTemplateSummary[]; demoMode: boolean }) {
+export function NewAssessmentWizard({ students, templates, demoMode, initialStudentId }: { students: ManagedStudent[]; templates: AssessmentTemplateSummary[]; demoMode: boolean; initialStudentId?: string | null }) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [studentId, setStudentId] = useState(students[0]?.id ?? "");
+  const [studentId, setStudentId] = useState(() => students.some((student) => student.id === initialStudentId) ? initialStudentId! : students[0]?.id ?? "");
   const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
   const [title, setTitle] = useState(templates[0]?.name ?? "");
   const [dueAt, setDueAt] = useState("");
@@ -31,8 +31,13 @@ export function NewAssessmentWizard({ students, templates, demoMode }: { student
   }, []);
 
   useEffect(() => {
-    if (state.ok && state.assessmentId) router.push(`/dashboard/assessments/${state.assessmentId}`);
-  }, [router, state.assessmentId, state.ok]);
+    if (!state.ok || !state.assessmentId) return;
+    if (state.status === "SENT") {
+      const timeout = window.setTimeout(() => router.replace(state.relationshipId ? `/dashboard/assessments?student=${state.relationshipId}` : "/dashboard/assessments"), 1600);
+      return () => window.clearTimeout(timeout);
+    }
+    router.push(`/dashboard/assessments/${state.assessmentId}${state.relationshipId ? `?student=${state.relationshipId}` : ""}`);
+  }, [router, state.assessmentId, state.ok, state.relationshipId, state.status]);
 
   function chooseTemplate(id: string) {
     const next = templates.find((item) => item.id === id);
@@ -47,12 +52,15 @@ export function NewAssessmentWizard({ students, templates, demoMode }: { student
 
   return <form action={formAction} className="pp-assessment-wizard">
     <input type="hidden" name="relationship_id" value={studentId} />
+    <input type="hidden" name="student_name" value={student?.name ?? ""} />
     <input type="hidden" name="template_version_id" value={version?.id ?? ""} />
     <input type="hidden" name="is_required" value={String(required)} />
     <input type="hidden" name="title" value={title} />
     <input type="hidden" name="due_at" value={dueAt} />
 
-    <ol className="pp-wizard-progress" aria-label="Progresso da nova avaliação">
+    {state.ok && state.status === "SENT" ? <section className="pp-assessment-success" role="status" aria-live="polite">
+      <span><Check aria-hidden="true" /></span><p>Envio concluído</p><h2>Avaliação enviada</h2><strong>{state.studentName ?? student?.name}</strong><small>Voltando para as avaliações deste aluno…</small>
+    </section> : <><ol className="pp-wizard-progress" aria-label="Progresso da nova avaliação">
       {steps.map((label, index) => <li key={label} className={index === step ? "active" : index < step ? "complete" : undefined} aria-current={index === step ? "step" : undefined}>
         <span>{index < step ? <Check aria-hidden="true" /> : index + 1}</span><small>{label}</small>
       </li>)}
@@ -115,6 +123,6 @@ export function NewAssessmentWizard({ students, templates, demoMode }: { student
         <button type="submit" name="send_now" value="true" className="pp-button pp-button--primary" disabled={pending}><Send aria-hidden="true" />{pending ? "Enviando…" : "Criar e enviar"}</button>
       </div>}
     </footer>
-    {state.message ? <p className={`matrix-message ${state.ok ? "success" : "error"}`} role="status">{state.message}</p> : null}
+    {state.message && !state.ok ? <p className="matrix-message error" role="status">{state.message}</p> : null}</>}
   </form>;
 }

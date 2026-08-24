@@ -7,11 +7,12 @@ export default async function WorkoutBuilderPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ view?: string; student?: string }>;
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const record = await getWorkoutRecord(id);
   if (!record) notFound();
   const initialView = query.view === "review" || query.view === "history" || query.view === "library" ? query.view : "builder";
-  return <WorkoutBuilder record={record} initialView={initialView} />;
+  const backHref = record.studentContext?.student.id === query.student ? `/dashboard/workouts?student=${query.student}` : "/dashboard/workouts";
+  return <WorkoutBuilder record={record} initialView={initialView} backHref={backHref} />;
 }

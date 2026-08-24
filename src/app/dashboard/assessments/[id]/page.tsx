@@ -15,12 +15,13 @@ import {
 } from "@/lib/assessments/presentation";
 import { getTrainerAssessmentRecord } from "@/lib/assessments/workspace";
 
-export default async function TrainerAssessmentDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function TrainerAssessmentDetailPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ student?: string }> }) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
   const record = await getTrainerAssessmentRecord(id);
   if (!record) notFound();
   const { assessment, student, template, measurements, events } = record;
   const studentName = student?.name ?? "Aluno";
+  const backHref = student?.id === query.student ? `/dashboard/assessments?student=${query.student}` : "/dashboard/assessments";
   const answersByKey = new Map(assessment.answers.map((answer) => [answer.questionKey, answer.value]));
   const responseQuestions = assessment.templateSchema.questions.filter((question) => question.type !== "MEASUREMENT");
   const measurementQuestions = assessment.templateSchema.questions.filter((question) => question.type === "MEASUREMENT");
@@ -32,7 +33,7 @@ export default async function TrainerAssessmentDetailPage({ params }: { params: 
   const eventLabels = { CREATED: "Avaliação criada", DRAFT_UPDATED: "Configuração do Draft atualizada", SENT: "Enviada ao aluno", ANSWER_SAVED: "Resposta salva", SUBMITTED: "Respostas enviadas", REVIEW_STARTED: "Revisão iniciada", COMPLETED: "Avaliação concluída" } as const;
 
   return <main className="dashboard-main pp-record-page pp-assessment-record">
-    <Link href="/dashboard/assessments" className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para avaliações</Link>
+    <Link href={backHref} className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para avaliações</Link>
 
     <header className="pp-record-header pp-assessment-record__header">
       <Avatar name={studentName} size="large" />

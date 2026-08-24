@@ -2,11 +2,11 @@ import "server-only";
 
 import {
   assessmentDemoDetails,
-  assessmentDemoFixtures,
   assessmentDemoMeasurements,
   assessmentDemoTemplates,
 } from "@/data/demo/assessments";
 import { demoWorkspaceFixture } from "@/lib/demo/fixture";
+import { getDemoAssessments, getDemoStudents } from "@/lib/demo/product-workspace";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import type {
   AssessmentDetail,
@@ -71,14 +71,16 @@ function demoEvents(assessment: AssessmentDetail): AssessmentEvent[] {
 export async function getTrainerAssessmentIndex() {
   const demoMode = await isDemoWorkspaceRequest();
   if (demoMode) {
+    const demoAssessments = getDemoAssessments();
+    const demoStudents = getDemoStudents();
     return {
-      items: assessmentDemoFixtures.map((assessment) => ({
+      items: demoAssessments.map((assessment) => ({
         assessment,
-        student: studentForRelationship(demoWorkspaceFixture.students.students, assessment.trainerStudentRelationshipId),
+        student: studentForRelationship(demoStudents, assessment.trainerStudentRelationshipId),
         template: templateForVersion(assessmentDemoTemplates, assessment.templateVersionId),
       })),
       templates: assessmentDemoTemplates,
-      students: demoWorkspaceFixture.students.students.filter((student) => student.status === "active"),
+      students: demoStudents.filter((student) => student.status === "active"),
       demoMode,
     };
   }
@@ -104,11 +106,11 @@ export async function getTrainerAssessmentIndex() {
 export async function getTrainerAssessmentRecord(assessmentId: string): Promise<TrainerAssessmentRecord | null> {
   const demoMode = await isDemoWorkspaceRequest();
   if (demoMode) {
-    const assessment = assessmentDemoDetails.find((item) => item.id === assessmentId);
+    const assessment = getDemoAssessments().find((item) => item.id === assessmentId);
     if (!assessment) return null;
     return {
       assessment,
-      student: studentForRelationship(demoWorkspaceFixture.students.students, assessment.trainerStudentRelationshipId),
+      student: studentForRelationship(getDemoStudents(), assessment.trainerStudentRelationshipId),
       template: templateForVersion(assessmentDemoTemplates, assessment.templateVersionId),
       measurements: assessmentDemoMeasurements.filter((measurement) => measurement.sourceAssessmentId === assessment.id),
       events: demoEvents(assessment),

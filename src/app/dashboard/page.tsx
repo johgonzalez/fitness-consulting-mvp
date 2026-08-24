@@ -110,7 +110,7 @@ export default async function DashboardPage() {
         </div>
 
         <Link
-          href="/dashboard/students"
+          href="/dashboard/students?add=1#add-student"
           className="ppv3-button ppv3-button--primary"
         >
           <Plus aria-hidden="true" />
@@ -436,7 +436,7 @@ export default async function DashboardPage() {
               action={
                 studentsWorkspace ? (
                   <Link
-                    href="/dashboard/students"
+                    href="/dashboard/students?add=1#add-student"
                     className="ppv3-button"
                   >
                     Adicionar aluno

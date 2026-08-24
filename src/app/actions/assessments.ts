@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { AssessmentService } from "@/lib/assessments/service";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
+import { createDemoAssessment } from "@/lib/demo/product-workspace";
 import type { AssessmentAnswerValue } from "@/lib/domain/assessments";
 import { SupabaseAssessmentRepository } from "@/lib/supabase/assessments";
 
@@ -11,6 +12,8 @@ export type AssessmentActionState = {
   message?: string;
   assessmentId?: string;
   status?: "DRAFT" | "SENT" | "ANSWERED" | "IN_REVIEW" | "COMPLETED";
+  studentName?: string;
+  relationshipId?: string;
 };
 
 const validUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
@@ -58,9 +61,6 @@ export async function createAssessmentAction(
   _previous: AssessmentActionState,
   formData: FormData,
 ): Promise<AssessmentActionState> {
-  const demoState = await readOnlyDemoState();
-  if (demoState) return demoState;
-
   const relationshipId = String(formData.get("relationship_id") ?? "");
   const templateVersionId = String(formData.get("template_version_id") ?? "");
   const title = String(formData.get("title") ?? "").trim();
@@ -69,6 +69,25 @@ export async function createAssessmentAction(
   if (!validUuid(relationshipId) || !validUuid(templateVersionId)) return { message: "Selecione um aluno e um modelo válidos." };
 
   try {
+    if (await isDemoWorkspaceRequest()) {
+      const created = createDemoAssessment({
+        relationshipId,
+        templateVersionId,
+        title,
+        isRequired: formData.get("is_required") === "true",
+        dueAt: dueDateInputToIso(dueAtValue),
+        sendNow,
+      });
+      revalidateAssessment(created.assessment.id);
+      return {
+        ok: true,
+        assessmentId: created.assessment.id,
+        status: created.assessment.status,
+        studentName: created.student.name,
+        relationshipId: created.student.id,
+        message: sendNow ? "Avaliação enviada" : "Rascunho criado com segurança.",
+      };
+    }
     const assessmentId = await service().createFromTemplate({
       relationshipId,
       templateVersionId,
@@ -82,7 +101,9 @@ export async function createAssessmentAction(
       ok: true,
       assessmentId,
       status: sendNow ? "SENT" : "DRAFT",
-      message: sendNow ? "Avaliação criada e enviada ao aluno." : "Rascunho criado com segurança.",
+      relationshipId,
+      studentName: String(formData.get("student_name") ?? "").trim() || undefined,
+      message: sendNow ? "Avaliação enviada" : "Rascunho criado com segurança.",
     };
   } catch (error) {
     return { message: friendlyAssessmentError(error, "Não foi possível criar a avaliação.") };

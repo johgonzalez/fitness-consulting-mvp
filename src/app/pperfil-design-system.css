@@ -1143,6 +1143,8 @@
 .pp-action-group .lead-terminal { margin:0;padding:0;border:0!important;background:transparent!important; }
 .pp-action-group .lead-terminal strong { font-size:.76rem; }
 .pp-action-group .lead-terminal p { margin:5px 0 0;color:var(--pp-text-muted);font-size:.68rem;line-height:1.45; }
+.pp-demo-result-link{width:100%;justify-content:center}.pp-demo-simulation-note{display:block;color:var(--pp-text-muted);font-size:.58rem;line-height:1.45}.pp-inline-create:target{scroll-margin-top:90px}
+.pp-action-confirmation{display:grid;gap:10px;margin-top:10px;padding:12px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-md);background:var(--pp-surface-elevated)}.pp-action-confirmation p{margin:0;color:var(--pp-text-secondary);font-size:.74rem;line-height:1.5}.pp-action-confirmation>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}.pp-action-confirmation>div button{min-height:44px}
 .pp-action-group .matrix-invite-form,.pp-inline-create .matrix-invite-form { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
 .pp-action-group .matrix-invite-form { grid-template-columns:1fr; }
 .pp-action-group .matrix-invite-form label,.pp-inline-create .matrix-invite-form label { display:grid;gap:6px;color:var(--pp-text-secondary);font-size:.68rem;font-weight:600; }

@@ -6,6 +6,7 @@ import { OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { formatWorkoutDate } from "@/lib/workouts/presentation";
 import { getWorkoutIndex } from "@/lib/workouts/workspace";
 import { getStudentDetail } from "@/lib/supabase/students";
+import { StudentRecordChrome } from "@/components/students/StudentRecordChrome";
 import styles from "@/components/workouts/workouts.module.css";
 
 type WorkoutFilter = "all" | "draft" | "published" | "archived";
@@ -49,10 +50,10 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
   const count = (key: WorkoutFilter) => scopedItems.filter((item) => accepts(item.currentVersion.status, key)).length;
   const attentionCount = scopedItems.filter((item) => item.currentVersion.status === "DRAFT" || item.currentVersion.status === "APPROVED").length;
 
-  return <main className={`dashboard-main pp-workspace ${styles.workspace}`}>
-    <header className="pp-page-header">
-      <div><p className="pp-page-context">{selectedStudent ? `Programação · ${selectedStudent.name}` : "Programação"}</p><h1>{selectedStudent ? `Treinos de ${selectedStudent.name}` : "Treinos"}</h1><p>{selectedStudent ? <>Exibindo somente os treinos deste aluno. <Link href="/dashboard/workouts">Ver todos os alunos</Link></> : "Planeje, revise e publique experiências de treino com contexto e precisão."}</p></div>
-    </header>
+  return <main className={`dashboard-main pp-workspace ${styles.workspace}${selectedStudent ? " pp-record-page pp-student-record" : ""}`}>
+    {selectedStudent ? <StudentRecordChrome student={selectedStudent} active="workouts" /> : <header className="pp-page-header">
+      <div><p className="pp-page-context">Programação</p><h1>Treinos</h1><p>Planeje, revise e publique experiências de treino com contexto e precisão.</p></div>
+    </header>}
 
     <OperationalToolbar
       filters={[
@@ -67,7 +68,7 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
 
     {visible.length ? <section className={styles.planList} aria-label="Planos de treino">
       <div className={styles.planListHeader} aria-hidden="true"><span>Aluno e plano</span><span>Estrutura</span><span>Versão</span><span>Status</span><span>Atualização</span><span /></div>
-      {visible.map((item) => <Link href={`/dashboard/workouts/${item.currentVersion.id}`} className={styles.planRow} key={item.currentVersion.id}>
+      {visible.map((item) => <Link href={`/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}`} className={styles.planRow} key={item.currentVersion.id}>
         <span className={styles.planIdentity}>
           <Avatar name={item.student?.name ?? "Aluno"} size="medium" />
           <span><strong>{item.plan.name}</strong><small><UserRound aria-hidden="true" />{item.student?.name ?? "Relacionamento protegido"}</small><em>{item.plan.goal ?? "Objetivo não informado"}</em></span>

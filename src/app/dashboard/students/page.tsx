@@ -33,9 +33,9 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       action={<Link href="/dashboard/students?add=1" className="pp-button pp-button--primary"><UserRoundPlus aria-hidden="true" />Adicionar aluno</Link>}
     />
 
-    {query.add === "1" ? <ContextPanel title="Adicionar aluno" description="Crie um convite por e-mail. Nenhum lead artificial será criado." className="pp-inline-create">
+    {query.add === "1" ? <div id="add-student"><ContextPanel title="Adicionar aluno" description="Crie um convite por e-mail. Nenhum lead artificial será criado." className="pp-inline-create">
       <InviteStudentForm />
-    </ContextPanel> : null}
+    </ContextPanel></div> : null}
 
     {invitations.length ? <section className="pp-invitations" aria-labelledby="pending-invitations">
       <header><div><h2 id="pending-invitations">Convites pendentes</h2><p>Pessoas que ainda não concluíram o acesso ao PPerfil.</p></div><Status tone="warning">{invitations.length} aguardando</Status></header>

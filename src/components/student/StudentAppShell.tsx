@@ -10,11 +10,11 @@ const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
   { label: "Treinos", href: "/student/workouts", icon: Dumbbell },
   { label: "Progresso", href: "/student/progress", icon: BarChart3 },
+  { label: "Perfil", href: "/student/profile", icon: UserRound },
 ] as const;
 
 const futureNavigation = [
   { label: "Chat", icon: MessageCircle },
-  { label: "Perfil", icon: UserRound },
 ] as const;
 
 export function StudentAppShell({ children, demoMode }: { children: React.ReactNode; demoMode: boolean }) {
