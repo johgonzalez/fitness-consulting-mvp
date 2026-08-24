@@ -209,6 +209,7 @@ export const assessmentDemoMeasurements: StudentMeasurement[] = [
   { id: "d3300000-0000-4000-8000-000000000002", studentProfileId: "75100000-0000-4000-8000-000000000003", trainerStudentRelationshipId: RELATIONSHIPS.mariana, sourceAssessmentId: summaries[2].id, measurementCode: "waist_circumference", value: 72, unitCode: "cm", measuredAt: "2026-08-17T08:30:00.000Z", createdAt: "2026-08-18T14:20:00.000Z" },
   { id: "d3300000-0000-4000-8000-000000000003", studentProfileId: "75100000-0000-4000-8000-000000000001", trainerStudentRelationshipId: RELATIONSHIPS.juliana, sourceAssessmentId: summaries[3].id, measurementCode: "body_weight", value: 67.2, unitCode: "kg", measuredAt: "2026-07-18T08:00:00.000Z", createdAt: "2026-07-18T12:00:00.000Z" },
   { id: "d3300000-0000-4000-8000-000000000004", studentProfileId: "75100000-0000-4000-8000-000000000003", trainerStudentRelationshipId: RELATIONSHIPS.mariana, sourceAssessmentId: summaries[4].id, measurementCode: "body_weight", value: 65.1, unitCode: "kg", measuredAt: "2026-08-19T07:45:00.000Z", createdAt: "2026-08-20T12:00:00.000Z" },
+  { id: "d3300000-0000-4000-8000-000000000005", studentProfileId: "75100000-0000-4000-8000-000000000001", trainerStudentRelationshipId: RELATIONSHIPS.juliana, sourceAssessmentId: null, measurementCode: "body_weight", value: 67.2, unitCode: "kg", measuredAt: "2026-06-18T08:00:00.000Z", createdAt: "2026-06-18T12:00:00.000Z" },
 ];
 
 export const completedAssessmentDemoFixture = {

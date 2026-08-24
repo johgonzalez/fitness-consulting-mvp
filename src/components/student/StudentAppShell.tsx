@@ -9,10 +9,10 @@ import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
   { label: "Treinos", href: "/student/workouts", icon: Dumbbell },
+  { label: "Progresso", href: "/student/progress", icon: BarChart3 },
 ] as const;
 
 const futureNavigation = [
-  { label: "Progresso", icon: BarChart3 },
   { label: "Chat", icon: MessageCircle },
   { label: "Perfil", icon: UserRound },
 ] as const;

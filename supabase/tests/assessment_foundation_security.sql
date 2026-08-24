@@ -165,6 +165,14 @@ insert into assessment_gate_results values
 
 -- Add private metadata/objects as a trusted backend would; no client upload policy exists yet.
 set local role postgres;
+insert into public.student_measurements(
+  id,student_profile_id,trainer_student_relationship_id,source_assessment_id,
+  measurement_code,value,unit_code,measured_at,recorded_by
+) values (
+  '3a700000-0000-4000-8000-000000000001','3a200000-0000-4000-8000-000000000002',
+  '3a300000-0000-4000-8000-000000000002',null,'body_weight',68.4,'kg',
+  '2026-08-22T12:00:00Z','3a000000-0000-4000-8000-000000000004'
+);
 insert into assessment_gate_results values
   ('measurement relationship and student must match', pg_temp.raises($sql$
     insert into public.student_measurements(
@@ -201,6 +209,7 @@ insert into storage.objects(bucket_id,name,metadata) values
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"3a000000-0000-4000-8000-000000000001","role":"authenticated"}';
 insert into assessment_gate_results values
+  ('active trainer reads related progress measurement', (select count(*)=1 from public.student_measurements where source_assessment_id=(select value from assessment_gate_context where key='assessment_a'))),
   ('active trainer reads related private media metadata', (select count(*)=1 from public.student_private_media)),
   ('active trainer reads related private storage object', (select count(*)=1 from storage.objects where bucket_id='student-private-media')),
   ('trainer A cannot read trainer B measurements', (select count(*)=0 from public.student_measurements where trainer_student_relationship_id='3a300000-0000-4000-8000-000000000002')),
@@ -233,7 +242,10 @@ set local request.jwt.claims = '{"sub":"3a000000-0000-4000-8000-000000000003","r
 insert into assessment_gate_results values
   ('inactive student retains historical assessment read', (select count(*)=1 from public.assessments where id=(select value from assessment_gate_context where key='assessment_a'))),
   ('inactive student sees completed feedback', ((public.get_my_assessment((select value from assessment_gate_context where key='assessment_a'))->>'trainer_feedback')='Excellent baseline. We will review progress next month.')),
+  ('student reads own progress measurements', (select count(*)=1 from public.student_measurements where student_profile_id='3a200000-0000-4000-8000-000000000001')),
+  ('student cannot read another student progress measurements', (select count(*)=0 from public.student_measurements where student_profile_id='3a200000-0000-4000-8000-000000000002')),
   ('student retains own private media access', (select count(*)=1 from public.student_private_media where student_profile_id='3a200000-0000-4000-8000-000000000001')),
+  ('student cannot read another student private media', (select count(*)=0 from public.student_private_media where student_profile_id='3a200000-0000-4000-8000-000000000002')),
   ('student retains own private object access', (select count(*)=1 from storage.objects where bucket_id='student-private-media' and name like '3a200000-0000-4000-8000-000000000001/%')),
   ('inactive student cannot mutate historical answer', pg_temp.raises(format(
     'select public.save_assessment_answer(%L::uuid,%L,%L::jsonb)',
@@ -255,6 +267,8 @@ set local role anon;
 set local request.jwt.claims = '{"role":"anon"}';
 insert into assessment_gate_results values
   ('anonymous has no assessment table access', not has_table_privilege('anon','public.assessments','SELECT,INSERT,UPDATE,DELETE')),
+  ('anonymous has no progress measurement table access', not has_table_privilege('anon','public.student_measurements','SELECT,INSERT,UPDATE,DELETE')),
+  ('anonymous has no private media metadata access', not has_table_privilege('anon','public.student_private_media','SELECT,INSERT,UPDATE,DELETE')),
   ('anonymous has no assessment RPC access', not has_function_privilege('anon','public.get_my_assessment(uuid)','EXECUTE')),
   ('anonymous sees no public private-media bucket', (select count(*)=0 from storage.buckets where id='student-private-media' and public is true)),
   ('anonymous cannot read private storage', (select count(*)=0 from storage.objects where bucket_id='student-private-media'));

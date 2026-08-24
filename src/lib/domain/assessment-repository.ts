@@ -30,4 +30,5 @@ export interface AssessmentTemplateRepository {
 export interface StudentProgressRepository {
   listMeasurements(relationshipId: string): Promise<StudentMeasurement[]>;
   listPrivateMediaMetadata(relationshipId: string): Promise<StudentPrivateMediaMetadata[]>;
+  createPrivateMediaSignedUrl(storagePath: string, expiresInSeconds?: number): Promise<string>;
 }

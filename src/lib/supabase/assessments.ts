@@ -297,4 +297,13 @@ implements AssessmentRepository, AssessmentTemplateRepository, StudentProgressRe
       createdAt: row.created_at as string,
     }));
   }
+
+  async createPrivateMediaSignedUrl(storagePath: string, expiresInSeconds = 300): Promise<string> {
+    const supabase = await requireAuthenticatedClient();
+    const { data, error } = await supabase.storage
+      .from("student-private-media")
+      .createSignedUrl(storagePath, expiresInSeconds);
+    if (error || !data?.signedUrl) throw new Error("Unable to authorize private media.");
+    return data.signedUrl;
+  }
 }
