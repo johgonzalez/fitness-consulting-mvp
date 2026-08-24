@@ -181,6 +181,7 @@
   display:flex;
   flex-direction:column;
 }
+.ppv3-mobile-actions{display:none}
 .ppv3-site-card__media{
   min-height:155px;
   position:relative;
@@ -616,7 +617,7 @@
   .ppv3-hero h2{font-size:2.375rem}
   .ppv3-kpi{
     grid-column:span 6;
-    order:1;
+    order:4;
     min-height:96px;
     padding:13px;
     border-radius:18px;
@@ -627,11 +628,39 @@
   .ppv3-kpi__icon svg{width:14px;height:14px}
   .ppv3-kpi strong{font-size:1.5rem;line-height:1}
   .ppv3-kpi p{font-size:.49rem;line-height:1.35}
-  .ppv3-site-card{order:2}
-  .ppv3-acquisition{order:3}
-  .ppv3-attention{order:4}
-  .ppv3-students{order:5}
-  .ppv3-rail{order:6}
+  .ppv3-attention{order:1}
+  .ppv3-mobile-actions{
+    grid-column:1/-1;
+    order:2;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+  }
+  .ppv3-mobile-actions a{
+    min-height:54px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:7px;
+    border:1px solid var(--ppv3-line);
+    border-radius:15px;
+    background:var(--ppv3-surface);
+    box-shadow:var(--ppv3-shadow);
+    color:var(--ppv3-text-2);
+    font-size:.53rem;
+    font-weight:780;
+    line-height:1.25;
+    text-align:center;
+    text-decoration:none;
+  }
+  .ppv3-mobile-actions svg{width:15px;height:15px;flex:none;color:var(--ppv3-purple)}
+  .ppv3-rail{display:contents}
+  .ppv3-activity{grid-column:1/-1;order:3}
+  .ppv3-site-card{order:5}
+  .ppv3-students{order:6}
+  .ppv3-acquisition{order:7}
+  .ppv3-finance{grid-column:1/-1;order:8}
   .ppv3-funnel__row{grid-template-columns:92px minmax(0,1fr) 34px}
   .ppv3-student-table__head{display:none}
   .ppv3-student-row{grid-template-columns:minmax(0,1fr) auto}

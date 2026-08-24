@@ -8,6 +8,8 @@ import {
   ArrowUpRight,
   BellRing,
   CircleDollarSign,
+  ClipboardCheck,
+  Dumbbell,
   Eye,
   GraduationCap,
   MessageCircle,
@@ -155,6 +157,12 @@ export default async function DashboardPage() {
             <small>sem métricas inventadas</small>
           </div>
         </article>
+
+        <nav className="ppv3-mobile-actions" aria-label="Ações rápidas">
+          <Link href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" /><span>Adicionar aluno</span></Link>
+          <Link href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" /><span>Criar treino</span></Link>
+          <Link href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" /><span>Nova avaliação</span></Link>
+        </nav>
 
         {/* Existing Meu Site information, moved upward visually. */}
         <article className="ppv3-card ppv3-site-card">
