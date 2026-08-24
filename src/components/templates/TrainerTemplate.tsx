@@ -13,10 +13,14 @@ const templateRenderers: Record<TemplateRendererId, ComponentType<{ site: Traine
   Template03,
 };
 
+export function NormalizedTrainerTemplate({ site }: { site: TrainerSiteData }) {
+  const definition = getTemplateDefinition(site.site.templateId);
+  const Renderer = templateRenderers[definition.renderer];
+  return <Renderer site={site} />;
+}
+
 export function TrainerTemplate(data: TrainerPageData & { previewTemplate?: TrainerPageData["profile"]["template_id"]; previewLayout?: SiteSectionPreference[] }) {
   const templateId = data.previewTemplate ?? data.profile.template_id;
   const site = normalizeTrainerSiteData(data, { templateId, layout: data.previewLayout });
-  const definition = getTemplateDefinition(templateId);
-  const Renderer = templateRenderers[definition.renderer];
-  return <Renderer site={site} />;
+  return <NormalizedTrainerTemplate site={site} />;
 }
