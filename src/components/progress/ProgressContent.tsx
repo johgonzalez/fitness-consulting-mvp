@@ -22,6 +22,7 @@ import type {
   ProgressWorkoutItem,
   ProgressWorkspace,
 } from "@/lib/domain/progress";
+import { ProgressPhotoUpload } from "./ProgressPhotoUpload";
 import styles from "./progress.module.css";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
@@ -215,10 +216,11 @@ function groupPhotos(photos: ProgressPhoto[]): Array<{ date: string; photos: Pro
   return [...groups.entries()].map(([date, items]) => ({ date, photos: items }));
 }
 
-export function ProgressPhotos({ photos }: { photos: ProgressPhoto[] }) {
+export function ProgressPhotos({ photos, canUpload = false }: { photos: ProgressPhoto[]; canUpload?: boolean }) {
   return <section className={styles.photosSection}>
     <div className={styles.privacyNotice}><ShieldCheck aria-hidden="true" /><div><strong>Fotos privadas</strong><p>Visíveis somente para o aluno e, durante um relacionamento ativo, para o Personal autorizado. Não são usadas publicamente.</p></div></div>
-    {photos.length === 0 ? <div className={styles.largeEmpty}><Images aria-hidden="true" /><h2>Nenhuma foto registrada</h2><p>Não existem fotos privadas disponíveis neste acompanhamento.</p><span><LockKeyhole aria-hidden="true" />Upload permanece indisponível até existir um contrato seguro de escrita.</span></div> : <div className={styles.photoGroups}>
+    {canUpload ? <ProgressPhotoUpload /> : null}
+    {photos.length === 0 ? <div className={styles.largeEmpty}><Images aria-hidden="true" /><h2>Nenhuma foto registrada</h2><p>Não existem fotos privadas disponíveis neste acompanhamento.</p>{canUpload ? <span><LockKeyhole aria-hidden="true" />Sua primeira foto aparecerá aqui após o envio seguro.</span> : null}</div> : <div className={styles.photoGroups}>
       {groupPhotos(photos).map((group) => <section key={group.date}>
         <header><CalendarDays aria-hidden="true" /><h2>{formatDate(`${group.date}T12:00:00`)}</h2><span>{group.photos.length} {group.photos.length === 1 ? "registro" : "registros"}</span></header>
         <div>{group.photos.map((photo) => <figure key={photo.id} className={styles.photoCard}>

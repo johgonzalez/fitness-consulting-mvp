@@ -202,7 +202,7 @@ export async function getStudentProgressWorkspace(): Promise<ProgressWorkspace> 
     workouts: projectStudentWorkouts(workoutRows),
     assessments: projectAssessments(assessmentRows, relationship.id),
     photos: await authorizePhotos(assessments, mediaRows),
-    photoUploadAvailable: false,
+    photoUploadAvailable: relationship.status === "active",
   };
 }
 

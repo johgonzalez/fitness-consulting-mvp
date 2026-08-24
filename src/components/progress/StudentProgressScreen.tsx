@@ -25,7 +25,7 @@ export function StudentProgressScreen({ workspace, view }: { workspace: Progress
     {workspace.relationship ? <>
       {view === "overview" ? <ProgressOverview workspace={workspace} /> : null}
       {view === "measurements" ? <ProgressMeasurements measurements={workspace.measurements} /> : null}
-      {view === "photos" ? <ProgressPhotos photos={workspace.photos} /> : null}
+      {view === "photos" ? <ProgressPhotos photos={workspace.photos} canUpload={workspace.photoUploadAvailable} /> : null}
     </> : <section className={styles.largeEmpty}><LockKeyhole aria-hidden="true" /><h2>Nenhum acompanhamento encontrado</h2><p>Seu progresso aparecerá quando houver um relacionamento de acompanhamento disponível.</p></section>}
   </div>;
 }

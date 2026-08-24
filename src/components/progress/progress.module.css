@@ -566,6 +566,232 @@
   line-height: 1.45;
 }
 
+.photoUpload {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+  padding: 17px;
+  border: 1px solid var(--pp-border);
+  border-radius: var(--pp-radius-xl);
+  background: var(--pp-surface);
+  box-shadow: var(--pp-shadow);
+}
+
+.photoUpload > header {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+
+.photoUpload > header > span:first-child {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--progress-accent-soft);
+  color: var(--progress-accent);
+}
+
+.photoUpload > header svg {
+  width: 18px;
+  height: 18px;
+}
+
+.photoUpload > header small {
+  display: block;
+  color: var(--pp-text-muted);
+  font-size: .66rem;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.photoUpload > header h2 {
+  margin: 3px 0 0;
+  font-family: var(--pp-font-display);
+  font-size: 1.08rem;
+}
+
+.privateBadge {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  border-radius: var(--pp-radius-pill);
+  background: var(--pp-success-soft);
+  color: var(--pp-success);
+  font-size: .66rem;
+  font-weight: 800;
+}
+
+.privateBadge svg {
+  width: 13px !important;
+  height: 13px !important;
+}
+
+.photoUpload fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.photoUpload legend {
+  margin-bottom: 8px;
+  color: var(--pp-text-secondary);
+  font-size: .74rem;
+  font-weight: 760;
+}
+
+.photoCategories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.photoCategories button,
+.photoSources button,
+.uploadSubmit {
+  min-height: 44px;
+  border: 1px solid var(--pp-border);
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 760;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.photoCategories button {
+  border-radius: var(--pp-radius-md);
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-secondary);
+}
+
+.photoCategories button[data-active] {
+  border-color: color-mix(in srgb, var(--progress-accent) 60%, var(--pp-border));
+  background: var(--progress-accent-soft);
+  color: var(--progress-accent);
+}
+
+.photoSources {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.photoSources button {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 10px;
+  border-radius: var(--pp-radius-md);
+  background: var(--pp-surface);
+  color: var(--pp-text-primary);
+}
+
+.photoSources button svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  color: var(--progress-accent);
+}
+
+.photoSources input {
+  display: none;
+}
+
+.uploadStatus {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border-radius: var(--pp-radius-md);
+  background: var(--pp-surface-subtle);
+}
+
+.uploadStatus > svg {
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 10px;
+  background: var(--pp-surface);
+  color: var(--pp-text-muted);
+}
+
+.uploadStatus[data-state="success"] > svg {
+  color: var(--pp-success);
+}
+
+.uploadStatus[data-state="error"] > svg {
+  color: var(--pp-danger);
+}
+
+.uploadStatus strong {
+  display: block;
+  font-size: .76rem;
+}
+
+.uploadStatus p {
+  overflow-wrap: anywhere;
+  margin: 3px 0 0;
+  color: var(--pp-text-muted);
+  font-size: .69rem;
+  line-height: 1.4;
+}
+
+.uploadProgress {
+  height: 5px;
+  overflow: hidden;
+  border-radius: var(--pp-radius-pill);
+  background: var(--pp-surface-subtle);
+}
+
+.uploadProgress span {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--progress-accent);
+  transition: width 120ms linear;
+}
+
+.uploadSubmit {
+  width: 100%;
+  padding: 10px 14px;
+  border-color: var(--progress-accent);
+  border-radius: var(--pp-radius-md);
+  background: var(--progress-accent);
+  color: white;
+}
+
+.photoCategories button:disabled,
+.photoSources button:disabled,
+.uploadSubmit:disabled {
+  cursor: not-allowed;
+  opacity: .52;
+}
+
+.photoCategories button:focus-visible,
+.photoSources button:focus-visible,
+.uploadSubmit:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--progress-accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.uploadConsent {
+  margin: -6px 0 0;
+  color: var(--pp-text-muted);
+  font-size: .66rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
 .photoGroups {
   display: grid;
   gap: 22px;
@@ -777,6 +1003,28 @@
   .photoGroups > section > div {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .photoUpload {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr);
+    align-items: end;
+    padding: 20px;
+  }
+
+  .photoUpload > header,
+  .photoUpload fieldset,
+  .uploadStatus,
+  .uploadProgress,
+  .uploadConsent {
+    grid-column: 1 / -1;
+  }
+
+  .photoSources {
+    grid-column: 1;
+  }
+
+  .uploadSubmit {
+    grid-column: 2;
+  }
 }
 
 @media (min-width: 900px) {
@@ -813,7 +1061,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tabs a {
+  .tabs a,
+  .photoCategories button,
+  .photoSources button,
+  .uploadSubmit,
+  .uploadProgress span {
     transition: none;
   }
 }

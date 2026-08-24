@@ -55,7 +55,7 @@ export type ProgressWorkspace = {
   workouts: ProgressWorkoutItem[];
   assessments: ProgressAssessmentItem[];
   photos: ProgressPhoto[];
-  photoUploadAvailable: false;
+  photoUploadAvailable: boolean;
 };
 
 const MEASUREMENT_LABELS: Record<string, string> = {
