@@ -2,6 +2,8 @@ export type ServiceMode = "online" | "presencial" | "both";
 export type TemplateId = "template_01" | "template_02" | "template_03";
 export type BillingType = "monthly" | "per_session" | "package" | "starting_at";
 export type PriceVisibility = "public" | "match_only" | "hidden";
+export type ServiceConversionMode = "WHATSAPP" | "INTEREST";
+export type ProfileStatusSemanticTone = "availability" | "online" | "announcement" | "attention" | "neutral";
 
 export interface TrainerProfile {
   id: string;
@@ -24,6 +26,9 @@ export interface TrainerProfile {
   instagram_url?: string | null;
   methodology_description?: string | null;
   testimonials_intro?: string | null;
+  profile_status_enabled?: boolean;
+  profile_status_text?: string | null;
+  profile_status_semantic_tone?: ProfileStatusSemanticTone | null;
   site_layouts?: unknown;
   template_id: TemplateId;
   primary_color: string;
@@ -44,6 +49,16 @@ export interface TrainerService {
   billing_type: BillingType | null;
   price_visibility: PriceVisibility;
   active: boolean;
+  benefits?: string[];
+  conversion_mode?: ServiceConversionMode | null;
+}
+
+export interface TrainerMethodologyItem {
+  id: string;
+  trainer_id?: string;
+  position: number;
+  title: string;
+  description: string;
 }
 
 export interface TrainerEntitlements {
@@ -52,6 +67,7 @@ export interface TrainerEntitlements {
   can_preview_site: boolean;
   can_use_template_01: boolean;
   can_use_template_02: boolean;
+  can_use_template_03: boolean;
   can_use_free_template: boolean;
   can_use_premium_templates: boolean;
   can_publish_site: boolean;
@@ -97,6 +113,7 @@ export interface TrainerPageData {
   profile: PublicTrainerProfile;
   services: TrainerService[];
   testimonials: Testimonial[];
+  methodology: TrainerMethodologyItem[];
 }
 
 export type LeadGoal = "weight_loss" | "hypertrophy" | "conditioning" | "health" | "performance" | "other";

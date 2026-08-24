@@ -29,6 +29,7 @@ export const mockTrainers: readonly TrainerPageData[] = [
       { id: "30000000-0000-4000-8000-000000000001", trainer_id: rafaelId, title: "Consultoria de 90 dias", description: "Avaliação, treino personalizado, suporte e ajustes periódicos.", service_mode: "online", price: null, currency: "BRL", billing_type: null, price_visibility: "hidden", price_visible: false, active: true },
     ],
     testimonials: [],
+    methodology: [],
   },
   {
     profile: {
@@ -55,6 +56,7 @@ export const mockTrainers: readonly TrainerPageData[] = [
       { id: "30000000-0000-4000-8000-000000000003", trainer_id: marinaId, title: "Treino presencial", description: "Sessões individuais no Rio de Janeiro, mediante disponibilidade.", service_mode: "presencial", price: null, currency: "BRL", billing_type: null, price_visibility: "hidden", price_visible: false, active: true },
     ],
     testimonials: [],
+    methodology: [],
   },
   demoWorkspaceFixture.trainerPage,
 ] as const;

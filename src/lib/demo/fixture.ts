@@ -4,6 +4,7 @@ import type {
   DashboardMetrics,
   LeadSettings,
   TrainerEntitlements,
+  TrainerMethodologyItem,
   TrainerPageData,
   TrainerProfile,
 } from "@/lib/domain/trainer";
@@ -11,6 +12,12 @@ import type { ManagedInvitation, ManagedLead, ManagedStudent } from "@/lib/domai
 
 const trainerId = "71000000-0000-4000-8000-000000000001";
 const userId = "70000000-0000-4000-8000-000000000001";
+const demoMethodology: TrainerMethodologyItem[] = [
+  { id: "assessment", trainer_id: trainerId, position: 10, title: "Avaliação inicial", description: "Rotina, histórico e objetivos dão contexto ao ponto de partida." },
+  { id: "strategy", trainer_id: trainerId, position: 20, title: "Estratégia personalizada", description: "O plano nasce das suas prioridades, disponibilidade e momento." },
+  { id: "execution", trainer_id: trainerId, position: 30, title: "Execução com acompanhamento", description: "Orientação próxima transforma o planejamento em uma rotina possível." },
+  { id: "evolution", trainer_id: trainerId, position: 40, title: "Ajustes e evolução", description: "O percurso é revisto com consistência para continuar fazendo sentido." },
+];
 
 const trainerPage: TrainerPageData = {
   profile: {
@@ -33,21 +40,25 @@ const trainerPage: TrainerPageData = {
     instagram_url: "https://www.instagram.com/thiagocosta.movimento/",
     methodology_description: "Uma jornada clara, com avaliação, estratégia, execução acompanhada e ajustes consistentes.",
     testimonials_intro: "Alunos que encontraram constância, clareza e acompanhamento de verdade.",
+    profile_status_enabled: true,
+    profile_status_text: "Agenda aberta",
+    profile_status_semantic_tone: "availability",
     site_layouts: {},
     template_id: "template_02",
     primary_color: "#6e42f5",
     published: true,
   },
   services: [
-    { id: "72000000-0000-4000-8000-000000000001", trainer_id: trainerId, title: "Acompanhamento Online", description: "Treino personalizado, ajustes recorrentes e acompanhamento de evolução.", service_mode: "online", price: 199, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true },
-    { id: "72000000-0000-4000-8000-000000000002", trainer_id: trainerId, title: "Consultoria Premium", description: "Plano individual com acompanhamento próximo e avaliação frequente.", service_mode: "online", price: 349, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true },
-    { id: "72000000-0000-4000-8000-000000000003", trainer_id: trainerId, title: "Personal Presencial", description: "Treinamento presencial individual em São Paulo.", service_mode: "presencial", price: 499, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true },
+    { id: "72000000-0000-4000-8000-000000000001", trainer_id: trainerId, title: "Acompanhamento Online", description: "Treino personalizado, ajustes recorrentes e acompanhamento de evolução.", service_mode: "online", price: 199, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true, benefits: ["Treino personalizado", "Ajustes recorrentes", "Acompanhamento de evolução"], conversion_mode: "INTEREST" },
+    { id: "72000000-0000-4000-8000-000000000002", trainer_id: trainerId, title: "Consultoria Premium", description: "Plano individual com acompanhamento próximo e avaliação frequente.", service_mode: "online", price: 349, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true, benefits: ["Plano individual", "Avaliações frequentes", "Contato direto"], conversion_mode: "WHATSAPP" },
+    { id: "72000000-0000-4000-8000-000000000003", trainer_id: trainerId, title: "Personal Presencial", description: "Treinamento presencial individual em São Paulo.", service_mode: "presencial", price: 499, currency: "BRL", billing_type: "monthly", price_visibility: "public", price_visible: true, active: true, benefits: ["Sessões individuais", "Correção presencial", "Planejamento contínuo"], conversion_mode: "INTEREST" },
   ],
   testimonials: [
     { id: "73000000-0000-4000-8000-000000000001", trainer_id: trainerId, student_name: "Mariana S.", content: "Consegui voltar a treinar com consistência e me senti muito acompanhada durante todo o processo.", image_url: null, before_image_url: null, after_image_url: null, result_context: "Mais constância, melhor rotina e maior adesão ao treino.", instagram_handle: "mariana.semove", instagram_url: "https://www.instagram.com/mariana.semove/", published: true },
     { id: "73000000-0000-4000-8000-000000000002", trainer_id: trainerId, student_name: "Lucas P.", content: "O treino ficou muito mais organizado e prático. Evoluí bastante em poucos meses.", image_url: null, before_image_url: null, after_image_url: null, result_context: "Plano estruturado com progressão e acompanhamento.", instagram_handle: null, instagram_url: null, published: true },
     { id: "73000000-0000-4000-8000-000000000003", trainer_id: trainerId, student_name: "Fernanda R.", content: "Gostei muito da atenção aos detalhes e do acompanhamento constante.", image_url: null, before_image_url: null, after_image_url: null, result_context: "Acompanhamento próximo e ajustes coerentes com a rotina.", instagram_handle: "fernanda.ativa", instagram_url: "https://www.instagram.com/fernanda.ativa/", published: true },
   ],
+  methodology: demoMethodology,
 };
 
 const profile: TrainerProfile = { ...trainerPage.profile, user_id: userId };
@@ -58,6 +69,7 @@ const entitlements: TrainerEntitlements = {
   can_preview_site: true,
   can_use_template_01: true,
   can_use_template_02: true,
+  can_use_template_03: false,
   can_use_free_template: true,
   can_use_premium_templates: true,
   can_publish_site: true,
@@ -111,7 +123,7 @@ export const demoWorkspaceFixture = {
   dashboardMetrics,
   leads: { profile, entitlements, settings: leadSettings, services: trainerPage.services, matches: leads },
   students: { students, invitations },
-  siteBuilder: { profile, services: trainerPage.services, testimonials: trainerPage.testimonials, entitlements, requests, offer, hasPurchaseIntent: false, demoMode: true },
+  siteBuilder: { profile, services: trainerPage.services, testimonials: trainerPage.testimonials, methodology: trainerPage.methodology, entitlements, requests, offer, hasPurchaseIntent: false, demoMode: true },
   siteContent: {
     specialties: [
       { id: "hypertrophy", label: "Hipertrofia" },
@@ -119,12 +131,7 @@ export const demoWorkspaceFixture = {
       { id: "conditioning", label: "Condicionamento físico" },
       { id: "performance", label: "Performance" },
     ],
-    methodology: [
-      { id: "assessment", title: "Avaliação inicial", description: "Rotina, histórico e objetivos dão contexto ao ponto de partida." },
-      { id: "strategy", title: "Estratégia personalizada", description: "O plano nasce das suas prioridades, disponibilidade e momento." },
-      { id: "execution", title: "Execução com acompanhamento", description: "Orientação próxima transforma o planejamento em uma rotina possível." },
-      { id: "evolution", title: "Ajustes e evolução", description: "O percurso é revisto com consistência para continuar fazendo sentido." },
-    ],
+    methodology: demoMethodology.map(({ id, title, description }) => ({ id, title, description })),
     results: [
       { id: "conditioning-progress", title: "Evolução de condicionamento", description: "Mais constância, melhor rotina e maior adesão ao treino.", image: null },
       { id: "hypertrophy-consistency", title: "Hipertrofia com consistência", description: "Plano estruturado com progressão e acompanhamento.", image: null },

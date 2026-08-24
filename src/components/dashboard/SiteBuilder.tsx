@@ -21,10 +21,12 @@ import Link from "next/link";
 import { useActionState, useState, type ReactNode } from "react";
 import {
   deleteService,
+  deleteMethodologyItem,
   deleteTestimonial,
   registerPurchaseIntent,
   saveContact,
   saveIdentity,
+  saveMethodologyItem,
   savePresentation,
   saveService,
   saveTestimonial,
@@ -45,14 +47,16 @@ import type {
   CustomSiteRequest,
   Testimonial,
   TrainerEntitlements,
+  TrainerMethodologyItem,
   TrainerProfile,
   TrainerService,
 } from "@/lib/domain/trainer";
+import { getTemplateDefinition } from "@/lib/domain/template-registry";
 
 const initialState: SiteActionState = {};
 
 type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance";
-type PersonalizationSection = "identity" | "presentation" | "services" | "testimonials" | "organize";
+type PersonalizationSection = "identity" | "presentation" | "methodology" | "services" | "testimonials" | "organize";
 type PersonalizationTab = "content" | "appearance" | "organize";
 
 const siteNavigation: Array<{ id: SiteSection; label: string; icon: typeof Globe2 }> = [
@@ -128,36 +132,39 @@ function TemplateSelector({
 }) {
   const [freeState, freeAction, freePending] = useActionState(selectTemplate.bind(null, "template_01"), initialState);
   const [premiumState, premiumAction, premiumPending] = useActionState(selectTemplate.bind(null, "template_02"), initialState);
+  const essential = getTemplateDefinition("template_01");
+  const motion = getTemplateDefinition("template_02");
+  const conversion = getTemplateDefinition("template_03");
   const templates = [
     {
       id: "template_01" as const,
-      name: "Essential Editorial",
-      description: "Presença sofisticada, editorial e centrada na marca do Personal.",
+      name: essential.name,
+      description: essential.description,
       state: freeState,
       action: freeAction,
       pending: freePending,
       allowed: entitlements.can_use_template_01,
-      available: true,
+      available: essential.availability.production,
     },
     {
       id: "template_02" as const,
-      name: "Motion",
-      description: "Direção atlética, luminosa e cinética para movimento e acompanhamento.",
+      name: motion.name,
+      description: motion.description,
       state: premiumState,
       action: premiumAction,
       pending: premiumPending,
       allowed: entitlements.can_use_template_02,
-      available: true,
+      available: motion.availability.production,
     },
     {
       id: "template_03" as const,
-      name: "Conversion",
-      description: "Serviços, preço real quando público e uma jornada clara de interesse.",
+      name: conversion.name,
+      description: conversion.description,
       state: initialState,
       action: null,
       pending: false,
-      allowed: false,
-      available: false,
+      allowed: entitlements.can_use_template_03,
+      available: conversion.availability.production,
     },
   ];
 
@@ -204,10 +211,12 @@ function ServiceForm({ service }: { service?: TrainerService }) {
         {service ? <input type="hidden" name="id" value={service.id} /> : null}
         <label>Nome do serviço<input name="title" required minLength={2} maxLength={120} defaultValue={service?.title} placeholder="Consultoria Online" /></label>
         <AssistedTextField name="description" label="Descrição do serviço" initialValue={service?.description ?? ""} suggestions={serviceDescriptionSuggestions} maxLength={1000} rows={3} />
+        <label>Benefícios (opcional, um por linha)<textarea name="benefits" maxLength={2000} defaultValue={(service?.benefits ?? []).join("\n")} rows={4} /></label>
         <div className="builder-grid">
           <label>Modalidade<select name="service_mode" defaultValue={service?.service_mode ?? "both"}><option value="online">Online</option><option value="presencial">Presencial</option><option value="both">Ambos</option></select></label>
           <label>Cobrança<select name="billing_type" defaultValue={service?.billing_type ?? ""}><option value="">Não informar</option><option value="monthly">Mensal</option><option value="per_session">Por sessão</option><option value="package">Pacote</option><option value="starting_at">A partir de</option></select></label>
         </div>
+        <label>Próxima ação<select name="conversion_mode" defaultValue={service?.conversion_mode ?? ""}><option value="">Usar contato padrão do perfil</option><option value="WHATSAPP">Conversar pelo WhatsApp</option><option value="INTEREST">Registrar interesse</option></select></label>
         <div className="builder-grid">
           <label>Preço em BRL (opcional)<input name="price" inputMode="decimal" defaultValue={service?.price ?? ""} placeholder="199,90" /></label>
           <label>Visibilidade<select name="price_visibility" defaultValue={service?.price_visibility ?? "hidden"}><option value="public">Mostrar no site</option><option value="match_only">Matching futuro</option><option value="hidden">Ocultar</option></select></label>
@@ -217,6 +226,24 @@ function ServiceForm({ service }: { service?: TrainerService }) {
         <ActionMessage state={state} />
       </form>
       {service ? <form action={deleteAction}><button className="danger-link" disabled={deletePending}><Trash2 aria-hidden="true" /> {deletePending ? "Removendo..." : "Remover serviço"}</button><ActionMessage state={deleteState} /></form> : null}
+    </div>
+  );
+}
+
+function MethodologyItemForm({ item, defaultPosition }: { item?: TrainerMethodologyItem; defaultPosition: number }) {
+  const [state, action, pending] = useActionState(saveMethodologyItem, initialState);
+  const [deleteState, deleteAction, deletePending] = useActionState(deleteMethodologyItem.bind(null, item?.id ?? ""), initialState);
+  return (
+    <div className="pp-collection-editor">
+      <form action={action} className="builder-form">
+        {item ? <input type="hidden" name="id" value={item.id} /> : null}
+        <label>Título da etapa<input name="title" required minLength={2} maxLength={120} defaultValue={item?.title} placeholder="Avaliação inicial" /></label>
+        <label>Descrição<textarea name="description" required minLength={2} maxLength={1000} defaultValue={item?.description} rows={4} /></label>
+        <label>Ordem<input name="position" type="number" min={0} max={999} step={1} defaultValue={item?.position ?? defaultPosition} /></label>
+        <Submit pending={pending}>{item ? "Salvar etapa" : "Adicionar etapa"}</Submit>
+        <ActionMessage state={state} />
+      </form>
+      {item ? <form action={deleteAction}><button className="danger-link" disabled={deletePending}><Trash2 aria-hidden="true" /> {deletePending ? "Removendo..." : "Remover etapa"}</button><ActionMessage state={deleteState} /></form> : null}
     </div>
   );
 }
@@ -249,6 +276,7 @@ export function SiteBuilder({
   profile,
   services,
   testimonials,
+  methodology,
   entitlements,
   offer,
   hasPurchaseIntent,
@@ -257,6 +285,7 @@ export function SiteBuilder({
   profile: TrainerProfile;
   services: TrainerService[];
   testimonials: Testimonial[];
+  methodology: TrainerMethodologyItem[];
   entitlements: TrainerEntitlements;
   requests: CustomSiteRequest[];
   offer: CommercialOffer | null;
@@ -272,6 +301,7 @@ export function SiteBuilder({
   const [publishState, publishAction, publishPending] = useActionState(setPublication.bind(null, !profile.published), initialState);
   const [intentState, intentAction, intentPending] = useActionState(registerPurchaseIntent.bind(null, offer?.code ?? "unavailable"), initialState);
   const [addingService, setAddingService] = useState(false);
+  const [addingMethodology, setAddingMethodology] = useState(false);
   const [addingTestimonial, setAddingTestimonial] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const publicPath = `/p/${profile.slug}/`;
@@ -353,12 +383,14 @@ export function SiteBuilder({
             <nav className="pp-site-editor-navigation" aria-label="Conteúdo do site">
               {([
                 ["presentation", "Apresentação", "Textos e especialidades"],
+                ["methodology", "Metodologia", `${methodology.length} etapas`],
                 ["services", "Serviços", `${services.length} cadastrados`],
                 ["testimonials", "Depoimentos", `${testimonials.length} cadastrados`],
               ] as Array<[PersonalizationSection, string, string]>).map(([id, label, detail]) => <button key={id} type="button" className={personalization === id ? "is-active" : ""} onClick={() => setPersonalization(id)}><span>{label}</span><small>{detail}</small></button>)}
             </nav>
             <div className="pp-site-editor-panel">
-              {personalization === "presentation" ? <><header><Settings2 aria-hidden="true" /><div><h2>Apresentação</h2><p>Use sugestões ou escreva com suas palavras. Tudo continua editável.</p></div></header><form action={presentationAction} className="builder-form"><label>Nome profissional<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} /></label><HeadlineAssistant initialValue={profile.headline} /><AssistedTextField name="bio" label="Bio" initialValue={profile.bio} suggestions={bioSuggestions} maxLength={2000} rows={5} /><SpecialtyAssistant initialValue={profile.specialty} suggestions={specialtySuggestions} /><AssistedTextField name="methodology_description" label="Como funciona" initialValue={profile.methodology_description ?? ""} suggestions={methodologySuggestions} maxLength={1000} rows={4} /><AssistedTextField name="testimonials_intro" label="Introdução dos depoimentos" initialValue={profile.testimonials_intro ?? ""} suggestions={testimonialsIntroSuggestions} maxLength={500} rows={3} /><input type="hidden" name="city" value={profile.city ?? ""} /><input type="hidden" name="cref" value={profile.cref ?? ""} /><label>Modalidade<select name="service_mode" defaultValue={profile.service_mode}><option value="online">Online</option><option value="presencial">Presencial</option><option value="both">Online e presencial</option></select></label><Submit pending={presentationPending}>Salvar conteúdo</Submit><ActionMessage state={presentationState} /></form></> : null}
+              {personalization === "presentation" ? <><header><Settings2 aria-hidden="true" /><div><h2>Apresentação</h2><p>Use sugestões ou escreva com suas palavras. Tudo continua editável.</p></div></header><form action={presentationAction} className="builder-form"><label>Nome profissional<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} /></label><HeadlineAssistant initialValue={profile.headline} /><AssistedTextField name="bio" label="Bio" initialValue={profile.bio} suggestions={bioSuggestions} maxLength={2000} rows={5} /><SpecialtyAssistant initialValue={profile.specialty} suggestions={specialtySuggestions} /><AssistedTextField name="methodology_description" label="Introdução da metodologia" initialValue={profile.methodology_description ?? ""} suggestions={methodologySuggestions} maxLength={1000} rows={4} /><AssistedTextField name="testimonials_intro" label="Introdução dos depoimentos" initialValue={profile.testimonials_intro ?? ""} suggestions={testimonialsIntroSuggestions} maxLength={500} rows={3} /><label className="check-row"><input type="checkbox" name="profile_status_enabled" defaultChecked={profile.profile_status_enabled ?? false} /> Exibir status público no site</label><div className="builder-grid"><label>Texto do status<input name="profile_status_text" maxLength={40} defaultValue={profile.profile_status_text ?? ""} placeholder="Agenda aberta" /></label><label>Tom do status<select name="profile_status_semantic_tone" defaultValue={profile.profile_status_semantic_tone ?? ""}><option value="">Selecione</option><option value="availability">Disponibilidade</option><option value="online">Online</option><option value="announcement">Anúncio</option><option value="attention">Atenção</option><option value="neutral">Neutro</option></select></label></div><input type="hidden" name="city" value={profile.city ?? ""} /><input type="hidden" name="cref" value={profile.cref ?? ""} /><label>Modalidade<select name="service_mode" defaultValue={profile.service_mode}><option value="online">Online</option><option value="presencial">Presencial</option><option value="both">Online e presencial</option></select></label><Submit pending={presentationPending}>Salvar conteúdo</Submit><ActionMessage state={presentationState} /></form></> : null}
+              {personalization === "methodology" ? <><header><Settings2 aria-hidden="true" /><div><h2>Metodologia</h2><p>Cadastre somente etapas reais. A ordem menor aparece primeiro.</p></div></header><div className="pp-collection-list">{methodology.map((item) => <details key={item.id}><summary><span><strong>{item.title}</strong><small>Ordem {item.position}</small></span><Pencil aria-hidden="true" /></summary><MethodologyItemForm item={item} defaultPosition={item.position} /></details>)}{addingMethodology ? <MethodologyItemForm defaultPosition={(methodology[methodology.length - 1]?.position ?? 0) + 10} /> : <button type="button" className="builder-secondary" onClick={() => setAddingMethodology(true)}><Plus aria-hidden="true" /> Adicionar etapa</button>}</div></> : null}
               {personalization === "services" ? <><header><Settings2 aria-hidden="true" /><div><h2>Serviços</h2><p>Organize as ofertas apresentadas no seu site.</p></div></header><div className="pp-collection-list">{services.map((service) => <details key={service.id}><summary><span><strong>{service.title}</strong><small>{service.active ? "Ativo" : "Inativo"} · {service.price_visibility === "public" ? "preço público" : "preço privado"}</small></span><Pencil aria-hidden="true" /></summary><ServiceForm service={service} /></details>)}{addingService ? <ServiceForm /> : <button type="button" className="builder-secondary" onClick={() => setAddingService(true)}><Plus aria-hidden="true" /> Adicionar serviço</button>}</div></> : null}
               {personalization === "testimonials" ? <><header><Settings2 aria-hidden="true" /><div><h2>Depoimentos</h2><p>Gerencie relatos reais e, quando autorizado, conecte a identidade do aluno no Instagram.</p></div></header><div className="pp-collection-list"><p className="section-help">Instagram é opcional. Google Reviews permanece como integração futura.</p>{testimonials.map((testimonial) => <details key={testimonial.id}><summary><span><strong>{testimonial.student_name}</strong><small>{testimonial.published ? "Publicado" : "Rascunho"}{testimonial.instagram_handle ? ` · @${testimonial.instagram_handle}` : ""}</small></span><Pencil aria-hidden="true" /></summary><TestimonialForm testimonial={testimonial} /></details>)}{addingTestimonial ? <TestimonialForm /> : <button type="button" className="builder-secondary" onClick={() => setAddingTestimonial(true)}><Plus aria-hidden="true" /> Adicionar depoimento</button>}</div></> : null}
             </div>

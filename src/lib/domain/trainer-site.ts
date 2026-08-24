@@ -3,11 +3,10 @@ import { getDemoTrainerSiteContent } from "@/data/demo/trainer-site-content";
 import { resolveTrainerMediaSlots, type TrainerMediaSlots } from "@/lib/domain/trainer-media";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import {
-  normalizeSectionLayout,
-  normalizeSiteTemplateLayouts,
   type SiteSectionId,
   type SiteSectionPreference,
 } from "@/lib/domain/site-sections";
+import { normalizeSectionLayout, normalizeSiteTemplateLayouts } from "@/lib/domain/template-registry";
 
 export type TrainerSiteContactMode = "WHATSAPP" | "INTEREST";
 
@@ -20,6 +19,7 @@ export interface TrainerSiteService {
   priceLabel: string | null;
   billingLabel: string | null;
   conversionMode: TrainerSiteContactMode;
+  benefits: string[];
 }
 
 export interface TrainerSiteData {
@@ -41,6 +41,11 @@ export interface TrainerSiteData {
   };
   about: {
     content: string;
+  };
+  profileStatus: {
+    enabled: boolean;
+    text: string | null;
+    semanticTone: PublicTrainerProfile["profile_status_semantic_tone"];
   };
   media: TrainerMediaSlots;
   specialties: Array<{ id: string; label: string }>;
@@ -93,26 +98,6 @@ function formatPrice(price: number, currency: "BRL") {
   return price.toLocaleString("pt-BR", { style: "currency", currency });
 }
 
-function methodologyFor(profile: PublicTrainerProfile, hasWhatsApp: boolean): TrainerSiteData["methodology"] {
-  return [
-    {
-      id: "context",
-      title: "Conheça a proposta",
-      description: `Entenda os serviços que ${profile.display_name.split(" ")[0]} disponibilizou neste perfil.`,
-    },
-    {
-      id: "format",
-      title: "Escolha o formato",
-      description: `Atendimento ${deliveryLabels[profile.service_mode].toLowerCase()}, conforme as opções publicadas.`,
-    },
-    {
-      id: "contact",
-      title: "Dê o próximo passo",
-      description: hasWhatsApp ? "Converse diretamente pelo WhatsApp informado neste perfil." : "Revise os serviços e escolha a opção mais adequada para você.",
-    },
-  ];
-}
-
 export function normalizeTrainerSiteData(data: TrainerPageData, options?: { templateId?: TemplateId; layout?: SiteSectionPreference[] }): TrainerSiteData {
   const { profile } = data;
   const firstName = profile.display_name.trim().split(/\s+/)[0] || profile.display_name;
@@ -147,10 +132,17 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
     about: {
       content: profile.bio,
     },
+    profileStatus: {
+      enabled: Boolean(profile.profile_status_enabled && profile.profile_status_text?.trim() && profile.profile_status_semantic_tone),
+      text: profile.profile_status_text?.trim() || null,
+      semanticTone: profile.profile_status_semantic_tone ?? null,
+    },
     media,
     specialties: demoContent?.specialties ?? specialties,
-    methodology: demoContent?.methodology ?? methodologyFor(profile, hasWhatsApp),
-    methodologyDescription: profile.methodology_description?.trim() || `Do primeiro contexto aos ajustes contínuos, cada etapa publicada por ${firstName} tem uma função.`,
+    methodology: demoContent?.methodology ?? [...(data.methodology ?? [])]
+      .sort((left, right) => left.position - right.position || left.id.localeCompare(right.id))
+      .map((item) => ({ id: item.id, title: item.title, description: item.description })),
+    methodologyDescription: profile.methodology_description?.trim() || "",
     services: data.services
       .filter((service) => service.active)
       .map((service) => ({
@@ -161,7 +153,8 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
         deliveryLabel: deliveryLabels[service.service_mode],
         priceLabel: service.price_visibility === "public" && service.price !== null ? formatPrice(service.price, service.currency) : null,
         billingLabel: service.price_visibility === "public" && service.price !== null && service.billing_type ? billingLabels[service.billing_type] : null,
-        conversionMode: demoContent?.serviceConversionModes[service.title] ?? contactMode,
+        conversionMode: service.conversion_mode ?? demoContent?.serviceConversionModes[service.title] ?? contactMode,
+        benefits: (service.benefits ?? []).map((benefit) => benefit.trim()).filter(Boolean),
       })),
     testimonials: data.testimonials
       .filter((testimonial) => testimonial.published)

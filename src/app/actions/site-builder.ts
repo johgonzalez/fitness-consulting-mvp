@@ -1,8 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import type { BillingType, PriceVisibility, ServiceMode, TemplateId } from "@/lib/domain/trainer";
-import { normalizeSectionLayout, normalizeSiteTemplateLayouts } from "@/lib/domain/site-sections";
+import type { BillingType, PriceVisibility, ProfileStatusSemanticTone, ServiceConversionMode, ServiceMode, TemplateId } from "@/lib/domain/trainer";
+import { normalizeSectionLayout, normalizeSiteTemplateLayouts } from "@/lib/domain/template-registry";
 import { rejectDemoMutation } from "@/lib/demo/workspace";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import { createClient } from "@/lib/supabase/server";
@@ -11,6 +11,8 @@ export type SiteActionState = { ok?: boolean; message?: string };
 const modes = new Set<ServiceMode>(["online", "presencial", "both"]);
 const billingTypes = new Set<BillingType>(["monthly", "per_session", "package", "starting_at"]);
 const priceVisibilities = new Set<PriceVisibility>(["public", "match_only", "hidden"]);
+const conversionModes = new Set<ServiceConversionMode>(["WHATSAPP", "INTEREST"]);
+const profileStatusTones = new Set<ProfileStatusSemanticTone>(["availability", "online", "announcement", "attention", "neutral"]);
 
 async function ownerContext() {
   const supabase = await createClient();
@@ -42,10 +44,14 @@ export async function savePresentation(_state: SiteActionState, formData: FormDa
   const service_mode = String(formData.get("service_mode") ?? "") as ServiceMode;
   const methodology_description = String(formData.get("methodology_description") ?? "").trim();
   const testimonials_intro = String(formData.get("testimonials_intro") ?? "").trim();
-  if (display_name.length < 2 || display_name.length > 100 || headline.length < 2 || headline.length > 180 || bio.length > 2000 || specialty.length < 2 || specialty.length > 120 || city.length > 120 || cref.length > 60 || methodology_description.length > 1000 || testimonials_intro.length > 500 || !modes.has(service_mode)) {
+  const profile_status_enabled = formData.get("profile_status_enabled") === "on";
+  const profile_status_text = String(formData.get("profile_status_text") ?? "").trim();
+  const statusToneRaw = String(formData.get("profile_status_semantic_tone") ?? "") as ProfileStatusSemanticTone;
+  const profile_status_semantic_tone = statusToneRaw || null;
+  if (display_name.length < 2 || display_name.length > 100 || headline.length < 2 || headline.length > 180 || bio.length > 2000 || specialty.length < 2 || specialty.length > 120 || city.length > 120 || cref.length > 60 || methodology_description.length > 1000 || testimonials_intro.length > 500 || profile_status_text.length > 40 || (profile_status_semantic_tone !== null && !profileStatusTones.has(profile_status_semantic_tone)) || (profile_status_enabled && (!profile_status_text || !profile_status_semantic_tone)) || !modes.has(service_mode)) {
     return { message: "Revise os campos de apresentacao." };
   }
-  const { error } = await context.supabase.from("trainer_profiles").update({ display_name, headline, bio, specialty, city: city || null, cref: cref || null, methodology_description: methodology_description || null, testimonials_intro: testimonials_intro || null, service_mode }).eq("id", context.profile.id);
+  const { error } = await context.supabase.from("trainer_profiles").update({ display_name, headline, bio, specialty, city: city || null, cref: cref || null, methodology_description: methodology_description || null, testimonials_intro: testimonials_intro || null, profile_status_enabled, profile_status_text: profile_status_text || null, profile_status_semantic_tone, service_mode }).eq("id", context.profile.id);
   if (error) return { message: "Nao foi possivel salvar a apresentacao." };
   refreshSite(context.profile.slug);
   return { ok: true, message: "Apresentacao salva." };
@@ -133,14 +139,49 @@ export async function saveService(_state: SiteActionState, formData: FormData): 
   const priceRaw = String(formData.get("price") ?? "").trim().replace(",", ".");
   const price = priceRaw ? Number(priceRaw) : null;
   const active = formData.get("active") === "on";
-  if (title.length < 2 || title.length > 120 || description.length > 1000 || !modes.has(service_mode) || (billingRaw && !billingTypes.has(billingRaw)) || !priceVisibilities.has(visibilityRaw) || (price !== null && (!Number.isFinite(price) || price < 0))) return { message: "Revise os dados do servico." };
+  const benefits = String(formData.get("benefits") ?? "").split(/\r?\n/).map((benefit) => benefit.trim()).filter(Boolean);
+  const conversionRaw = String(formData.get("conversion_mode") ?? "") as ServiceConversionMode;
+  const conversion_mode = conversionRaw || null;
+  if (title.length < 2 || title.length > 120 || description.length > 1000 || benefits.length > 12 || benefits.some((benefit) => benefit.length > 160) || (conversion_mode !== null && !conversionModes.has(conversion_mode)) || !modes.has(service_mode) || (billingRaw && !billingTypes.has(billingRaw)) || !priceVisibilities.has(visibilityRaw) || (price !== null && (!Number.isFinite(price) || price < 0))) return { message: "Revise os dados do servico." };
   if (visibilityRaw === "public" && price === null) return { message: "Informe o preco para mostra-lo publicamente." };
-  const payload = { trainer_id: context.profile.id, title, description, service_mode, price, currency: "BRL", billing_type: billingRaw || null, price_visibility: visibilityRaw, price_visible: visibilityRaw === "public", active };
+  const payload = { trainer_id: context.profile.id, title, description, service_mode, price, currency: "BRL", billing_type: billingRaw || null, price_visibility: visibilityRaw, price_visible: visibilityRaw === "public", active, benefits, conversion_mode };
   const query = id ? context.supabase.from("services").update(payload).eq("id", id).eq("trainer_id", context.profile.id) : context.supabase.from("services").insert(payload);
   const { error } = await query;
   if (error) return { message: "Nao foi possivel salvar o servico." };
   refreshSite(context.profile.slug);
   return { ok: true, message: "Servico salvo." };
+}
+
+export async function saveMethodologyItem(_state: SiteActionState, formData: FormData): Promise<SiteActionState> {
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  const id = String(formData.get("id") ?? "");
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const position = Number(String(formData.get("position") ?? "0"));
+  if (title.length < 2 || title.length > 120 || description.length < 2 || description.length > 1000 || !Number.isInteger(position) || position < 0 || position > 999) {
+    return { message: "Revise os dados da etapa." };
+  }
+  const payload = { trainer_id: context.profile.id, title, description, position, updated_at: new Date().toISOString() };
+  const query = id
+    ? context.supabase.from("trainer_methodology_items").update(payload).eq("id", id).eq("trainer_id", context.profile.id)
+    : context.supabase.from("trainer_methodology_items").insert(payload);
+  const { error } = await query;
+  if (error) return { message: "Nao foi possivel salvar a etapa da metodologia." };
+  refreshSite(context.profile.slug);
+  return { ok: true, message: "Etapa da metodologia salva." };
+}
+
+export async function deleteMethodologyItem(id: string, state: SiteActionState): Promise<SiteActionState> {
+  void state;
+  const demo = await rejectDemoMutation(); if (demo) return demo;
+  const context = await ownerContext();
+  if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  const { error } = await context.supabase.from("trainer_methodology_items").delete().eq("id", id).eq("trainer_id", context.profile.id);
+  if (error) return { message: "Nao foi possivel remover a etapa da metodologia." };
+  refreshSite(context.profile.slug);
+  return { ok: true, message: "Etapa removida." };
 }
 
 export async function deleteService(id: string, state: SiteActionState): Promise<SiteActionState> {

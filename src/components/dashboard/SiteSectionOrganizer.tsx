@@ -14,14 +14,17 @@ import { useActionState, useEffect, useMemo, useState, type DragEvent } from "re
 import { saveSectionLayout, type SiteActionState } from "@/app/actions/site-builder";
 import type { TrainerProfile } from "@/lib/domain/trainer";
 import {
-  defaultSiteTemplateLayouts,
-  encodeSectionLayout,
   getSectionMeta,
-  normalizeSiteTemplateLayouts,
   type SiteSectionId,
   type SiteSectionPreference,
-  type SiteTemplateLayouts,
 } from "@/lib/domain/site-sections";
+import {
+  defaultSiteTemplateLayouts,
+  encodeSectionLayout,
+  getTemplateSectionDefinition,
+  normalizeSiteTemplateLayouts,
+  type SiteTemplateLayouts,
+} from "@/lib/domain/template-registry";
 
 const initialState: SiteActionState = {};
 const demoStorageKey = "pperfil-demo-site-layouts-v1";
@@ -32,10 +35,12 @@ const templateNames = {
   template_03: "Conversion",
 } as const;
 
-function moveItem(items: SiteSectionPreference[], id: SiteSectionId, direction: -1 | 1) {
+function moveItem(items: SiteSectionPreference[], id: SiteSectionId, direction: -1 | 1, templateId: TrainerProfile["template_id"]) {
   const from = items.findIndex((item) => item.id === id);
   const to = from + direction;
   if (from <= 0 || to <= 0 || from >= items.length - 1 || to >= items.length - 1) return items;
+  if (!getTemplateSectionDefinition(templateId, id)?.reorderable) return items;
+  if (!getTemplateSectionDefinition(templateId, items[to].id)?.reorderable) return items;
   const next = [...items];
   [next[from], next[to]] = [next[to], next[from]];
   return next;
@@ -70,13 +75,15 @@ export function SiteSectionOrganizer({ profile, demoMode }: { profile: TrainerPr
   }
 
   function toggle(id: SiteSectionId) {
-    const meta = getSectionMeta(id);
-    if (meta.locked) return;
+    const section = getTemplateSectionDefinition(templateId, id);
+    if (!section?.visibilityEditable) return;
     updateCurrent(current.map((item) => item.id === id ? { ...item, enabled: !item.enabled } : item));
   }
 
   function dropOn(target: SiteSectionId) {
-    if (!dragged || dragged === target || getSectionMeta(target).locked) return;
+    if (!dragged || dragged === target) return;
+    if (!getTemplateSectionDefinition(templateId, dragged)?.reorderable) return;
+    if (!getTemplateSectionDefinition(templateId, target)?.reorderable) return;
     const from = current.findIndex(({ id }) => id === dragged);
     const to = current.findIndex(({ id }) => id === target);
     if (from <= 0 || to <= 0 || from >= current.length - 1 || to >= current.length - 1) return;
@@ -102,29 +109,32 @@ export function SiteSectionOrganizer({ profile, demoMode }: { profile: TrainerPr
         <div className="pp-section-organizer__list">
           {current.map((item, index) => {
             const meta = getSectionMeta(item.id);
-            const locked = Boolean(meta.locked);
+            const section = getTemplateSectionDefinition(templateId, item.id);
+            const locked = Boolean(section?.locked);
+            const reorderable = Boolean(section?.reorderable);
+            const visibilityEditable = Boolean(section?.visibilityEditable);
             return (
               <article
                 key={item.id}
                 className={`${locked ? "is-locked" : ""}${item.enabled ? "" : " is-hidden"}${dragged === item.id ? " is-dragging" : ""}`}
-                onDragOver={(event) => { if (!locked) event.preventDefault(); }}
+                onDragOver={(event) => { if (reorderable) event.preventDefault(); }}
                 onDrop={() => dropOn(item.id)}
               >
                 <button
                   className="pp-section-organizer__handle"
                   type="button"
-                  draggable={!locked}
-                  disabled={locked}
+                  draggable={reorderable}
+                  disabled={!reorderable}
                   onDragStart={(event: DragEvent<HTMLButtonElement>) => { event.dataTransfer.effectAllowed = "move"; setDragged(item.id); }}
                   onDragEnd={() => setDragged(null)}
                   aria-label={locked ? `${meta.label}, posição fixa` : `Arrastar ${meta.label}`}
                 ><GripVertical aria-hidden="true" /></button>
-                <span className="pp-section-organizer__copy"><strong>{meta.label}</strong>{locked ? <small>{meta.locked === "FIRST" ? "Fixo no topo" : "Fixo no final"}</small> : <small>{item.enabled ? "Visível" : "Oculto"}</small>}</span>
-                {!locked ? <div className="pp-section-organizer__move" aria-label={`Mover ${meta.label}`}>
-                  <button type="button" onClick={() => updateCurrent(moveItem(current, item.id, -1))} disabled={index <= 1} aria-label={`Mover ${meta.label} para cima`}><ArrowUp aria-hidden="true" /></button>
-                  <button type="button" onClick={() => updateCurrent(moveItem(current, item.id, 1))} disabled={index >= current.length - 2} aria-label={`Mover ${meta.label} para baixo`}><ArrowDown aria-hidden="true" /></button>
+                <span className="pp-section-organizer__copy"><strong>{meta.label}</strong>{locked ? <small>{section?.locked === "FIRST" ? "Fixo no topo" : "Fixo no final"}</small> : <small>{item.enabled ? "Visível" : "Oculto"}</small>}</span>
+                {reorderable ? <div className="pp-section-organizer__move" aria-label={`Mover ${meta.label}`}>
+                  <button type="button" onClick={() => updateCurrent(moveItem(current, item.id, -1, templateId))} disabled={index <= 1} aria-label={`Mover ${meta.label} para cima`}><ArrowUp aria-hidden="true" /></button>
+                  <button type="button" onClick={() => updateCurrent(moveItem(current, item.id, 1, templateId))} disabled={index >= current.length - 2} aria-label={`Mover ${meta.label} para baixo`}><ArrowDown aria-hidden="true" /></button>
                 </div> : null}
-                {!locked ? <button className="pp-section-organizer__visibility" type="button" aria-pressed={item.enabled} onClick={() => toggle(item.id)} aria-label={`${item.enabled ? "Ocultar" : "Mostrar"} ${meta.label}`}>{item.enabled ? <Eye aria-hidden="true" /> : <EyeOff aria-hidden="true" />}</button> : <span className="pp-section-organizer__lock" aria-hidden="true"><Eye /></span>}
+                {visibilityEditable ? <button className="pp-section-organizer__visibility" type="button" aria-pressed={item.enabled} onClick={() => toggle(item.id)} aria-label={`${item.enabled ? "Ocultar" : "Mostrar"} ${meta.label}`}>{item.enabled ? <Eye aria-hidden="true" /> : <EyeOff aria-hidden="true" />}</button> : <span className="pp-section-organizer__lock" aria-hidden="true"><Eye /></span>}
               </article>
             );
           })}

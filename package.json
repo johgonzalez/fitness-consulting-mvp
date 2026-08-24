@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "template-foundation:validate": "node scripts/templates/validate-template-foundation-v1a.mjs",
     "exercise-catalog:build": "node scripts/exercises/build-catalog-v1.mjs",
     "exercise-catalog:validate": "node scripts/exercises/import-catalog-v1.mjs --mode validate",
     "exercise-media:build": "node scripts/exercises/build-media-pack-v1.mjs",
