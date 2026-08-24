@@ -131,3 +131,16 @@ export function createDemoAssessment(input: {
   workspace.assessments.unshift(assessment);
   return { assessment: structuredClone(assessment), student: structuredClone(student) };
 }
+
+export function sendDemoAssessment(assessmentId: string) {
+  const workspace = state();
+  const assessment = workspace.assessments.find((item) => item.id === assessmentId);
+  if (!assessment || assessment.status !== "DRAFT") throw new Error("assessment_not_available");
+  const student = workspace.students.find((item) => item.id === assessment.trainerStudentRelationshipId && item.status === "active");
+  if (!student) throw new Error("relationship_not_active");
+  const now = new Date().toISOString();
+  assessment.status = "SENT";
+  assessment.sentAt = now;
+  assessment.updatedAt = now;
+  return { assessment: structuredClone(assessment), student: structuredClone(student) };
+}

@@ -21,6 +21,7 @@ export function ExerciseMedia({ exercise, demoMode, priority = false }: { exerci
         fill
         sizes="(max-width: 560px) 50vw, 220px"
         preload={priority && index === 0}
+        loading={priority && index === 0 ? "eager" : "lazy"}
         unoptimized
         onError={() => setFailedUrls((current) => new Set(current).add(item.displayUrl))}
       />

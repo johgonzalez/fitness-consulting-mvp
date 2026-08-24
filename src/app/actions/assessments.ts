@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { AssessmentService } from "@/lib/assessments/service";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
-import { createDemoAssessment } from "@/lib/demo/product-workspace";
+import { createDemoAssessment, sendDemoAssessment } from "@/lib/demo/product-workspace";
 import type { AssessmentAnswerValue } from "@/lib/domain/assessments";
 import { SupabaseAssessmentRepository } from "@/lib/supabase/assessments";
 
@@ -114,17 +115,24 @@ export async function sendAssessmentAction(
   _previous: AssessmentActionState,
   formData: FormData,
 ): Promise<AssessmentActionState> {
-  const demoState = await readOnlyDemoState();
-  if (demoState) return demoState;
   const assessmentId = String(formData.get("assessment_id") ?? "");
+  const requestedReturnHref = String(formData.get("return_href") ?? "");
   if (!validUuid(assessmentId)) return { message: "Avaliação inválida." };
+  const contextualReturn = requestedReturnHref.match(/^\/dashboard\/assessments\?student=([0-9a-f-]+)$/i);
+  const returnHref = contextualReturn && validUuid(contextualReturn[1] ?? "")
+    ? requestedReturnHref
+    : "/dashboard/assessments";
   try {
-    await service().send(assessmentId);
-    revalidateAssessment(assessmentId);
-    return { ok: true, status: "SENT", message: "Avaliação enviada. O status agora é Aguardando aluno." };
+    if (await isDemoWorkspaceRequest()) {
+      sendDemoAssessment(assessmentId);
+    } else {
+      await service().send(assessmentId);
+    }
   } catch (error) {
     return { message: friendlyAssessmentError(error, "Não foi possível enviar a avaliação.") };
   }
+  revalidateAssessment(assessmentId);
+  redirect(`${returnHref}${returnHref.includes("?") ? "&" : "?"}sent=${assessmentId}`);
 }
 
 export async function updateDraftAssessmentAction(

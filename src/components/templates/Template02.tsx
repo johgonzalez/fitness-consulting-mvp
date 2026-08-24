@@ -86,7 +86,7 @@ export function Template02({ site }: { site: TrainerSiteData }) {
           </div>
         </div>
         <figure className={styles.heroMedia} data-motion="image">
-          {heroMedia ? <Image src={heroMedia.url} alt={heroMedia.alt} fill priority sizes="(max-width: 760px) 92vw, 62vw" /> : <div className={styles.mediaFallback}>{site.trainer.firstName}</div>}
+          {heroMedia ? <Image src={heroMedia.url} alt={heroMedia.alt} fill priority loading="eager" sizes="(max-width: 760px) 92vw, 62vw" /> : <div className={styles.mediaFallback}>{site.trainer.firstName}</div>}
           <EditorialMediaLabel media={heroMedia} className={styles.editorialMediaLabel} />
         </figure>
         <div className={styles.heroMeta}>

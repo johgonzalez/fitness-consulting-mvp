@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, ClipboardCheck, Plus, Sparkles } from "lucide-react";
+import { CalendarDays, CheckCircle2, ClipboardCheck, Plus, Sparkles } from "lucide-react";
 import { AssessmentStatusBadge } from "@/components/assessments/AssessmentStatusBadge";
 import { DataList, DataListRow, IdentityCell, OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { EmptyState } from "@/components/ui/PPerfilPrimitives";
@@ -14,7 +14,7 @@ import { getStudentDetail } from "@/lib/supabase/students";
 import { StudentRecordChrome } from "@/components/students/StudentRecordChrome";
 
 type AssessmentFilter = "all" | "draft" | "waiting" | "review" | "completed";
-type AssessmentsSearchParams = { status?: string | string[]; student?: string | string[] };
+type AssessmentsSearchParams = { status?: string | string[]; student?: string | string[]; sent?: string | string[] };
 
 const relationshipIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -46,6 +46,10 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
     requestedRelationshipId ? getStudentDetail(requestedRelationshipId) : Promise.resolve(null),
   ]);
   const relationshipId = selectedStudent?.id === requestedRelationshipId ? requestedRelationshipId : null;
+  const sentAssessmentId = safeRelationshipId(query.sent);
+  const sentItem = sentAssessmentId
+    ? workspace.items.find((item) => item.assessment.id === sentAssessmentId && item.assessment.status === "SENT" && (!relationshipId || item.assessment.trainerStudentRelationshipId === relationshipId))
+    : null;
   const status = typeof query.status === "string" ? query.status : "";
   const filter: AssessmentFilter = ["draft", "waiting", "review", "completed"].includes(status) ? status as AssessmentFilter : "all";
   const scopedItems = workspace.items.filter((item) => !relationshipId || item.assessment.trainerStudentRelationshipId === relationshipId);
@@ -70,6 +74,12 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
       note={<><Sparkles aria-hidden="true" />{count("review")} aguardando sua atenção</>}
       action={<Link href={relationshipId ? `/dashboard/assessments/new?student=${relationshipId}` : "/dashboard/assessments/new"} className="pp-button pp-button--primary"><Plus aria-hidden="true" />Nova avaliação</Link>}
     />
+
+    {sentItem ? <section className="pp-assessment-index-success" role="status" aria-live="polite">
+      <CheckCircle2 aria-hidden="true" />
+      <div><small>Envio concluído</small><strong>Avaliação enviada</strong><span>{sentItem.student?.name ?? "Aluno"} · status Aguardando aluno</span></div>
+      <Link href={`/dashboard/assessments/${sentItem.assessment.id}${relationshipId ? `?student=${relationshipId}` : ""}`}>Abrir avaliação</Link>
+    </section> : null}
 
     {items.length ? <DataList label="Avaliações" columns={["Aluno", "Avaliação", "Status", "Atualizada em", "Prazo", "Próxima ação", ""]} className="pp-assessment-list">
       {items.map(({ assessment, student, template }) => <DataListRow href={`/dashboard/assessments/${assessment.id}${relationshipId ? `?student=${relationshipId}` : ""}`} key={assessment.id}>

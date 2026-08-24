@@ -19,19 +19,16 @@ const items = [
 
 export function BottomNavigation({ leadCount = 0 }: { leadCount?: number }) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuPath, setMobileMenuPath] = useState<string | null>(null);
+  const mobileMenuOpen = mobileMenuPath === pathname;
   const groups = ["Fixados", "Operação", "Acompanhamento", "Negócio", "Conta"] as const;
   const mobileMoreItems = items.filter((item) => "href" in item && ["/dashboard/assessments", "/dashboard/site", "/dashboard/profile"].includes(item.href));
   const mobileMoreActive = mobileMoreItems.some((item) => "href" in item && pathname.startsWith(item.href));
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     if (!mobileMenuOpen) return;
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      if (event.key === "Escape") setMobileMenuPath(null);
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
@@ -59,7 +56,7 @@ export function BottomNavigation({ leadCount = 0 }: { leadCount?: number }) {
         className={`pp-nav-item pp-nav-item--mobile pp-nav-item--more${mobileMoreActive ? " active" : ""}`}
         aria-expanded={mobileMenuOpen}
         aria-controls="pp-mobile-more-menu"
-        onClick={() => setMobileMenuOpen((open) => !open)}
+        onClick={() => setMobileMenuPath((openPath) => openPath === pathname ? null : pathname)}
       >
         <span className="nav-icon"><Menu aria-hidden="true" /></span>
         <span className="pp-nav-item__label">Mais</span>
@@ -68,9 +65,9 @@ export function BottomNavigation({ leadCount = 0 }: { leadCount?: number }) {
     <aside className="pp-referral-card"><span><Send aria-hidden="true" /></span><div><strong>Conhece outro Personal?</strong><small>Indique PPerfil.</small></div><a href="mailto:?subject=Conheça%20o%20PPerfil&body=Conheça%20o%20PPerfil%2C%20uma%20plataforma%20para%20Personal%20Trainers.">Indicar</a></aside>
     <div className="pp-sidebar-caption"><span>Portal do Personal</span><small>Operação centralizada no PPerfil</small></div>
   </div>{mobileMenuOpen ? <div className="pp-mobile-more" id="pp-mobile-more-menu" role="dialog" aria-modal="true" aria-labelledby="pp-mobile-more-title">
-    <button type="button" className="pp-mobile-more__backdrop" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)} />
+    <button type="button" className="pp-mobile-more__backdrop" aria-label="Fechar menu" onClick={() => setMobileMenuPath(null)} />
     <section>
-      <header><div><span>Portal do Personal</span><strong id="pp-mobile-more-title">Mais destinos</strong></div><button type="button" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)}><X aria-hidden="true" /></button></header>
+      <header><div><span>Portal do Personal</span><strong id="pp-mobile-more-title">Mais destinos</strong></div><button type="button" aria-label="Fechar menu" onClick={() => setMobileMenuPath(null)}><X aria-hidden="true" /></button></header>
       <nav aria-label="Mais destinos do Portal do Personal">
         {mobileMoreItems.map((item) => {
           if (!("href" in item)) return null;

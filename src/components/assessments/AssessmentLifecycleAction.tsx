@@ -23,11 +23,13 @@ export function AssessmentLifecycleAction({
   assessmentId,
   studentName,
   assessmentTitle,
+  returnHref,
 }: {
   kind: ActionKind;
   assessmentId: string;
   studentName: string;
   assessmentTitle: string;
+  returnHref?: string;
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
@@ -42,6 +44,7 @@ export function AssessmentLifecycleAction({
 
   return <form action={formAction} className="pp-assessment-action" aria-busy={pending}>
     <input type="hidden" name="assessment_id" value={assessmentId} />
+    {kind === "send" ? <input type="hidden" name="return_href" value={returnHref ?? "/dashboard/assessments"} /> : null}
     {kind === "complete" ? <label className="pp-field">
       <span>Feedback final <b>Obrigatório</b></span>
       <textarea name="trainer_feedback" rows={6} maxLength={5000} required placeholder="Registre uma devolutiva clara, humana e acionável para o aluno." />
