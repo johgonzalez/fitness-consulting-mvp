@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "billing-domain:test": "node --no-warnings --test tests/billing/access-resolver.test.mjs",
     "template-foundation:validate": "node scripts/templates/validate-template-foundation-v1a.mjs",
     "exercise-catalog:build": "node scripts/exercises/build-catalog-v1.mjs",
     "exercise-catalog:validate": "node scripts/exercises/import-catalog-v1.mjs --mode validate",

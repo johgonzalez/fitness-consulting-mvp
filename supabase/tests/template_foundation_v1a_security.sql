@@ -29,6 +29,10 @@ insert into public.trainer_profiles(
   ('f1a10000-0000-4000-8000-000000000001','f1a00000-0000-4000-8000-000000000001','template-v1a-a','Trainer A','Headline A','Bio A','Treino','online','5511000000001',false),
   ('f1a10000-0000-4000-8000-000000000002','f1a00000-0000-4000-8000-000000000002','template-v1a-b','Trainer B','Headline B','Bio B','Treino','online','5511000000002',true);
 
+update public.trainer_entitlements
+set can_publish_site = true
+where trainer_id = 'f1a10000-0000-4000-8000-000000000002';
+
 insert into public.services(
   id,trainer_id,title,description,service_mode,currency,billing_type,
   price_visibility,price_visible,active,benefits,conversion_mode
@@ -168,10 +172,13 @@ insert into template_v1a_results values
 reset role;
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"f1a00000-0000-4000-8000-000000000002","role":"authenticated"}';
+select public.set_my_site_template('template_03');
 insert into template_v1a_results values
-  ('Unentitled trainer cannot select template_03',
-    pg_temp.raises($sql$select public.set_my_site_template('template_03')$sql$)
-  );
+  ('FREE trainer can select rollout-enabled template_03', (
+    select template_id = 'template_03'
+    from public.trainer_profiles
+    where id = 'f1a10000-0000-4000-8000-000000000002'
+  ));
 
 reset role;
 do $$
