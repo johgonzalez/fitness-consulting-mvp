@@ -4,11 +4,13 @@ import { StripeProviderError, sanitizeStripeProviderError } from "./errors.ts";
 import { normalizeStripeSubscription } from "./normalization.ts";
 import type {
   CreateStripeCustomerInput,
+  CreateStripeCheckoutSessionInput,
   GetNormalizedStripeSubscriptionInput,
   StripeBillingProvider,
   StripeCatalogSelection,
   StripeProviderConfiguration,
   StripeProviderCustomer,
+  StripeProviderCheckoutSession,
   StripeProviderHealth,
   StripeProviderProduct,
   StripeSubscriptionReference,
@@ -45,6 +47,12 @@ interface StripeClientPort {
       limit: number;
     }): Promise<unknown>;
   };
+  checkout: {
+    sessions: {
+      create(params: Record<string, unknown>, options: { idempotencyKey: string }): Promise<unknown>;
+      retrieve(id: string): Promise<unknown>;
+    };
+  };
 }
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -77,6 +85,44 @@ async function providerCall<T>(operation: string, call: () => Promise<T>): Promi
   } catch (error) {
     throw sanitizeStripeProviderError(error, operation);
   }
+}
+
+function checkoutSession(
+  raw: unknown,
+  configuration: StripeProviderConfiguration,
+  expectedCustomerId?: string,
+): StripeProviderCheckoutSession {
+  const session = asObject(raw, "invalid_checkout_session_response");
+  const customerId = objectId(session.customer);
+  const expiresAt = typeof session.expires_at === "number"
+    ? new Date(session.expires_at * 1000).toISOString()
+    : null;
+  if (typeof session.id !== "string" || !session.id.startsWith("cs_test_")) {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "invalid_checkout_session_id" });
+  }
+  if (!matchesEnvironment(session.livemode, configuration)) {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "checkout_environment_mismatch" });
+  }
+  if (!customerId || (expectedCustomerId && customerId !== expectedCustomerId)) {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "checkout_customer_mismatch" });
+  }
+  if (session.status !== "open" && session.status !== "complete" && session.status !== "expired") {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "invalid_checkout_status" });
+  }
+  if (!expiresAt) {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "invalid_checkout_expiry" });
+  }
+  const url = session.url === null || typeof session.url === "string" ? session.url : null;
+  if (session.status === "open" && (!url || !url.startsWith("https://checkout.stripe.com/"))) {
+    throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "invalid_checkout_url" });
+  }
+  return {
+    id: session.id,
+    customerId,
+    status: session.status,
+    url,
+    expiresAt,
+  };
 }
 
 export class StripeBillingProviderCore implements StripeBillingProvider {
@@ -212,6 +258,54 @@ export class StripeBillingProviderCore implements StripeBillingProvider {
         providerStatus: subscription.status,
       }];
     });
+  }
+
+  async createCheckoutSession(
+    input: CreateStripeCheckoutSessionInput,
+  ): Promise<StripeProviderCheckoutSession> {
+    if (!uuidPattern.test(input.billingAccountId) || !uuidPattern.test(input.checkoutAttemptId)) {
+      throw new StripeProviderError("STRIPE_CONFIGURATION_ERROR", { reason: "invalid_internal_identity" });
+    }
+    if (!/^cus_[A-Za-z0-9]+$/.test(input.customerId) || !/^price_[A-Za-z0-9]+$/.test(input.priceId)) {
+      throw new StripeProviderError("STRIPE_CONFIGURATION_ERROR", { reason: "invalid_provider_identity" });
+    }
+    if (!idempotencyPattern.test(input.idempotencyKey)) {
+      throw new StripeProviderError("STRIPE_CONFIGURATION_ERROR", { reason: "invalid_idempotency_key" });
+    }
+    const raw = await providerCall("checkout.sessions.create", () => this.stripe.checkout.sessions.create({
+      mode: "subscription",
+      customer: input.customerId,
+      line_items: [{ price: input.priceId, quantity: 1 }],
+      payment_method_types: ["card"],
+      success_url: input.successUrl,
+      cancel_url: input.cancelUrl,
+      client_reference_id: input.checkoutAttemptId,
+      metadata: {
+        billing_account_id: input.billingAccountId,
+        checkout_attempt_id: input.checkoutAttemptId,
+        product_code: input.productCode,
+        market: input.market,
+      },
+      subscription_data: {
+        metadata: {
+          billing_account_id: input.billingAccountId,
+          product_code: input.productCode,
+          market: input.market,
+        },
+      },
+    }, { idempotencyKey: input.idempotencyKey }));
+    return checkoutSession(raw, this.configuration, input.customerId);
+  }
+
+  async getCheckoutSession(sessionId: string): Promise<StripeProviderCheckoutSession> {
+    if (!/^cs_test_[A-Za-z0-9]+$/.test(sessionId)) {
+      throw new StripeProviderError("STRIPE_OBJECT_NOT_FOUND", { object: "checkout_session" });
+    }
+    const raw = await providerCall(
+      "checkout.sessions.retrieve",
+      () => this.stripe.checkout.sessions.retrieve(sessionId),
+    );
+    return checkoutSession(raw, this.configuration);
   }
 
   async getSubscription(

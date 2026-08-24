@@ -72,6 +72,26 @@ export interface StripeSubscriptionReference {
   providerStatus: string;
 }
 
+export interface CreateStripeCheckoutSessionInput {
+  billingAccountId: string;
+  checkoutAttemptId: string;
+  customerId: string;
+  priceId: string;
+  productCode: "PRO";
+  market: "BR";
+  successUrl: string;
+  cancelUrl: string;
+  idempotencyKey: string;
+}
+
+export interface StripeProviderCheckoutSession {
+  id: string;
+  customerId: string;
+  status: "open" | "complete" | "expired";
+  url: string | null;
+  expiresAt: string;
+}
+
 export interface NormalizeStripeSubscriptionInput {
   appUserId: string;
   subscription: unknown;
@@ -97,5 +117,7 @@ export interface StripeBillingProvider {
   getProduct(productId: string): Promise<StripeProviderProduct>;
   getPrice(selection: StripeCatalogSelection): Promise<ValidatedStripePrice>;
   listCurrentSubscriptions(customerId: string): Promise<StripeSubscriptionReference[]>;
+  createCheckoutSession(input: CreateStripeCheckoutSessionInput): Promise<StripeProviderCheckoutSession>;
+  getCheckoutSession(sessionId: string): Promise<StripeProviderCheckoutSession>;
   getSubscription(input: GetNormalizedStripeSubscriptionInput): Promise<NormalizedBillingProviderSnapshot>;
 }

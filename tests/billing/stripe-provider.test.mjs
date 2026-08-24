@@ -35,7 +35,7 @@ const priceFixture = {
   unit_amount: 5990,
   livemode: false,
   recurring: { interval: "month", interval_count: 1 },
-  product: { id: "prod_pperfil_pro", active: true },
+  product: { id: "prod_pperfil_pro", active: true, metadata: { product_code: "PRO", market: "BR" } },
   metadata: {},
 };
 
@@ -48,7 +48,7 @@ function subscriptionFixture(status = "active") {
   return {
     id: "sub_pperfil_pro",
     status,
-    customer: "cus_pperfil_trainer",
+    customer: "cus_pperfiltrainer",
     currency: "brl",
     livemode: false,
     cancel_at_period_end: false,
@@ -77,6 +77,26 @@ function stripeMock(overrides = {}) {
     subscriptions: {
       retrieve: async () => subscriptionFixture(),
       list: async () => ({ data: [] }),
+    },
+    checkout: {
+      sessions: {
+        create: async () => ({
+          id: "cs_test_created",
+          customer: "cus_pperfiltrainer",
+          status: "open",
+          url: "https://checkout.stripe.com/c/pay/test",
+          expires_at: 1790208000,
+          livemode: false,
+        }),
+        retrieve: async () => ({
+          id: "cs_test_created",
+          customer: "cus_pperfiltrainer",
+          status: "open",
+          url: "https://checkout.stripe.com/c/pay/test",
+          expires_at: 1790208000,
+          livemode: false,
+        }),
+      },
     },
     ...overrides,
   };
@@ -171,6 +191,13 @@ test("Price interval mismatch fails closed", () => {
   ), "STRIPE_CATALOG_MISMATCH");
 });
 
+test("approved Sandbox Price amount is validated but never becomes entitlement authority", () => {
+  expectCode(() => validateStripePrice(
+    { ...priceFixture, unit_amount: 4990 },
+    resolveStripeCatalogEntry(catalogSelection, testConfig),
+  ), "STRIPE_CATALOG_MISMATCH");
+});
+
 test("unrecognized Stripe Product fails closed", () => {
   expectCode(() => validateStripePrice(
     { ...priceFixture, product: { id: "prod_random", active: true } },
@@ -258,6 +285,46 @@ test("customer creation uses internal IDs only and sends an idempotency key", as
   });
   assert.equal(captured.options.idempotencyKey.startsWith("billing-customer:"), true);
   assert.equal("email" in captured.params, false);
+});
+
+test("Checkout Session uses only the trusted server catalog and stable attempt idempotency", async () => {
+  let captured;
+  const provider = new StripeBillingProviderCore(stripeMock({
+    checkout: {
+      sessions: {
+        create: async (params, options) => {
+          captured = { params, options };
+          return {
+            id: "cs_test_created",
+            customer: "cus_pperfiltrainer",
+            status: "open",
+            url: "https://checkout.stripe.com/c/pay/test",
+            expires_at: 1790208000,
+            livemode: false,
+          };
+        },
+        retrieve: async () => null,
+      },
+    },
+  }), testConfig);
+  await provider.createCheckoutSession({
+    billingAccountId: "b1b10000-0000-4000-8000-000000000001",
+    checkoutAttemptId: "c1c00000-0000-4000-8000-000000000001",
+    customerId: "cus_pperfiltrainer",
+    priceId: "price_pperfilprobrmonthly",
+    productCode: "PRO",
+    market: "BR",
+    successUrl: "http://localhost:3000/dashboard/settings/billing?checkout=returned&session_id={CHECKOUT_SESSION_ID}",
+    cancelUrl: "http://localhost:3000/dashboard/settings/billing?checkout=canceled",
+    idempotencyKey: "checkout:c1c00000-0000-4000-8000-000000000001",
+  });
+  assert.deepEqual(captured.params.line_items, [{ price: "price_pperfilprobrmonthly", quantity: 1 }]);
+  assert.equal(captured.params.mode, "subscription");
+  assert.deepEqual(captured.params.payment_method_types, ["card"]);
+  assert.equal("amount" in captured.params, false);
+  assert.equal("currency" in captured.params, false);
+  assert.equal("trial_period_days" in captured.params, false);
+  assert.equal(captured.options.idempotencyKey, "checkout:c1c00000-0000-4000-8000-000000000001");
 });
 
 test("provider errors are sanitized", () => {

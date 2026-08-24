@@ -23,6 +23,8 @@ interface StripePriceShape {
   metadata?: unknown;
 }
 
+export const PRO_BR_MONTHLY_AMOUNT_MINOR = 5990;
+
 function mismatch(reason: string): never {
   throw new StripeProviderError("STRIPE_CATALOG_MISMATCH", { reason });
 }
@@ -47,14 +49,22 @@ export function resolveStripeCatalogEntry(
   };
 }
 
-function productIdentity(product: unknown): { id: string; active: boolean | null } | null {
-  if (typeof product === "string") return { id: product, active: null };
+function productIdentity(product: unknown): {
+  id: string;
+  active: boolean | null;
+  metadata: Record<string, unknown>;
+} | null {
+  if (typeof product === "string") return { id: product, active: null, metadata: {} };
   if (typeof product !== "object" || product === null) return null;
   const candidate = product as { id?: unknown; active?: unknown; deleted?: unknown };
   if (typeof candidate.id !== "string" || candidate.deleted === true) return null;
   return {
     id: candidate.id,
     active: typeof candidate.active === "boolean" ? candidate.active : null,
+    metadata: typeof (product as { metadata?: unknown }).metadata === "object"
+      && (product as { metadata?: unknown }).metadata !== null
+      ? (product as { metadata: Record<string, unknown> }).metadata
+      : {},
   };
 }
 
@@ -73,9 +83,14 @@ export function validateStripePrice(
     mismatch("interval_mismatch");
   }
 
-  if (!entry.recognizedProductId) mismatch("recognized_product_not_configured");
   const product = productIdentity(candidate.product);
-  if (!product || product.id !== entry.recognizedProductId || product.active === false) {
+  if (!product || product.active === false) {
+    mismatch("unrecognized_product");
+  }
+  if (entry.recognizedProductId) {
+    if (product.id !== entry.recognizedProductId) mismatch("unrecognized_product");
+  } else if (product.metadata.product_code !== entry.productCode
+    || product.metadata.market !== entry.market) {
     mismatch("unrecognized_product");
   }
 
@@ -96,6 +111,7 @@ export function validateStripePrice(
     && (!Number.isSafeInteger(candidate.unit_amount) || Number(candidate.unit_amount) < 0)) {
     mismatch("invalid_unit_amount");
   }
+  if (candidate.unit_amount !== PRO_BR_MONTHLY_AMOUNT_MINOR) mismatch("amount_mismatch");
 
   return {
     providerPriceId: candidate.id,
