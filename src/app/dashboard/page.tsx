@@ -1,505 +1,61 @@
-import "./dashboard-v3.css";
-
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import {
-  ArrowRight,
-  ArrowUpRight,
-  BellRing,
-  CircleDollarSign,
-  ClipboardCheck,
-  Dumbbell,
-  Eye,
-  GraduationCap,
-  MessageCircle,
-  MonitorCheck,
-  Plus,
-  Radar,
-  UserPlus,
-  UsersRound,
-} from "lucide-react";
-import { Avatar, EmptyState, Status } from "@/components/ui/PPerfilPrimitives";
+import { ArrowRight, ClipboardCheck, Dumbbell, ExternalLink, Globe2, Send, Share2, UserPlus, UsersRound } from "lucide-react";
+import { getTrainerAssessmentIndex } from "@/lib/assessments/workspace";
+import { getWorkoutIndex } from "@/lib/workouts/workspace";
+import { Avatar, Status } from "@/components/ui/PPerfilPrimitives";
 import { getLeadsWorkspace } from "@/lib/supabase/leads";
 import { getStudentsWorkspace } from "@/lib/supabase/students";
-import { getTemplateDefinition } from "@/lib/domain/template-registry";
-import {
-  findDashboardMetrics,
-  findOwnerEntitlements,
-  findOwnerProfile,
-} from "@/lib/supabase/trainers";
+import { findDashboardMetrics, findOwnerProfile } from "@/lib/supabase/trainers";
 
-const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
-  day: "2-digit",
-  month: "short",
-});
+const dayFormatter = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
-function formatDate(value: string) {
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime())
-    ? "Data indisponível"
-    : dateFormatter.format(parsed);
+function countLabel(count: number, singular: string, plural: string) {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
-export default async function DashboardPage() {
-  const [profile, entitlements, metrics, studentsWorkspace, leadsWorkspace] =
-    await Promise.all([
-      findOwnerProfile(),
-      findOwnerEntitlements(),
-      findDashboardMetrics(),
-      getStudentsWorkspace().catch(() => null),
-      getLeadsWorkspace().catch(() => null),
-    ]);
 
+export default async function DashboardPage() {
+  const [profile, metrics, studentData, leadData, assessmentData, workoutData] = await Promise.all([
+    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null),
+  ]);
   if (!profile) redirect("/onboarding");
 
-  const firstName = profile.display_name.split(" ")[0];
-  const students = studentsWorkspace?.students ?? [];
+  const students = studentData?.students ?? [];
   const activeStudents = students.filter((student) => student.status === "active");
-  const invitations = studentsWorkspace?.invitations ?? [];
-  const leads = leadsWorkspace?.matches ?? [];
-  const attentionLeads = leads.filter(
-    (lead) => lead.state === "new" || lead.state === "pending",
-  );
+  const invitations = studentData?.invitations ?? [];
+  const attentionLeads = (leadData?.matches ?? []).filter((lead) => lead.state === "new" || lead.state === "pending");
+  const reviewAssessments = (assessmentData?.items ?? []).filter(({ assessment }) => assessment.status === "ANSWERED" || assessment.status === "IN_REVIEW");
+  const draftWorkouts = (workoutData?.items ?? []).filter(({ currentVersion }) => currentVersion.status === "DRAFT");
+  const siteHref = `/p/${profile.slug}`;
+  const siteUrl = `pperfil.com/p/${profile.slug}`;
+  const priorities = [
+    reviewAssessments.length ? { label: `${countLabel(reviewAssessments.length, "avaliação", "avaliações")} para revisar`, href: "/dashboard/assessments", action: "Revisar", icon: ClipboardCheck, tone: "warning" } : null,
+    draftWorkouts.length ? { label: `${countLabel(draftWorkouts.length, "treino", "treinos")} em rascunho`, href: "/dashboard/workouts", action: "Continuar", icon: Dumbbell, tone: "accent" } : null,
+    attentionLeads.length ? { label: `${countLabel(attentionLeads.length, "lead", "leads")} aguardando ação`, href: "/dashboard/leads", action: "Ver leads", icon: UsersRound, tone: "info" } : null,
+    invitations.length ? { label: countLabel(invitations.length, "convite pendente", "convites pendentes"), href: "/dashboard/students", action: "Acompanhar", icon: Send, tone: "neutral" } : null,
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 
-  const maxAcquisitionValue = Math.max(
-    metrics.profile_views,
-    metrics.whatsapp_clicks,
-    metrics.leads,
-    1,
-  );
+  return <main className="pc-dashboard">
+    <header className="pc-dashboard__header"><div><h1>Bom dia, {profile.display_name.split(" ")[0]}</h1><p>{dayFormatter.format(new Date())}</p></div><Link className="pc-primary-action" href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link></header>
 
-  const templateName = getTemplateDefinition(profile.template_id).name;
+    <section className="pc-pulse" aria-label="Resumo do negócio">
+      <div><strong>{activeStudents.length}</strong><span>alunos ativos</span></div><div><strong>{draftWorkouts.length}</strong><span>treinos em rascunho</span></div><div><strong>{reviewAssessments.length}</strong><span>avaliações pendentes</span></div><div><strong>{attentionLeads.length}</strong><span>novos leads</span></div><div><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Site publicado" : "Site em rascunho"}</Status></div>
+    </section>
 
-  const activity = [
-    ...students.map((student) => ({
-      id: `student-${student.id}`,
-      date: student.startedAt,
-      title: student.name,
-      detail:
-        student.status === "active"
-          ? "Aluno ativo"
-          : "Relacionamento atualizado",
-      kind: "student" as const,
-    })),
-    ...invitations.map((invitation) => ({
-      id: `invite-${invitation.id}`,
-      date: invitation.createdAt,
-      title: invitation.name ?? invitation.email,
-      detail: "Convite enviado",
-      kind: "invite" as const,
-    })),
-    ...leads.map((lead) => ({
-      id: `lead-${lead.id}`,
-      date: lead.createdAt,
-      title: lead.lead.firstName,
-      detail: "Lead recebido",
-      kind: "lead" as const,
-    })),
-  ]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
+    <div className="pc-dashboard__workspace">
+      <section className="pc-dashboard__today" aria-labelledby="today-title">
+        <header><h2 id="today-title">Hoje</h2><span>{countLabel(priorities.length, "prioridade", "prioridades")}</span></header>
+        <div className="pc-priority-list">{priorities.length ? priorities.map(({ label, href, action, icon: Icon, tone }) => <Link href={href} key={label} className="pc-priority-row"><span className={`pc-priority-row__icon pc-tone--${tone}`}><Icon aria-hidden="true" /></span><strong>{label}</strong><span>{action}</span><ArrowRight aria-hidden="true" /></Link>) : <div className="pc-quiet-state"><strong>Nenhuma pendência nos módulos disponíveis.</strong><span>Seu dia começa organizado.</span></div>}</div>
 
-  return (
-    <main className="dashboard-main pp-dashboard-v3">
-      <header className="ppv3-page-head">
-        <div>
-          <p className="ppv3-kicker">Visão operacional</p>
-          <h1>Dashboard</h1>
-          <p>
-            Olá, {firstName}. Acompanhe sua operação e priorize o que precisa
-            de atenção.
-          </p>
-        </div>
-
-        <Link
-          href="/dashboard/students?add=1#add-student"
-          className="ppv3-button ppv3-button--primary"
-        >
-          <Plus aria-hidden="true" />
-          Adicionar aluno
-        </Link>
-      </header>
-
-      <section className="ppv3-grid">
-        {/* Approved V3 banner. Uses only current dashboard truths. */}
-        <article className="ppv3-card ppv3-hero">
-          <div className="ppv3-hero__copy">
-            <span className="ppv3-kicker ppv3-kicker--accent">
-              Resumo de hoje
-            </span>
-            <h2>
-              Sua operação está
-              <br />
-              em movimento.
-            </h2>
-            <p>
-              Você tem <strong>{attentionLeads.length} leads aguardando ação</strong>,
-              {" "}
-              <strong>{invitations.length} convites pendentes</strong> e{" "}
-              <strong>{activeStudents.length} alunos ativos</strong>.
-            </p>
-          </div>
-
-          <div className="ppv3-hero__actions">
-            <Link href="/dashboard/leads" className="ppv3-button ppv3-button--primary">
-              Ver prioridades
-            </Link>
-            {attentionLeads.length > 0 ? (
-              <span className="ppv3-pill ppv3-pill--warning">
-                {attentionLeads.length} leads em atenção
-              </span>
-            ) : null}
-            {invitations.length > 0 ? (
-              <span className="ppv3-pill ppv3-pill--accent">
-                {invitations.length} convites
-              </span>
-            ) : null}
-            <small>sem métricas inventadas</small>
-          </div>
-        </article>
-
-        <nav className="ppv3-mobile-actions" aria-label="Ações rápidas">
-          <Link href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" /><span>Adicionar aluno</span></Link>
-          <Link href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" /><span>Criar treino</span></Link>
-          <Link href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" /><span>Nova avaliação</span></Link>
-        </nav>
-
-        {/* Existing Meu Site information, moved upward visually. */}
-        <article className="ppv3-card ppv3-site-card">
-          <div className="ppv3-site-card__media">
-            <Image
-              src={
-                profile.hero_image_url ||
-                "/images/saas/site-preview-trainer.webp"
-              }
-              alt=""
-              fill
-              loading="eager"
-              sizes="(max-width: 900px) 100vw, 360px"
-              unoptimized={Boolean(profile.hero_image_url)}
-            />
-            <span className="ppv3-site-card__status">
-              <Status tone={profile.published ? "success" : "warning"}>
-                {profile.published ? "Publicado" : "Rascunho"}
-              </Status>
-            </span>
-          </div>
-
-          <div className="ppv3-site-card__copy">
-            <span>Meu Site · {templateName}</span>
-            <strong>pperfil.pro/p/{profile.slug}</strong>
-            <p>
-              {profile.published
-                ? "Seu perfil está recebendo tráfego e pronto para conversão."
-                : entitlements?.can_publish_site
-                  ? "Revise o conteúdo antes de publicar."
-                  : "Publicação ainda não habilitada para esta conta."}
-            </p>
-            <Link href="/dashboard/site" className="ppv3-text-link">
-              Gerenciar site <ArrowRight aria-hidden="true" />
-            </Link>
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-kpi">
-          <div className="ppv3-kpi__top">
-            <span className="ppv3-kpi__icon ppv3-tone--success">
-              <GraduationCap aria-hidden="true" />
-            </span>
-            <small>Alunos ativos</small>
-          </div>
-          <div>
-            <strong>{studentsWorkspace ? activeStudents.length : "—"}</strong>
-            <p>
-              {studentsWorkspace
-                ? `${invitations.length} convite(s) pendente(s)`
-                : "Dados indisponíveis"}
-            </p>
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-kpi">
-          <div className="ppv3-kpi__top">
-            <span className="ppv3-kpi__icon ppv3-tone--accent">
-              <UsersRound aria-hidden="true" />
-            </span>
-            <small>Leads em atenção</small>
-          </div>
-          <div>
-            <strong>{leadsWorkspace ? attentionLeads.length : metrics.leads}</strong>
-            <p>{metrics.leads} oportunidade(s) atribuída(s)</p>
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-kpi">
-          <div className="ppv3-kpi__top">
-            <span className="ppv3-kpi__icon ppv3-tone--info">
-              <Eye aria-hidden="true" />
-            </span>
-            <small>Visitas ao perfil</small>
-          </div>
-          <div>
-            <strong>{metrics.profile_views.toLocaleString("pt-BR")}</strong>
-            <p>Acessos únicos na janela atual</p>
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-kpi">
-          <div className="ppv3-kpi__top">
-            <span className="ppv3-kpi__icon ppv3-tone--warning">
-              <MessageCircle aria-hidden="true" />
-            </span>
-            <small>Contatos</small>
-          </div>
-          <div>
-            <strong>{metrics.whatsapp_clicks.toLocaleString("pt-BR")}</strong>
-            <p>Cliques rastreados no WhatsApp</p>
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-acquisition">
-          <div className="ppv3-section-head">
-            <div>
-              <h3>Aquisição</h3>
-              <p>Dados reais disponíveis no funil do seu perfil.</p>
-            </div>
-            <Link href="/dashboard/site" className="ppv3-text-link">
-              Meu Site <ArrowUpRight aria-hidden="true" />
-            </Link>
-          </div>
-
-          <div className="ppv3-funnel">
-            {[
-              {
-                label: "Visitas ao perfil",
-                value: metrics.profile_views,
-                tone: "info",
-              },
-              {
-                label: "Cliques no WhatsApp",
-                value: metrics.whatsapp_clicks,
-                tone: "accent",
-              },
-              {
-                label: "Leads atribuídos",
-                value: metrics.leads,
-                tone: "success",
-              },
-            ].map((item) => (
-              <div className="ppv3-funnel__row" key={item.label}>
-                <span>{item.label}</span>
-                <div className="ppv3-funnel__track">
-                  <i
-                    className={`ppv3-funnel__bar ppv3-funnel__bar--${item.tone}`}
-                    style={{
-                      width: `${Math.max(
-                        (item.value / maxAcquisitionValue) * 100,
-                        item.value > 0 ? 0.65 : 0,
-                      )}%`,
-                    }}
-                  />
-                </div>
-                <strong>{item.value.toLocaleString("pt-BR")}</strong>
-              </div>
-            ))}
-          </div>
-
-          <footer className="ppv3-truth-note">
-            <span>
-              <Radar aria-hidden="true" />
-              Sem séries históricas disponíveis
-            </span>
-            <small>O painel não fabrica tendências sem dados.</small>
-          </footer>
-        </article>
-
-        <article className="ppv3-card ppv3-attention">
-          <div className="ppv3-section-head">
-            <div>
-              <h3>Requer atenção</h3>
-              <p>Pendências reais da sua operação.</p>
-            </div>
-          </div>
-
-          <div className="ppv3-attention-list">
-            {attentionLeads.length ? (
-              <Link href="/dashboard/leads" className="ppv3-attention-item">
-                <span className="ppv3-attention-item__icon ppv3-tone--warning">
-                  <BellRing aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{attentionLeads.length} lead(s) aguardando ação</strong>
-                  <small>Revise antes do fim da reserva.</small>
-                </span>
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            ) : null}
-
-            {invitations.length ? (
-              <Link href="/dashboard/students" className="ppv3-attention-item">
-                <span className="ppv3-attention-item__icon ppv3-tone--accent">
-                  <UserPlus aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>{invitations.length} convite(s) pendente(s)</strong>
-                  <small>Acompanhe os acessos dos alunos.</small>
-                </span>
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            ) : null}
-
-            {!profile.published ? (
-              <Link href="/dashboard/site" className="ppv3-attention-item">
-                <span className="ppv3-attention-item__icon ppv3-tone--info">
-                  <MonitorCheck aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>Perfil público não publicado</strong>
-                  <small>Finalize a configuração do seu site.</small>
-                </span>
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            ) : null}
-
-            {!attentionLeads.length &&
-            !invitations.length &&
-            profile.published ? (
-              <EmptyState
-                compact
-                icon={MonitorCheck}
-                title="Tudo em dia"
-                description="Nenhuma pendência identificada nos módulos disponíveis."
-              />
-            ) : null}
-          </div>
-        </article>
-
-        <article className="ppv3-card ppv3-students">
-          <div className="ppv3-students__head">
-            <div>
-              <h3>Alunos</h3>
-              <p>Relacionamentos mais recentes.</p>
-            </div>
-            <Link href="/dashboard/students" className="ppv3-text-link">
-              Ver todos <ArrowRight aria-hidden="true" />
-            </Link>
-          </div>
-
-          {studentsWorkspace && students.length ? (
-            <div className="ppv3-student-table" role="table" aria-label="Alunos recentes">
-              <div className="ppv3-student-table__head" role="row">
-                <span role="columnheader">Aluno</span>
-                <span role="columnheader">Origem</span>
-                <span role="columnheader">Desde</span>
-                <span role="columnheader">Status</span>
-              </div>
-
-              {students.slice(0, 5).map((student) => (
-                <Link
-                  href={`/dashboard/students/${student.id}`}
-                  className="ppv3-student-row"
-                  role="row"
-                  key={student.id}
-                >
-                  <span className="ppv3-student-row__identity" role="cell">
-                    <Avatar name={student.name} size="small" />
-                    <span>
-                      <strong>{student.name}</strong>
-                      <small>{student.email ?? "E-mail não informado"}</small>
-                    </span>
-                  </span>
-                  <span role="cell">
-                    {student.origin === "lead_conversion"
-                      ? "Lead convertido"
-                      : "Convite"}
-                  </span>
-                  <span role="cell">{formatDate(student.startedAt)}</span>
-                  <span role="cell">
-                    <Status
-                      tone={student.status === "active" ? "success" : "neutral"}
-                    >
-                      {student.status === "active"
-                        ? "Ativo"
-                        : student.status === "inactive"
-                          ? "Inativo"
-                          : "Encerrado"}
-                    </Status>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon={GraduationCap}
-              title={
-                studentsWorkspace
-                  ? "Nenhum aluno ainda"
-                  : "Alunos indisponíveis"
-              }
-              description={
-                studentsWorkspace
-                  ? "Adicione um aluno para iniciar o acompanhamento."
-                  : "Não foi possível carregar este módulo agora."
-              }
-              action={
-                studentsWorkspace ? (
-                  <Link
-                    href="/dashboard/students?add=1#add-student"
-                    className="ppv3-button"
-                  >
-                    Adicionar aluno
-                  </Link>
-                ) : null
-              }
-            />
-          )}
-        </article>
-
-        <div className="ppv3-rail">
-          <article className="ppv3-card ppv3-activity">
-            <div className="ppv3-section-head">
-              <div>
-                <h3>Atividade recente</h3>
-              </div>
-            </div>
-
-            {activity.length ? (
-              <ol>
-                {activity.map((item) => (
-                  <li key={item.id}>
-                    <span
-                      className={`ppv3-activity-dot ppv3-activity-dot--${item.kind}`}
-                    />
-                    <span>
-                      <strong>{item.title}</strong>
-                      <small>{item.detail}</small>
-                    </span>
-                    <time dateTime={item.date}>{formatDate(item.date)}</time>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <EmptyState
-                compact
-                icon={Radar}
-                title="Sem atividade recente"
-                description="As movimentações aparecerão aqui quando ocorrerem."
-              />
-            )}
-          </article>
-
-          <article className="ppv3-card ppv3-finance">
-            <span className="ppv3-finance__icon">
-              <CircleDollarSign aria-hidden="true" />
-            </span>
-            <div>
-              <strong>Financeiro</strong>
-              <p>Módulo ainda não disponível nesta versão.</p>
-            </div>
-            <Status>Em breve</Status>
-          </article>
-        </div>
+        <div className="pc-section-heading"><h2>Alunos</h2><Link href="/dashboard/students">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
+        <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} size="small" /><span><strong>{student.name}</strong><small>{student.email ?? "Contato não informado"}</small></span><Status tone="success">Ativo</Status><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <div className="pc-quiet-state"><strong>Nenhum aluno ativo.</strong><Link href="/dashboard/students?add=1#add-student">Adicionar aluno</Link></div> : null}</div>
       </section>
-    </main>
-  );
+
+      <aside className="pc-dashboard__rail">
+        <section className="pc-site-panel"><header><Globe2 aria-hidden="true" /><div><strong>Meu Site</strong><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Publicado" : "Rascunho"}</Status></div></header><a href={siteHref} target="_blank" rel="noreferrer">{siteUrl}<ExternalLink aria-hidden="true" /></a>{profile.published ? <p>{metrics.profile_views.toLocaleString("pt-BR")} visitas · {metrics.leads.toLocaleString("pt-BR")} leads</p> : <p>Finalize a revisão antes de publicar.</p>}<div><Link href={siteHref} target="_blank">Abrir</Link><Link href="/dashboard/site">Editar</Link><Link href="/dashboard/site"><Share2 aria-hidden="true" />Compartilhar</Link></div></section>
+        <section className="pc-quick-actions" aria-labelledby="quick-actions-title"><h2 id="quick-actions-title">Ações rápidas</h2><div><Link href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" />Adicionar aluno</Link><Link href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link><Link href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" />Nova avaliação</Link><Link href="/dashboard/site"><Globe2 aria-hidden="true" />Meu Site</Link></div></section>
+        <p className="pc-data-note">Mensagens e check-ins aparecerão quando esses módulos disponibilizarem dados confiáveis.</p>
+      </aside>
+    </div>
+  </main>;
 }
