@@ -8,6 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "billing-domain:test": "node --no-warnings --test tests/billing/access-resolver.test.mjs",
+    "billing:stripe:test": "node --conditions=react-server --no-warnings --test tests/billing/stripe-provider.test.mjs",
+    "billing:checkout:test": "node --conditions=react-server --no-warnings --test tests/billing/checkout.test.mjs",
+    "billing:stripe:check": "node --env-file-if-exists=.env.local --conditions=react-server --no-warnings scripts/billing/check-stripe.mjs",
+    "billing:stripe:setup-catalog": "node --env-file-if-exists=.env.local --conditions=react-server --no-warnings scripts/billing/setup-stripe-catalog.mjs",
     "template-foundation:validate": "node scripts/templates/validate-template-foundation-v1a.mjs",
     "exercise-catalog:build": "node scripts/exercises/build-catalog-v1.mjs",
     "exercise-catalog:validate": "node scripts/exercises/import-catalog-v1.mjs --mode validate",
@@ -22,7 +27,9 @@
     "lucide-react": "^1.28.0",
     "next": "16.2.12",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "0.0.1",
+    "stripe": "22.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

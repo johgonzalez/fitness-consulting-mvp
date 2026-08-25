@@ -18,6 +18,10 @@ insert into public.trainer_profiles(
   ('f1c10000-0000-4000-8000-000000000001','f1c00000-0000-4000-8000-000000000001','services-owner-a','Trainer A','Headline A','Bio A','Treino','online','5511000000101',false),
   ('f1c10000-0000-4000-8000-000000000002','f1c00000-0000-4000-8000-000000000002','services-owner-b','Trainer B','Headline B','Bio B','Treino','online','5511000000102',true);
 
+update public.trainer_entitlements
+set can_publish_site = true
+where trainer_id = 'f1c10000-0000-4000-8000-000000000002';
+
 insert into public.services(
   id,trainer_id,title,description,service_mode,price,currency,billing_type,
   price_visibility,price_visible,active,benefits,conversion_mode
