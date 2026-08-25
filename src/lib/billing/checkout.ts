@@ -83,7 +83,7 @@ function pendingSession(session: StripeProviderCheckoutSession): StartProCheckou
 
 export async function startProCheckout(input: StartProCheckoutInput): Promise<StartProCheckoutResult> {
   if (!input.identity.appUserId) throw new BillingCheckoutError("AUTH_REQUIRED");
-  if (!input.identity.roles.includes("TRAINER")) throw new BillingCheckoutError("TRAINER_REQUIRED");
+  if (!input.identity.roles.includes("trainer")) throw new BillingCheckoutError("TRAINER_REQUIRED");
 
   let account = await input.repository.getOrCreateAccount(input.identity.appUserId);
   if (account.appUserId !== input.identity.appUserId) {

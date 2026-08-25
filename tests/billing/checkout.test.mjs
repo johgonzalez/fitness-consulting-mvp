@@ -171,7 +171,18 @@ function checkoutFixture(overrides = {}) {
   return { calls, account, attempt, repository, provider };
 }
 
-const trainer = { appUserId: "b1b00000-0000-4000-8000-000000000001", roles: ["TRAINER"] };
+const trainer = { appUserId: "b1b00000-0000-4000-8000-000000000001", roles: ["trainer"] };
+
+test("unauthenticated Checkout is denied before repository or Stripe access", async () => {
+  const fixture = checkoutFixture();
+  await assert.rejects(startProCheckout({
+    identity: { ...trainer, appUserId: "" },
+    repository: fixture.repository,
+    provider: fixture.provider,
+    appBaseUrl: "http://localhost:3000",
+  }), (error) => error instanceof BillingCheckoutError && error.code === "AUTH_REQUIRED");
+  assert.deepEqual(fixture.calls, { createdCustomers: 0, createdSessions: 0, markedOpen: 0, reserved: 0 });
+});
 
 test("Trainer Checkout creates one Customer and one Session without granting entitlement", async () => {
   const fixture = checkoutFixture();
@@ -189,7 +200,18 @@ test("Trainer Checkout creates one Customer and one Session without granting ent
 test("Student role cannot start Trainer Checkout", async () => {
   const fixture = checkoutFixture();
   await assert.rejects(startProCheckout({
-    identity: { ...trainer, roles: ["STUDENT"] },
+    identity: { ...trainer, roles: ["student"] },
+    repository: fixture.repository,
+    provider: fixture.provider,
+    appBaseUrl: "http://localhost:3000",
+  }), (error) => error instanceof BillingCheckoutError && error.code === "TRAINER_REQUIRED");
+  assert.equal(fixture.calls.createdCustomers, 0);
+});
+
+test("uppercase legacy role cannot impersonate the canonical trainer role", async () => {
+  const fixture = checkoutFixture();
+  await assert.rejects(startProCheckout({
+    identity: { ...trainer, roles: ["TRAINER"] },
     repository: fixture.repository,
     provider: fixture.provider,
     appBaseUrl: "http://localhost:3000",

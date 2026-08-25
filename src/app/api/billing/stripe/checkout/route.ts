@@ -4,6 +4,7 @@ import { assertNoClientCatalogAuthority, BillingCheckoutError, startProCheckout 
 import { createStripeBillingProvider } from "@/lib/billing/providers/stripe/adapter";
 import { StripeProviderError } from "@/lib/billing/providers/stripe/errors";
 import { SupabaseBillingCheckoutRepository } from "@/lib/billing/supabase-checkout-repository";
+import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -32,6 +33,9 @@ async function rejectsClientAuthority(request: Request): Promise<boolean> {
 
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return response("Origem da solicitação não autorizada.", 403, "ORIGIN_DENIED");
+  if (await isDemoWorkspaceRequest()) {
+    return response("O workspace Demo é somente leitura. Entre com uma conta real para assinar.", 403, "DEMO_READ_ONLY");
+  }
   if (await rejectsClientAuthority(request)) {
     return response("O catálogo do pagamento é definido pelo servidor.", 400, "CLIENT_CATALOG_REJECTED");
   }
@@ -46,7 +50,7 @@ export async function POST(request: Request) {
   if (identityError || safeIdentity?.id !== authData.user.id || !Array.isArray(safeIdentity.roles)) {
     return response("Não foi possível validar sua conta.", 403, "IDENTITY_REQUIRED");
   }
-  if (!safeIdentity.roles.includes("TRAINER")) {
+  if (!safeIdentity.roles.includes("trainer")) {
     return response("A assinatura do Personal exige uma conta de treinador.", 403, "TRAINER_REQUIRED");
   }
 

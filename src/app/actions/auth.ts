@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { clearDemoWorkspaceSession } from "@/lib/demo/session";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +21,7 @@ export async function signup(_state: AuthFormState, formData: FormData): Promise
   });
   if (error) return { message: "Não foi possível criar a conta. Revise os dados ou tente novamente." };
   if (!data.session) return { message: "Conta criada. Confirme seu e-mail para continuar." };
+  await clearDemoWorkspaceSession();
   redirect(nextPath);
 }
 
@@ -31,6 +33,7 @@ export async function login(_state: AuthFormState, formData: FormData): Promise<
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(validation.data);
   if (error) return { message: "E-mail ou senha inválidos." };
+  await clearDemoWorkspaceSession();
   redirect(safeInternalPath(formData.get("next"), "/dashboard"));
 }
 
