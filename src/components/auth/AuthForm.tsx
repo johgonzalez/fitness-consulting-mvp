@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import type { AuthFormState } from "@/lib/validation/auth";
+import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import { PasswordField } from "./PasswordField";
 
 type AuthAction = (state: AuthFormState, formData: FormData) => Promise<AuthFormState>;
@@ -10,6 +11,7 @@ type AuthAction = (state: AuthFormState, formData: FormData) => Promise<AuthForm
 export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup"; action: AuthAction; nextPath?: string }) {
   const [state, formAction, pending] = useActionState(action, {});
   const signupMode = mode === "signup";
+  const alternateAuthHref = authRouteWithNext(signupMode ? "/login" : "/signup", nextPath);
   const passwordErrorId = state.errors?.password ? `${mode}-password-error` : undefined;
   return <form action={formAction} className="saas-form">
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
@@ -22,6 +24,6 @@ export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup";
     {state.message ? <p className="form-message" role="status">{state.message}</p> : null}
     <button type="submit" disabled={pending}>{pending ? "Aguarde…" : signupMode ? "Criar conta" : "Entrar"}</button>
     {!signupMode ? <span className="forgot-password" aria-disabled="true" title="Recuperação de senha será disponibilizada futuramente">Esqueci minha senha</span> : null}
-    <p className="form-switch">{signupMode ? "Já tem uma conta?" : "Não tem uma conta?"} <Link href={signupMode ? "/login" : "/signup"}>{signupMode ? "Entrar" : "Criar conta"}</Link></p>
+    <p className="form-switch">{signupMode ? "Já tem uma conta?" : "Não tem uma conta?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar conta"}</Link></p>
   </form>;
 }
