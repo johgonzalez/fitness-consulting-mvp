@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SecureLogoutForm } from "@/components/auth/SecureLogoutForm";
 import { BrandLogo } from "./BrandLogo";
 import { TrainerAvatar } from "./TrainerAvatar";
 import { ThemeToggle } from "./ThemeToggle";
@@ -13,6 +14,7 @@ export function DashboardHeader({ name, imageUrl, demoMode = false }: { name: st
         <span><strong>{name}</strong><small>Personal Trainer</small></span>
       </Link>
       <ThemeToggle />
+      <SecureLogoutForm compact />
     </div>
   </div></header>;
 }

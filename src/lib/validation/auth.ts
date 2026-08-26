@@ -1,4 +1,4 @@
-export type AuthFormState = { message?: string; errors?: { email?: string; password?: string } };
+export type AuthFormState = { message?: string; tone?: "success" | "danger"; errors?: { email?: string; password?: string } };
 
 export function validateAuthInput(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();

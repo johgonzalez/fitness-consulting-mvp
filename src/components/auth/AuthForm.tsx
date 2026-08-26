@@ -13,7 +13,7 @@ export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup";
   const signupMode = mode === "signup";
   const alternateAuthHref = authRouteWithNext(signupMode ? "/login" : "/signup", nextPath);
   const passwordErrorId = state.errors?.password ? `${mode}-password-error` : undefined;
-  return <form action={formAction} className="saas-form">
+  return <form action={formAction} className="pc-auth-form" aria-busy={pending}>
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
     <label htmlFor={`${mode}-email`}>E-mail</label>
     <input id={`${mode}-email`} name="email" type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com" required aria-describedby={state.errors?.email ? `${mode}-email-error` : undefined} />
@@ -21,9 +21,9 @@ export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup";
     <label htmlFor={`${mode}-password`}>Senha</label>
     <PasswordField id={`${mode}-password`} autoComplete={signupMode ? "new-password" : "current-password"} describedBy={passwordErrorId} />
     {state.errors?.password ? <p id={`${mode}-password-error`} className="field-error">{state.errors.password}</p> : null}
-    {state.message ? <p className="form-message" role="status">{state.message}</p> : null}
-    <button type="submit" disabled={pending}>{pending ? "Aguarde…" : signupMode ? "Criar conta" : "Entrar"}</button>
-    {!signupMode ? <span className="forgot-password" aria-disabled="true" title="Recuperação de senha será disponibilizada futuramente">Esqueci minha senha</span> : null}
-    <p className="form-switch">{signupMode ? "Já tem uma conta?" : "Não tem uma conta?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar conta"}</Link></p>
+    {state.message ? <p className={`pc-auth-feedback pc-auth-feedback--${state.tone ?? "danger"}`} role={state.tone === "success" ? "status" : "alert"}>{state.message}</p> : null}
+    <button className="pp-button pp-button--primary" type="submit" disabled={pending}>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</button>
+    {!signupMode ? <span className="pc-auth-forgot" aria-disabled="true" title="Recuperação de senha será disponibilizada futuramente">Esqueci minha senha</span> : null}
+    <p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar acesso"}</Link></p>
   </form>;
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import { LogOut } from "lucide-react";
+import { useState } from "react";
 import { logout } from "@/app/actions/auth";
 import { clearWorkoutRecoveryStorage } from "@/lib/workouts/offline-recovery";
 
-export function SecureLogoutForm() {
+export function SecureLogoutForm({ compact = false }: { compact?: boolean }) {
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   async function logoutWithLocalCleanup() {
     try {
       await clearWorkoutRecoveryStorage();
@@ -14,7 +16,12 @@ export function SecureLogoutForm() {
     await logout();
   }
 
-  return <form action={logoutWithLocalCleanup}>
-    <button type="submit"><LogOut aria-hidden="true" />Sair da conta</button>
+  return <form action={logoutWithLocalCleanup} className={`pp-secure-logout${compact ? " pp-secure-logout--compact" : ""}`}>
+    <button type="button" onClick={() => setConfirmationOpen(true)} aria-expanded={confirmationOpen}><LogOut aria-hidden="true" /><span>{compact ? "Sair" : "Sair da conta"}</span></button>
+    {confirmationOpen ? <div className="pp-logout-confirmation" role="alertdialog" aria-modal="true" aria-label="Confirmar saída">
+      <strong>Encerrar esta sessão?</strong>
+      <p>Você precisará entrar novamente para acessar o PPerfil.</p>
+      <div><button type="submit">Sair</button><button type="button" onClick={() => setConfirmationOpen(false)}>Continuar conectado</button></div>
+    </div> : null}
   </form>;
 }
