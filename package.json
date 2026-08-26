@@ -19,7 +19,10 @@
     "exercise-media:build": "node scripts/exercises/build-media-pack-v1.mjs",
     "exercise-media:validate": "node scripts/exercises/import-media-pack-v1.mjs --mode validate",
     "exercise-media:upload": "node scripts/exercises/upload-media-pack-v1.mjs",
-    "exercise-media:verify": "node scripts/exercises/verify-media-pack-v1.mjs"
+    "exercise-media:verify": "node scripts/exercises/verify-media-pack-v1.mjs",
+    "qa:trainer:create": "node --env-file-if-exists=.env.local scripts/create-qa-trainer.mjs",
+    "qa:trainer:delete": "node --env-file-if-exists=.env.local scripts/delete-qa-trainer.mjs",
+    "qa:trainer:test": "node --no-warnings --test tests/qa/qa-trainer-utility.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",
