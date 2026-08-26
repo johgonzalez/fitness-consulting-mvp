@@ -2,10 +2,10 @@
 import Link from "next/link";
 import {
   Activity,
-  BarChart3,
   CalendarDays,
   Camera,
   CheckCircle2,
+  ChevronRight,
   Clock3,
   Dumbbell,
   FileCheck2,
@@ -89,8 +89,8 @@ function ProgressHeroSummary({ workspace }: { workspace: ProgressWorkspace }) {
     ...(duration > 0 ? [{ label: "Tempo em treino", value: formatTotalDuration(duration), detail: "atividade registrada" }] : []),
     ...(recent.length > 0 ? [{ label: "Frequência", value: `${numberFormatter.format(weeklyFrequency)}x`, detail: "média por semana" }] : []),
   ];
-  return <section className={styles.progressSummary} aria-label="Resumo dos últimos 30 dias">
-    {facts.map((fact) => <article key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><span>{fact.detail}</span></article>)}
+  return <section className={styles.progressPulse} aria-label="Resumo dos últimos 30 dias">
+    {facts.map((fact) => <div key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><span>{fact.detail}</span></div>)}
   </section>;
 }
 
@@ -113,8 +113,8 @@ function TrainingFrequency({ workouts }: { workouts: ProgressWorkoutItem[] }) {
     return { start, count };
   });
   const max = Math.max(1, ...weeks.map((week) => week.count));
-  return <section className={styles.progressSection} aria-labelledby="progress-frequency-title">
-    <header className={styles.sectionHeading}><div><small>Frequência</small><h2 id="progress-frequency-title">Ritmo das últimas semanas</h2></div><p>Somente sessões efetivamente concluídas.</p></header>
+  return <section className={styles.openSection} aria-labelledby="progress-frequency-title">
+    <header className={styles.openHeading}><div><small>Atividade</small><h2 id="progress-frequency-title">Seu ritmo recente</h2></div></header>
     {workouts.some((workout) => workout.status === "COMPLETED") ? <div className={styles.frequencyChart} role="img" aria-label={`Treinos concluídos nas últimas seis semanas: ${weeks.map((week) => week.count).join(", ")}`}>
       {weeks.map((week) => <div key={week.start.toISOString()}><span><i style={{ height: `${Math.max(8, (week.count / max) * 100)}%` }} /></span><strong>{week.count}</strong><small>{shortDateFormatter.format(week.start)}</small></div>)}
     </div> : <div className={styles.empty}><Activity aria-hidden="true" /><strong>Seu ritmo começa no primeiro treino</strong><p>As semanas aparecerão aqui quando houver sessões concluídas.</p></div>}
@@ -122,18 +122,35 @@ function TrainingFrequency({ workouts }: { workouts: ProgressWorkoutItem[] }) {
 }
 
 function ExerciseProgression({ series }: { series: ProgressExerciseSeries[] }) {
-  return <section className={styles.progressSection} aria-labelledby="exercise-progress-title">
-    <header className={styles.sectionHeading}><div><small>Exercícios</small><h2 id="exercise-progress-title">Evolução de carga</h2></div><p>Comparações seguras do mesmo exercício e da mesma unidade.</p></header>
-    {series.length ? <div className={styles.exerciseProgressGrid}>{series.slice(0, 4).map((item) => <article key={`${item.exerciseId}-${item.unit}`}>
-      <span><BarChart3 aria-hidden="true" /></span><div><strong>{item.exerciseName}</strong><p>{numberFormatter.format(item.first.value)} {item.unit} <em>→</em> {numberFormatter.format(item.latest.value)} {item.unit}</p><small>{item.delta > 0 ? "+" : ""}{numberFormatter.format(item.delta)} {item.unit} · {item.recordCount} registros comparáveis</small></div>
-    </article>)}</div> : <div className={styles.empty}><Dumbbell aria-hidden="true" /><strong>Ainda não há comparação segura</strong><p>Complete mais sessões do mesmo exercício para visualizar sua evolução.</p></div>}
+  const focal = series[0];
+  return <section className={styles.openSection} aria-labelledby="exercise-progress-title">
+    <header className={styles.openHeading}><div><small>Exercícios</small><h2 id="exercise-progress-title">Evolução de carga</h2></div></header>
+    {focal ? <>
+      <figure className={styles.exerciseFocalChart}>
+        <figcaption><span><strong>{focal.exerciseName}</strong><small>{focal.recordCount} registros comparáveis</small></span><b>{numberFormatter.format(focal.latest.value)} {focal.unit}</b></figcaption>
+        <svg viewBox="0 0 320 96" role="img" aria-label={`${focal.exerciseName}: de ${numberFormatter.format(focal.first.value)} para ${numberFormatter.format(focal.latest.value)} ${focal.unit}`}>
+          <line x1="20" y1="78" x2="300" y2="78" />
+          <polyline points="24,70 296,20" />
+          <circle cx="24" cy="70" r="5" /><circle cx="296" cy="20" r="5" />
+        </svg>
+        <div><span>{shortDateFormatter.format(new Date(focal.first.happenedAt))}<strong>{numberFormatter.format(focal.first.value)} {focal.unit}</strong></span><span>{shortDateFormatter.format(new Date(focal.latest.happenedAt))}<strong>{numberFormatter.format(focal.latest.value)} {focal.unit}</strong></span></div>
+      </figure>
+      <div className={styles.compactHistory}>{series.slice(0, 4).map((item) => <div key={`${item.exerciseId}-${item.unit}`}><span><strong>{item.exerciseName}</strong><small>{shortDateFormatter.format(new Date(item.latest.happenedAt))}</small></span><b>{item.delta > 0 ? "+" : ""}{numberFormatter.format(item.delta)} {item.unit}</b></div>)}</div>
+    </> : <div className={styles.empty}><Dumbbell aria-hidden="true" /><strong>Ainda não há comparação segura</strong><p>Complete mais sessões do mesmo exercício para visualizar sua evolução.</p></div>}
   </section>;
 }
 
 function MeasurementProgress({ measurements }: { measurements: ProgressMeasurementSeries[] }) {
-  return <section className={styles.progressSection} aria-labelledby="body-progress-title">
-    <header className={styles.sectionHeading}><div><small>Corpo</small><h2 id="body-progress-title">Medidas corporais</h2></div><Link href="/student/progress?view=measurements">Ver histórico</Link></header>
-    {measurements.length ? <div className={styles.bodyProgressGrid}>{measurements.slice(0, 4).map((series) => <article key={`${series.code}-${series.unit}`}><small>{series.label}</small><strong>{series.previous ? `${numberFormatter.format(series.previous.value)} → ` : ""}{numberFormatter.format(series.latest.value)} <em>{series.unit}</em></strong><span>{formatDate(series.latest.measuredAt)}</span></article>)}</div> : <div className={styles.empty}><Ruler aria-hidden="true" /><strong>Suas medidas aparecerão aqui</strong><p>Quando forem registradas pelo seu acompanhamento, você verá a cronologia sem interpretações automáticas.</p></div>}
+  return <section className={styles.openSection} aria-labelledby="body-progress-title">
+    <header className={styles.openHeading}><div><small>Medidas</small><h2 id="body-progress-title">Registros corporais</h2></div><Link href="/student/progress?view=measurements">Ver histórico</Link></header>
+    {measurements.length ? <div className={styles.measurementRows}>{measurements.slice(0, 4).map((series) => <div key={`${series.code}-${series.unit}`}><span><strong>{series.label}</strong><small>{formatDate(series.latest.measuredAt)}</small></span><b>{numberFormatter.format(series.latest.value)} <em>{series.unit}</em></b></div>)}</div> : <div className={styles.empty}><Ruler aria-hidden="true" /><strong>Suas medidas aparecerão aqui</strong><p>Quando forem registradas pelo seu acompanhamento, você verá a cronologia sem interpretações automáticas.</p></div>}
+  </section>;
+}
+
+function ProgressPhotoPreview({ photos }: { photos: ProgressPhoto[] }) {
+  return <section className={styles.openSection} aria-labelledby="photo-preview-title">
+    <header className={styles.openHeading}><div><small>Fotos privadas</small><h2 id="photo-preview-title">Registros visuais</h2></div><Link href="/student/progress?view=photos">Ver todas</Link></header>
+    {photos.length ? <div className={styles.photoPreviewRail}>{photos.slice(0, 4).map((photo) => <figure key={photo.id}>{photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Indisponível</span></div>}<figcaption><strong>{photoViewLabel(photo)}</strong><span>{shortDateFormatter.format(new Date(photo.createdAt))}</span></figcaption></figure>)}</div> : <div className={styles.empty}><Images aria-hidden="true" /><strong>Nenhuma foto registrada</strong><p>Seus registros privados aparecerão aqui.</p></div>}
   </section>;
 }
 
@@ -200,12 +217,12 @@ function AssessmentHistory({ assessments, limit }: { assessments: ProgressAssess
 export function ProgressOverview({ workspace }: { workspace: ProgressWorkspace }) {
   return <div className={styles.contentStack}>
     <ProgressHeroSummary workspace={workspace} />
-    <section className={styles.panel}><header><span><Activity aria-hidden="true" /></span><div><small>Atividade</small><h2>Treinos recentes</h2></div></header><WorkoutHistory workouts={workspace.workouts} limit={4} /></section>
     <TrainingFrequency workouts={workspace.workouts} />
+    <details className={styles.progressDisclosure}><summary><span><strong>Treinos recentes</strong><small>{workspace.workouts.length ? `${workspace.workouts.length} registros disponíveis` : "Nenhum registro"}</small></span><ChevronRight aria-hidden="true" /></summary><WorkoutHistory workouts={workspace.workouts} limit={4} /></details>
     <ExerciseProgression series={workspace.exerciseProgress} />
     <MeasurementProgress measurements={workspace.measurements} />
-    <section className={styles.progressSection}><div className={styles.sectionHeading}><div><small>Registros visuais</small><h2>Fotos de progresso</h2></div><Link href="/student/progress?view=photos">Abrir fotos</Link></div><ProgressPhotos photos={workspace.photos} canUpload={workspace.photoUploadAvailable} /></section>
-    <section className={styles.panel}><header><span><FileCheck2 aria-hidden="true" /></span><div><small>Avaliações</small><h2>Check-ins concluídos</h2></div></header><AssessmentHistory assessments={workspace.assessments} limit={4} /></section>
+    <ProgressPhotoPreview photos={workspace.photos} />
+    <section className={styles.openSection}><header className={styles.openHeading}><div><small>Avaliações</small><h2>Check-ins e avaliações</h2></div></header><AssessmentHistory assessments={workspace.assessments} limit={1} />{workspace.assessments.length > 1 ? <details className={styles.inlineDisclosure}><summary>Ver histórico completo</summary><AssessmentHistory assessments={workspace.assessments.slice(1)} /></details> : null}</section>
   </div>;
 }
 

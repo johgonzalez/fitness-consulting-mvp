@@ -54,3 +54,47 @@
 @media(max-width:1240px){.builderLayout{grid-template-columns:170px minmax(500px,1fr)}.studentContext{position:static;grid-column:1/3}.studentContextHeader>svg{display:block}.studentContextBody{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}.contextSection{margin:0;padding:0 0 0 14px;border-top:0;border-left:1px solid var(--pp-divider)}}
 @media(max-width:900px){.builderPage{padding-bottom:142px}.builderTopbar{top:68px;grid-template-columns:44px minmax(0,1fr) auto auto;padding:8px 14px}.builderTopbar>a{width:44px;height:44px}.builderTopbar>.saveState,.builderTopbar>:global(.pp-status),.builderTopbar>.historyButton{grid-row:2}.builderTopbar>.saveState{grid-column:2}.builderTopbar>:global(.pp-status){grid-column:3}.historyButton{grid-column:4;width:44px;height:44px;padding:0}.historyButton span{display:none}.lifecycleActions{display:none}.builderLayout{display:flex;flex-direction:column;padding:10px}.sessionRail,.editorCanvas,.studentContext{width:100%;border-radius:var(--pp-radius-md)}.sessionRail{position:static;min-height:0;padding:8px;order:1}.sessionRail>header{display:none}.sessionRail nav{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.sessionRail nav>button{min-width:180px;scroll-snap-align:start}.sessionRail nav>button:hover em{display:none}.addSessionButton{display:none}.studentContext{order:2}.studentContextBody{display:none;grid-template-columns:1fr}.studentContextOpen .studentContextBody{display:grid}.contextSection{padding:12px 0 0;border-top:1px solid var(--pp-divider);border-left:0}.editorCanvas{order:3;padding:12px}.sessionHeader{padding:2px 2px 12px}.sessionHeader input[aria-label="Nome da sessão"]{min-height:44px}.sessionHeader input[aria-label="Nome da sessão"],.sessionHeader h1{font-size:1.05rem}.sessionHeader p input{width:60px;height:44px}.sectionHeader input{height:44px}.sectionActions button,.connectSuperset{min-width:44px;height:44px}.exerciseIdentity{grid-template-columns:94px minmax(0,1fr) auto;padding:10px}.dragHandle{display:none}.exerciseIdentity>div:nth-child(3){grid-column:2}.exerciseActions{grid-column:3;grid-row:1}.exerciseActions button:nth-child(-n+2){display:none}.exerciseActions button{min-width:44px;min-height:44px}.setHeader{display:none}.setRow{grid-template-columns:34px repeat(2,minmax(0,1fr));gap:9px;padding:12px}.setNumber{grid-row:1/3}.setRow input,.setRow select{height:44px}.targetEditor{grid-column:2/4}.valueWithUnit{grid-column:2}.setRow>label:nth-of-type(3){grid-column:2}.setActions{grid-column:3;align-self:end;justify-self:end}.setActions button{width:44px;height:44px}.setNotes{grid-column:2/4}.setNotes input{height:44px}.addSet{min-height:44px}.exerciseDetails{grid-template-columns:1fr 1fr}.exerciseDetails input{height:44px}.trainerOnly,.studentInstruction{grid-column:1/3}.addExerciseButton{min-height:44px}.sectionTypePicker>div{grid-template-columns:repeat(2,minmax(0,1fr))}.mobilePrimaryAction{position:fixed;z-index:45;right:12px;bottom:78px;left:12px;display:block}.mobilePrimaryAction :global(.pp-button){width:100%;justify-content:center;box-shadow:var(--pp-shadow-raised)}.libraryDrawer{top:auto;bottom:0;width:100%;height:min(86svh,760px);border-top:1px solid var(--pp-border);border-left:0;border-radius:22px 22px 0 0}.libraryContent{grid-template-columns:minmax(220px,.9fr) minmax(280px,1.1fr)}.historyPanel{top:auto;bottom:0;width:100%;height:min(82svh,680px);border-top:1px solid var(--pp-border);border-left:0;border-radius:22px 22px 0 0}.reviewBanner{padding:10px 14px}.builderMessage{top:142px;width:calc(100% - 28px)}}
 @media(max-width:560px){.builderTopbar{grid-template-columns:44px minmax(0,1fr) auto}.builderTopbar>.saveState{grid-column:2}.builderTopbar>:global(.pp-status){grid-column:3}.builderTopbar>.historyButton{display:none}.builderTitle strong{font-size:.78rem}.builderTitle small{font-size:.54rem}.builderLayout{padding:8px}.sessionRail nav>button{min-width:158px}.editorCanvas{padding:10px}.sessionHeader{align-items:center}.sessionHeader>div:last-child{display:none}.sectionHeader{grid-template-columns:30px minmax(0,1fr) auto}.connectSuperset{grid-column:2/4;width:100%}.sectionActions button:nth-child(-n+2){display:none}.exerciseIdentity{grid-template-columns:112px minmax(0,1fr);align-items:start}.exerciseIdentity .exerciseMedia{height:96px}.exerciseActions{grid-column:2;grid-row:2}.exerciseActions button{width:44px;height:44px}.exerciseIdentity>div:nth-child(3){grid-column:2;grid-row:1}.setRow{grid-template-columns:30px 1fr;gap:10px}.setNumber{grid-row:1/5}.setRow>label:nth-of-type(1),.targetEditor,.valueWithUnit,.setRow>label:nth-of-type(2),.setRow>label:nth-of-type(3),.setActions,.setNotes{grid-column:2}.targetEditor{grid-template-columns:1fr}.valueWithUnit{grid-template-columns:1fr 56px}.setActions{justify-self:start;margin-top:0}.setActions button{width:44px;height:44px}.exerciseDetails{grid-template-columns:1fr}.exerciseDetails label,.trainerOnly,.studentInstruction{grid-column:1}.sectionTypePicker>div{grid-template-columns:1fr}.inlineConfirm{align-items:stretch;flex-direction:column}.inlineConfirm>span{margin:0}.addSet{min-height:46px}.libraryDrawer{height:92svh}.libraryContent{display:block;overflow-y:auto}.libraryList{max-height:44%;border-right:0;border-bottom:1px solid var(--pp-border)}.exercisePreview{min-height:56%;overflow:visible}.exercisePreview>.exerciseMedia{height:190px}.libraryFilters{grid-template-columns:20px 1fr}.libraryFilters select:nth-of-type(2),.libraryFilters select:nth-of-type(3){display:none}.libraryCard{grid-template-columns:92px minmax(0,1fr) 22px}.publishConfirm{padding:26px 20px}.publishConfirm>div{align-items:stretch;flex-direction:column-reverse}.studentContextHeader>svg{display:block}}
+
+/* Premium Consumer V1B: keep the professional density, with flatter working layers. */
+.builderPage .sessionRail,
+.builderPage .editorCanvas,
+.builderPage .studentContext {
+  box-shadow: none;
+}
+
+.builderPage .editorCanvas {
+  border-color: var(--pp-divider);
+}
+
+.builderPage .exerciseCard {
+  border-color: var(--pp-divider);
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface);
+  box-shadow: none;
+}
+
+.builderPage .exerciseIdentity {
+  background: transparent;
+}
+
+.builderPage .setRow:nth-child(even) {
+  background: color-mix(in srgb, var(--pp-surface-subtle) 58%, transparent);
+}
+
+.builderPage .exerciseDetails {
+  background: color-mix(in srgb, var(--pp-surface-subtle) 42%, transparent);
+}
+
+@media(max-width:900px) {
+  .builderPage .sessionRail,
+  .builderPage .studentContext {
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .builderPage .exerciseCard {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+}

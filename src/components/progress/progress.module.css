@@ -7,7 +7,7 @@
 }
 
 .studentPage {
-  width: min(100%, 1120px);
+  width: min(100%, 820px);
   margin: 0 auto;
   padding: 6px 16px 40px;
 }
@@ -16,7 +16,7 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  padding: 22px 2px 20px;
+  padding: 16px 2px 17px;
 }
 
 .studentHero > div:first-child > span {
@@ -39,14 +39,14 @@
   max-width: 720px;
   margin: 8px 0 0;
   font-family: var(--pp-font-display);
-  font-size: clamp(2rem, 9vw, 4rem);
+  font-size: clamp(1.85rem, 8vw, 3rem);
   line-height: .98;
   letter-spacing: -.055em;
 }
 
 .studentHero p {
   max-width: 620px;
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--pp-text-secondary);
   font-size: var(--pp-type-body);
   line-height: 1.55;
@@ -59,7 +59,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 4px;
-  margin: 0 -4px 22px;
+  margin: 0 -4px 18px;
   padding: 4px;
   border: 1px solid var(--pp-border);
   border-radius: var(--pp-radius-pill);
@@ -97,6 +97,116 @@
   display: grid;
   gap: 18px;
 }
+
+.contentStack {
+  gap: 0;
+}
+
+.progressPulse {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 4px 0 22px;
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+.progressPulse > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+  padding: 5px 12px;
+}
+
+.progressPulse > div:first-child { padding-left: 0; }
+.progressPulse > div + div { border-left: 1px solid var(--pp-divider); }
+.progressPulse small,
+.progressPulse span { color: var(--pp-text-muted);font-size: .58rem; }
+.progressPulse strong { font: 750 clamp(1.25rem, 6vw, 1.75rem)/1.1 var(--pp-font-display);letter-spacing: -.04em; }
+
+.openSection {
+  min-width: 0;
+  padding: 25px 0;
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+.openHeading {
+  min-height: 44px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.openHeading > div { display: grid;gap: 4px; }
+.openHeading small { color: var(--pp-text-muted);font-size: .58rem;font-weight: 780;letter-spacing: .055em;text-transform: uppercase; }
+.openHeading h2 { margin: 0;font: 740 1.05rem/1.2 var(--pp-font-display);letter-spacing: -.025em; }
+.openHeading a { min-height: 44px;display: inline-flex;align-items: center;color: var(--pp-accent);font-size: .68rem;font-weight: 750;text-decoration: none; }
+
+.progressDisclosure {
+  padding: 0;
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+.progressDisclosure > summary {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.progressDisclosure > summary::-webkit-details-marker { display: none; }
+.progressDisclosure > summary > span { display: grid;gap: 4px; }
+.progressDisclosure > summary strong { font-size: .78rem; }
+.progressDisclosure > summary small { color: var(--pp-text-muted);font-size: .61rem; }
+.progressDisclosure > summary svg { width: 17px;color: var(--pp-text-muted);transition: transform var(--pp-motion-fast) var(--pp-ease); }
+.progressDisclosure[open] > summary svg { transform: rotate(90deg); }
+.progressDisclosure .timeline { padding-bottom: 10px; }
+
+.exerciseFocalChart { margin: 0;padding: 16px 0 4px; }
+.exerciseFocalChart figcaption { display: flex;align-items: flex-start;justify-content: space-between;gap: 12px; }
+.exerciseFocalChart figcaption span { display: grid;gap: 4px; }
+.exerciseFocalChart figcaption strong { font-size: .78rem; }
+.exerciseFocalChart figcaption small { color: var(--pp-text-muted);font-size: .6rem; }
+.exerciseFocalChart figcaption b { font: 760 1.35rem/1 var(--pp-font-display);letter-spacing: -.035em; }
+.exerciseFocalChart svg { width: 100%;height: 116px;margin-top: 5px;overflow: visible; }
+.exerciseFocalChart svg line { stroke: var(--pp-divider);stroke-width: 1; }
+.exerciseFocalChart svg polyline { fill: none;stroke: var(--pp-accent);stroke-width: 4;stroke-linecap: round;stroke-linejoin: round; }
+.exerciseFocalChart svg circle { fill: var(--pp-surface);stroke: var(--pp-accent);stroke-width: 3; }
+.exerciseFocalChart > div { display: flex;justify-content: space-between;margin-top: -8px; }
+.exerciseFocalChart > div span { display: grid;gap: 3px;color: var(--pp-text-muted);font-size: .56rem; }
+.exerciseFocalChart > div span:last-child { justify-items: end; }
+.exerciseFocalChart > div strong { color: var(--pp-text-primary);font-size: .65rem; }
+
+.compactHistory,
+.measurementRows { border-top: 1px solid var(--pp-divider); }
+.compactHistory > div,
+.measurementRows > div { min-height: 60px;display: flex;align-items: center;justify-content: space-between;gap: 14px;border-bottom: 1px solid var(--pp-divider); }
+.compactHistory > div:last-child,
+.measurementRows > div:last-child { border-bottom: 0; }
+.compactHistory span,
+.measurementRows span { min-width: 0;display: grid;gap: 3px; }
+.compactHistory strong,
+.measurementRows strong { overflow: hidden;font-size: .7rem;text-overflow: ellipsis;white-space: nowrap; }
+.compactHistory small,
+.measurementRows small { color: var(--pp-text-muted);font-size: .58rem; }
+.compactHistory b { color: var(--pp-success);font-size: .68rem;white-space: nowrap; }
+.measurementRows b { font: 740 .82rem/1 var(--pp-font-display);white-space: nowrap; }
+.measurementRows em { color: var(--pp-text-muted);font: 600 .58rem var(--pp-font-ui);font-style: normal; }
+
+.photoPreviewRail { display: grid;grid-auto-flow: column;grid-auto-columns: minmax(112px, 32%);gap: 9px;overflow-x: auto;padding-bottom: 5px;scroll-snap-type: x proximity;scrollbar-width: none; }
+.photoPreviewRail::-webkit-scrollbar { display: none; }
+.photoPreviewRail figure { min-width: 0;margin: 0;scroll-snap-align: start; }
+.photoPreviewRail img,
+.photoPreviewRail .photoUnavailable { width: 100%;aspect-ratio: 4/5;display: block;border-radius: var(--pp-radius-md);object-fit: cover;background: var(--pp-surface-subtle); }
+.photoPreviewRail figcaption { display: grid;gap: 2px;padding-top: 7px; }
+.photoPreviewRail figcaption strong { font-size: .65rem; }
+.photoPreviewRail figcaption span { color: var(--pp-text-muted);font-size: .56rem; }
+
+.inlineDisclosure { border-top: 1px solid var(--pp-divider); }
+.inlineDisclosure > summary { min-height: 48px;display: flex;align-items: center;color: var(--pp-accent);font-size: .66rem;font-weight: 750;cursor: pointer; }
 
 .progressSummary {
   display: grid;
@@ -151,12 +261,12 @@
 }
 
 .frequencyChart {
-  height: 190px;
+  height: 142px;
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: end;
   gap: 8px;
-  margin-top: 18px;
+  margin-top: 5px;
 }
 
 .frequencyChart > div {
@@ -168,7 +278,7 @@
 
 .frequencyChart > div > span {
   width: min(32px, 100%);
-  height: 120px;
+  height: 88px;
   display: flex;
   align-items: end;
   border-radius: var(--pp-radius-pill);
@@ -1113,7 +1223,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-    padding-block: 30px 24px;
+    padding-block: 24px 20px;
   }
 
   .facts {

@@ -119,7 +119,7 @@ function initialActuals(set: WorkoutSetExecutionProjection): WorkoutSetActuals {
     actualDurationSeconds: set.execution.actualDurationSeconds ?? set.durationSeconds,
     actualDistance: set.execution.actualDistance ?? set.distanceValue,
     distanceUnit: set.execution.distanceUnit ?? set.distanceUnit,
-    actualRpe: set.execution.actualRpe ?? set.targetRpe,
+    actualRpe: set.execution.actualRpe,
     studentNote: set.execution.studentNote,
   };
 }
@@ -333,9 +333,12 @@ export function WorkoutExecutionExperience({
   const current = sequence[currentIndex] ?? null;
   const next = sequence[currentIndex + 1];
   const [actualsDraft, setActualsDraft] = useState<{ setId: string; values: WorkoutSetActuals } | null>(null);
+  const [actualEntrySetId, setActualEntrySetId] = useState<string | null>(null);
   const actuals = current
     ? actualsDraft?.setId === current.set.execution.id ? actualsDraft.values : initialActuals(current.set)
     : null;
+
+  const actualEntryOpen = current != null && actualEntrySetId === current.set.execution.id;
 
   function updateActuals(transform: (values: WorkoutSetActuals) => WorkoutSetActuals) {
     if (!current) return;
@@ -876,14 +879,25 @@ export function WorkoutExecutionExperience({
     </div>
 
     <div className="pp-set-logger">
-      <header><span>Série {current.set.setNumber}</span><small>Alvo do Personal</small></header>
-      <div className="pp-set-controls">
-        {targetReps(current.set) != null ? <NumericControl label="Repetições" value={actuals?.actualReps ?? 0} step={1} suffix="reps" target={`${targetReps(current.set)} reps`} onChange={(value) => updateActuals((values) => ({ ...values, actualReps: Math.max(0, Math.round(value)) }))} /> : null}
-        {current.set.targetLoad != null ? <NumericControl label="Carga" value={actuals?.actualLoad ?? 0} step={0.5} suffix={current.set.loadUnit ?? "kg"} target={`${current.set.targetLoad} ${current.set.loadUnit ?? "kg"}`} onChange={(value) => updateActuals((values) => ({ ...values, actualLoad: Math.max(0, value), loadUnit: current.set.loadUnit }))} /> : null}
-        {current.set.durationSeconds != null ? <NumericControl label="Tempo" value={actuals?.actualDurationSeconds ?? 0} step={5} suffix="s" target={`${current.set.durationSeconds}s`} onChange={(value) => updateActuals((values) => ({ ...values, actualDurationSeconds: Math.max(0, Math.round(value)) }))} /> : null}
-        {current.set.distanceValue != null ? <NumericControl label="Distância" value={actuals?.actualDistance ?? 0} step={0.1} suffix={current.set.distanceUnit ?? "m"} target={`${current.set.distanceValue} ${current.set.distanceUnit ?? ""}`} onChange={(value) => updateActuals((values) => ({ ...values, actualDistance: Math.max(0, value), distanceUnit: current.set.distanceUnit }))} /> : null}
-      </div>
-      {current.set.targetRpe != null ? <div className="pp-rpe-control"><span>Esforço percebido</span><div>{[6, 7, 8, 9, 10].map((value) => <button type="button" key={value} aria-pressed={actuals?.actualRpe === value} onClick={() => updateActuals((values) => ({ ...values, actualRpe: value }))}>{value}</button>)}</div></div> : null}
+      <header><span>Série {current.set.setNumber} de {current.exercise.sets.length}</span><small>Prescrição do Personal</small></header>
+      <dl className="pp-prescription-summary">
+        {targetReps(current.set) != null ? <div><dt>Repetições</dt><dd>{targetReps(current.set)}</dd></div> : null}
+        {current.set.targetLoad != null ? <div><dt>Carga</dt><dd>{current.set.targetLoad} <small>{current.set.loadUnit ?? "kg"}</small></dd></div> : null}
+        {current.set.durationSeconds != null ? <div><dt>Tempo</dt><dd>{current.set.durationSeconds}<small>s</small></dd></div> : null}
+        {current.set.distanceValue != null ? <div><dt>Distância</dt><dd>{current.set.distanceValue} <small>{current.set.distanceUnit ?? ""}</small></dd></div> : null}
+        {current.set.restSeconds != null ? <div><dt>Descanso</dt><dd>{current.set.restSeconds}<small>s</small></dd></div> : null}
+      </dl>
+      <button type="button" className="pp-outcome-toggle" aria-expanded={actualEntryOpen} onClick={() => setActualEntrySetId((setId) => setId === current.set.execution.id ? null : current.set.execution.id)}><span><strong>Registrar o que fiz</strong><small>Opcional · carga, repetições e percepção</small></span><ChevronRight aria-hidden="true" /></button>
+      {actualEntryOpen ? <div className="pp-outcome-entry">
+        <div className="pp-set-controls">
+          {targetReps(current.set) != null ? <NumericControl label="Repetições" value={actuals?.actualReps ?? 0} step={1} suffix="reps" target={`${targetReps(current.set)} reps`} onChange={(value) => updateActuals((values) => ({ ...values, actualReps: Math.max(0, Math.round(value)) }))} /> : null}
+          {current.set.targetLoad != null ? <NumericControl label="Carga" value={actuals?.actualLoad ?? 0} step={0.5} suffix={current.set.loadUnit ?? "kg"} target={`${current.set.targetLoad} ${current.set.loadUnit ?? "kg"}`} onChange={(value) => updateActuals((values) => ({ ...values, actualLoad: Math.max(0, value), loadUnit: current.set.loadUnit }))} /> : null}
+          {current.set.durationSeconds != null ? <NumericControl label="Tempo" value={actuals?.actualDurationSeconds ?? 0} step={5} suffix="s" target={`${current.set.durationSeconds}s`} onChange={(value) => updateActuals((values) => ({ ...values, actualDurationSeconds: Math.max(0, Math.round(value)) }))} /> : null}
+          {current.set.distanceValue != null ? <NumericControl label="Distância" value={actuals?.actualDistance ?? 0} step={0.1} suffix={current.set.distanceUnit ?? "m"} target={`${current.set.distanceValue} ${current.set.distanceUnit ?? ""}`} onChange={(value) => updateActuals((values) => ({ ...values, actualDistance: Math.max(0, value), distanceUnit: current.set.distanceUnit }))} /> : null}
+        </div>
+        <div className="pp-rpe-control"><span>Dificuldade percebida <small>Opcional</small></span><div>{[6, 7, 8, 9, 10].map((value) => <button type="button" key={value} aria-pressed={actuals?.actualRpe === value} onClick={() => updateActuals((values) => ({ ...values, actualRpe: values.actualRpe === value ? null : value }))}>{value}</button>)}</div></div>
+        <label className="pp-outcome-note"><span>Observação <small>Opcional</small></span><textarea value={actuals?.studentNote ?? ""} maxLength={500} placeholder="Algo importante sobre esta série" onChange={(event) => updateActuals((values) => ({ ...values, studentNote: event.target.value || null }))} /></label>
+      </div> : null}
       {current.set.durationSeconds != null ? <div className="pp-timed-exercise" role="timer" aria-label={timedSecondsRemaining === null ? "Cronômetro ainda não iniciado" : `${timedSecondsRemaining} segundos restantes`}><Clock3 aria-hidden="true" /><span><small>Tempo da série</small><strong>{timedSecondsRemaining === null ? formatClock(current.set.durationSeconds) : formatClock(timedSecondsRemaining)}</strong></span></div> : null}
       {previousText ? <button type="button" className="pp-previous-performance" onClick={() => setDetailOpen(true)}><RotateCcw aria-hidden="true" /><span>{previousText}</span><ChevronRight aria-hidden="true" /></button> : null}
     </div>
