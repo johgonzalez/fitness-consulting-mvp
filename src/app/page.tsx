@@ -1,8 +1,5 @@
-import { TrainerTemplate } from "@/components/templates/TrainerTemplate";
-import { trainerRepository } from "@/lib/supabase/trainers";
+import { redirect } from "next/navigation";
 
-export default async function Home() {
-  const data = await trainerRepository.findPublishedBySlug("rafael-martins");
-  if (!data) return null;
-  return <TrainerTemplate {...data} />;
+export default function Home() {
+  redirect("/login");
 }
