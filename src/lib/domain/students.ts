@@ -15,7 +15,7 @@ export interface ManagedStudent {
 }
 
 export interface ManagedInvitation {
-  id: string; name: string | null; email: string; status: "pending" | "expired";
+  id: string; name: string | null; email: string; status: "pending" | "expired" | "revoked";
   expiresAt: string; createdAt: string;
 }
 

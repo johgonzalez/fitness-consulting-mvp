@@ -41,21 +41,31 @@ export function getDemoStudents() {
 }
 
 export function getDemoInvitations() {
-  return structuredClone(state().invitations);
+  return structuredClone(state().invitations.filter((invitation) => invitation.status !== "revoked"));
 }
 
 export function createDemoInvitation(name: string, email: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  if (state().invitations.some((invitation) => invitation.status === "pending" && invitation.email.toLowerCase() === normalizedEmail)) {
+    throw new Error("invitation_not_available");
+  }
   const token = crypto.randomUUID().replaceAll("-", "").repeat(2);
   const invitation: ManagedInvitation = {
     id: crypto.randomUUID(),
     name,
-    email,
+    email: normalizedEmail,
     status: "pending",
     expiresAt: new Date(Date.now() + 7 * 86_400_000).toISOString(),
     createdAt: new Date().toISOString(),
   };
   state().invitations.unshift(invitation);
   return { invitation, token };
+}
+
+export function revokeDemoInvitation(invitationId: string) {
+  const invitation = state().invitations.find((item) => item.id === invitationId);
+  if (!invitation || invitation.status !== "pending") throw new Error("invitation_not_available");
+  invitation.status = "revoked";
 }
 
 export function getDemoAssessments() {
