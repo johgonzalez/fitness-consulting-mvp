@@ -13,6 +13,7 @@ export interface TrainerProfile {
   headline: string;
   bio: string;
   specialty: string;
+  specialty_code?: string | null;
   cref: string | null;
   cep?: string | null;
   city: string | null;
@@ -24,6 +25,10 @@ export interface TrainerProfile {
   instagram: string | null;
   instagram_handle?: string | null;
   instagram_url?: string | null;
+  tiktok?: string | null;
+  youtube?: string | null;
+  publication_requested_at?: string | null;
+  onboarding_completed_at?: string | null;
   methodology_description?: string | null;
   testimonials_intro?: string | null;
   profile_status_enabled?: boolean;

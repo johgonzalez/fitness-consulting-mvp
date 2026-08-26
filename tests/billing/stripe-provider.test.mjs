@@ -227,15 +227,17 @@ test("subscription normalization returns provider-neutral Billing snapshot", () 
   assert.equal(normalized.currency, "BRL");
 });
 
-test("trialing fails closed because PPerfil V1 has no trial", () => {
-  expectCode(() => normalizeStripeSubscription({
+test("trialing is authoritative paid access during the approved seven-day trial", () => {
+  const normalized = normalizeStripeSubscription({
     appUserId: "b1b00000-0000-4000-8000-000000000001",
     subscription: subscriptionFixture("trialing"),
     catalogPrice: validatedPrice,
     observedAt: "2026-08-24T12:00:00.000Z",
     priorPaidAccess: false,
     isCurrent: true,
-  }), "STRIPE_UNSUPPORTED_STATUS");
+  });
+  assert.equal(normalized.providerStatus, "trialing");
+  assert.equal(normalized.billingState, "ACTIVE");
 });
 
 test("TEST normalizer rejects a Live Subscription", () => {
@@ -317,13 +319,15 @@ test("Checkout Session uses only the trusted server catalog and stable attempt i
     successUrl: "http://localhost:3000/dashboard/settings/billing?checkout=returned&session_id={CHECKOUT_SESSION_ID}",
     cancelUrl: "http://localhost:3000/dashboard/settings/billing?checkout=canceled",
     idempotencyKey: "checkout:c1c00000-0000-4000-8000-000000000001",
+    trialPeriodDays: 7,
   });
   assert.deepEqual(captured.params.line_items, [{ price: "price_pperfilprobrmonthly", quantity: 1 }]);
   assert.equal(captured.params.mode, "subscription");
   assert.deepEqual(captured.params.payment_method_types, ["card"]);
   assert.equal("amount" in captured.params, false);
   assert.equal("currency" in captured.params, false);
-  assert.equal("trial_period_days" in captured.params, false);
+  assert.equal(captured.params.payment_method_collection, "always");
+  assert.equal(captured.params.subscription_data.trial_period_days, 7);
   assert.equal(captured.options.idempotencyKey, "checkout:c1c00000-0000-4000-8000-000000000001");
 });
 

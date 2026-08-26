@@ -10,7 +10,7 @@ import { productConfig } from "@/config/site";
 import { createClient } from "@/lib/supabase/server";
 
 const legacyPublicProfileColumns = "id,slug,display_name,headline,bio,specialty,cref,city,service_mode,profile_image_url,hero_image_url,logo_url,whatsapp,instagram,instagram_handle,instagram_url,methodology_description,testimonials_intro,site_layouts,template_id,primary_color,published";
-const publicProfileColumns = `${legacyPublicProfileColumns},profile_status_enabled,profile_status_text,profile_status_semantic_tone`;
+const publicProfileColumns = `${legacyPublicProfileColumns},profile_status_enabled,profile_status_text,profile_status_semantic_tone,tiktok,youtube`;
 const testimonialColumns = "id,trainer_id,student_name,content,image_url,before_image_url,after_image_url,result_context,instagram_handle,instagram_url,published";
 const legacyEntitlementColumns = "trainer_id,can_build_site,can_preview_site,can_use_template_01,can_use_template_02,can_use_free_template,can_use_premium_templates,can_publish_site,can_receive_leads,can_use_matching";
 const templateFoundationEntitlementColumns = `${legacyEntitlementColumns},can_use_template_03`;

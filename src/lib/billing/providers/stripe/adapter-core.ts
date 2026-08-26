@@ -277,6 +277,7 @@ export class StripeBillingProviderCore implements StripeBillingProvider {
       customer: input.customerId,
       line_items: [{ price: input.priceId, quantity: 1 }],
       payment_method_types: ["card"],
+      payment_method_collection: "always",
       success_url: input.successUrl,
       cancel_url: input.cancelUrl,
       client_reference_id: input.checkoutAttemptId,
@@ -287,6 +288,7 @@ export class StripeBillingProviderCore implements StripeBillingProvider {
         market: input.market,
       },
       subscription_data: {
+        trial_period_days: input.trialPeriodDays,
         metadata: {
           billing_account_id: input.billingAccountId,
           product_code: input.productCode,

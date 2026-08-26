@@ -59,6 +59,7 @@ export interface StartProCheckoutInput {
   repository: BillingCheckoutRepository;
   provider: StripeBillingProvider;
   appBaseUrl: string;
+  returnPath?: "billing" | "onboarding";
 }
 
 export interface StartProCheckoutResult {
@@ -121,6 +122,7 @@ export async function startProCheckout(input: StartProCheckoutInput): Promise<St
     return pendingSession(await input.provider.getCheckoutSession(attempt.providerCheckoutSessionId));
   }
 
+  const onboarding = input.returnPath === "onboarding";
   const session = await input.provider.createCheckoutSession({
     billingAccountId: account.id,
     checkoutAttemptId: attempt.id,
@@ -128,9 +130,10 @@ export async function startProCheckout(input: StartProCheckoutInput): Promise<St
     priceId: price.providerPriceId,
     productCode: "PRO",
     market: "BR",
-    successUrl: `${input.appBaseUrl}/dashboard/settings/billing?checkout=returned&session_id={CHECKOUT_SESSION_ID}`,
-    cancelUrl: `${input.appBaseUrl}/dashboard/settings/billing?checkout=canceled`,
+    successUrl: onboarding ? `${input.appBaseUrl}/onboarding?checkout=returned` : `${input.appBaseUrl}/dashboard/settings/billing?checkout=returned&session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: onboarding ? `${input.appBaseUrl}/onboarding?checkout=canceled` : `${input.appBaseUrl}/dashboard/settings/billing?checkout=canceled`,
     idempotencyKey: attempt.providerIdempotencyKey,
+    trialPeriodDays: 7,
   });
   if (!session.url) throw new BillingCheckoutError("CHECKOUT_UNAVAILABLE");
   await input.repository.markAttemptOpen(attempt.id, session);

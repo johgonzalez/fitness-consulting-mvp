@@ -37,6 +37,7 @@ function isoFromUnix(value: unknown): string | null {
 export function mapStripeSubscriptionStatus(status: string): BillingState {
   switch (status) {
     case "active":
+    case "trialing":
       return "ACTIVE";
     case "past_due":
       return "GRACE";
@@ -46,8 +47,6 @@ export function mapStripeSubscriptionStatus(status: string): BillingState {
     case "incomplete":
     case "incomplete_expired":
       return "SUSPENDED";
-    case "trialing":
-      throw new StripeProviderError("STRIPE_UNSUPPORTED_STATUS", { status: "trialing" });
     default:
       throw new StripeProviderError("STRIPE_UNSUPPORTED_STATUS", { status: "unknown" });
   }

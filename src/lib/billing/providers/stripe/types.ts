@@ -82,6 +82,7 @@ export interface CreateStripeCheckoutSessionInput {
   successUrl: string;
   cancelUrl: string;
   idempotencyKey: string;
+  trialPeriodDays: 7;
 }
 
 export interface StripeProviderCheckoutSession {

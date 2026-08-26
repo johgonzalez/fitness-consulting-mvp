@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const migration=await readFile(new URL("../../supabase/migrations/202608260001_functional_onboarding_v2.sql",import.meta.url),"utf8");
+const onboarding=await readFile(new URL("../../src/components/onboarding/OnboardingForm.tsx",import.meta.url),"utf8");
+const actions=await readFile(new URL("../../src/app/actions/onboarding.ts",import.meta.url),"utf8");
+const checkout=await readFile(new URL("../../src/lib/billing/providers/stripe/adapter-core.ts",import.meta.url),"utf8");
+const webhook=await readFile(new URL("../../src/app/api/billing/stripe/webhook/route.ts",import.meta.url),"utf8");
+
+test("onboarding progress is persisted server-side and direct draft writes stay closed",()=>{assert.match(migration,/trainer_onboarding_drafts/);assert.match(migration,/identity_completed_at/);assert.match(migration,/social_completed_at/);assert.match(migration,/template_completed_at/);assert.match(migration,/revoke all on public\.trainer_onboarding_drafts from public, anon, authenticated/i);assert.match(onboarding,/stageOf\(draft,profile,canPublish\)/);});
+test("first persisted step bootstraps the canonical app user",()=>{assert.match(actions,/rpc\("ensure_my_app_user"/);assert.match(actions,/rpc\("save_my_onboarding_identity"/);});
+test("profile persists normalized specialty, social and template facts",()=>{assert.match(migration,/add column if not exists specialty_code text/);assert.match(migration,/specialty_code=draft\.specialty_code/);assert.match(migration,/add column if not exists tiktok text/);assert.match(migration,/add column if not exists youtube text/);assert.match(migration,/save_my_onboarding_template/);assert.match(migration,/template_id=draft\.template_id/);});
+test("publication intent survives entitlement loss",()=>{assert.match(migration,/publication_requested_at/);assert.match(migration,/if new\.can_publish_site and not old\.can_publish_site/);assert.doesNotMatch(migration,/set published\s*=\s*false/i);});
+test("trial requires a card and never activates from a success URL",()=>{assert.match(checkout,/payment_method_collection:\s*"always"/);assert.match(checkout,/trial_period_days:\s*input\.trialPeriodDays/);assert.match(webhook,/constructEventAsync/);assert.match(webhook,/reconcile_billing_subscription/);assert.match(onboarding,/Retornar do Checkout não ativa o PRO/);});
+test("webhook is signature verified and idempotent",()=>{assert.match(webhook,/stripe-signature/);assert.match(webhook,/payload_sha256/);assert.match(webhook,/23505/);assert.match(webhook,/createBillingAdminClient/);});
+test("real preview and truthful first invitation are present",()=>{assert.match(onboarding,/src={`\/site-preview\?template=/);assert.match(onboarding,/A entrega por e-mail ainda não está ativa/);assert.match(onboarding,/InviteStudentForm/);});

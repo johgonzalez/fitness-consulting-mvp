@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       repository: new SupabaseBillingCheckoutRepository(),
       provider: createStripeBillingProvider(),
       appBaseUrl: requireAppBaseUrl(),
+      returnPath: new URL(request.url).searchParams.get("flow") === "onboarding" ? "onboarding" : "billing",
     });
     return NextResponse.json({ ok: true, checkoutUrl: result.checkoutUrl, reused: result.reused });
   } catch (error) {
