@@ -16,6 +16,7 @@ const trainerHeader = read("../../src/components/dashboard/DashboardHeader.tsx")
 const studentProfile = read("../../src/app/student/profile/page.tsx");
 const proxy = read("../../src/lib/supabase/proxy.ts");
 const authenticatedHome = read("../../src/lib/navigation/authenticated-home.ts");
+const dashboardLayout = read("../../src/app/dashboard/layout.tsx");
 
 test("login and signup share the canonical auth shell and preserve safe next", () => {
   assert.match(authShell, /pc-auth-page/);
@@ -82,7 +83,17 @@ test("protected Trainer and Student routes are role-separated", () => {
 test("post-auth routing resumes factual V2 activation state", () => {
   assert.match(authenticatedHome, /get_my_trainer_profile/);
   assert.match(authenticatedHome, /onboarding_completed_at/);
+  assert.match(authenticatedHome, /publication_requested_at/);
+  assert.match(authenticatedHome, /get_my_access_state/);
+  assert.match(authenticatedHome, /waitlist_joined/);
   assert.match(authenticatedHome, /get_my_students/);
   assert.match(authenticatedHome, /state\.relationships/);
   assert.match(authenticatedHome, /state\.invitations/);
+});
+
+test("pre-activation Waitlist cannot open the unrestricted Trainer dashboard", () => {
+  assert.match(dashboardLayout, /publication_requested_at == null/);
+  assert.match(dashboardLayout, /get_my_access_state/);
+  assert.match(dashboardLayout, /waitlist_joined === true/);
+  assert.match(dashboardLayout, /redirect\("\/onboarding"\)/);
 });

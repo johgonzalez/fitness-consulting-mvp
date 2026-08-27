@@ -2,8 +2,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { defaultAuthenticatedHome } from "@/lib/navigation/student-invitation";
 
 type AppIdentity = { id?: unknown; roles?: unknown };
-type TrainerProfileState = { onboarding_completed_at?: unknown };
+type TrainerProfileState = { onboarding_completed_at?: unknown; publication_requested_at?: unknown };
 type TrainerWorkspaceState = { relationships?: unknown; invitations?: unknown };
+type TrainerAccessState = { founder_access_active?: unknown; waitlist_joined?: unknown };
 
 function hasRows(value: unknown): boolean {
   return Array.isArray(value) && value.length > 0;
@@ -26,7 +27,13 @@ export async function resolveAuthenticatedHome(supabase: SupabaseClient): Promis
   if (profileError || !profile) return "/onboarding";
 
   const profileState = profile as TrainerProfileState;
-  if (profileState.onboarding_completed_at == null) return "/dashboard";
+  if (profileState.onboarding_completed_at == null) return "/onboarding";
+
+  if (profileState.publication_requested_at == null) {
+    const { data: access } = await supabase.rpc("get_my_access_state");
+    const accessState = access as TrainerAccessState | null;
+    if (accessState?.waitlist_joined === true && accessState.founder_access_active !== true) return "/onboarding";
+  }
 
   const { data: workspace, error: workspaceError } = await supabase.rpc("get_my_students");
   if (workspaceError || !workspace) return "/onboarding";
