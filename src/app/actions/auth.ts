@@ -5,7 +5,7 @@ import { clearDemoWorkspaceSession } from "@/lib/demo/session";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import { defaultAuthenticatedHome } from "@/lib/navigation/student-invitation";
+import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { safeInternalPath, type AuthFormState, validateAuthInput } from "@/lib/validation/auth";
 
 function authSiteUrl(): string | null {
@@ -55,9 +55,7 @@ export async function login(_state: AuthFormState, formData: FormData): Promise<
   await clearDemoWorkspaceSession();
   const explicitNext = safeInternalPath(formData.get("next"), "");
   if (explicitNext) redirect(explicitNext);
-  const { data: identity } = await supabase.rpc("get_my_app_identity");
-  const roles = (identity as { roles?: unknown[] } | null)?.roles;
-  redirect(defaultAuthenticatedHome(roles));
+  redirect(await resolveAuthenticatedHome(supabase));
 }
 
 export async function logout() {

@@ -15,6 +15,7 @@ const logoutForm = read("../../src/components/auth/SecureLogoutForm.tsx");
 const trainerHeader = read("../../src/components/dashboard/DashboardHeader.tsx");
 const studentProfile = read("../../src/app/student/profile/page.tsx");
 const proxy = read("../../src/lib/supabase/proxy.ts");
+const authenticatedHome = read("../../src/lib/navigation/authenticated-home.ts");
 
 test("login and signup share the canonical auth shell and preserve safe next", () => {
   assert.match(authShell, /pc-auth-page/);
@@ -22,7 +23,7 @@ test("login and signup share the canonical auth shell and preserve safe next", (
   assert.match(authForm, /name="next" value=\{nextPath\}/);
   assert.match(authForm, /authRouteWithNext/);
   assert.match(authActions, /safeInternalPath\(formData\.get\("next"\), ""\)/);
-  assert.match(authActions, /redirect\(defaultAuthenticatedHome\(roles\)\)/);
+  assert.match(authActions, /redirect\(await resolveAuthenticatedHome\(supabase\)\)/);
 });
 
 test("invitation bridge prioritizes account creation and keeps next on both auth paths", () => {
@@ -67,6 +68,20 @@ test("trainer and student logout entry points require explicit confirmation", ()
 
 test("authenticated auth-route redirect respects explicit next and role-aware home", () => {
   assert.match(proxy, /safeInternalPath\(request\.nextUrl\.searchParams\.get\("next"\), ""\)/);
-  assert.match(proxy, /defaultAuthenticatedHome\(roles\)/);
+  assert.match(proxy, /resolveAuthenticatedHome\(supabase\)/);
   assert.doesNotMatch(proxy, /authRoute && authenticated\) return NextResponse\.redirect\(new URL\("\/dashboard"/);
+});
+
+test("protected Trainer and Student routes are role-separated", () => {
+  assert.match(proxy, /const protectedRoute = trainerRoute \|\| studentRoute/);
+  assert.match(proxy, /trainerRoute && !roles\.includes\("trainer"\)/);
+  assert.match(proxy, /studentRoute && !roles\.includes\("student"\)/);
+});
+
+test("post-auth routing resumes factual V2 activation state", () => {
+  assert.match(authenticatedHome, /get_my_trainer_profile/);
+  assert.match(authenticatedHome, /onboarding_completed_at/);
+  assert.match(authenticatedHome, /get_my_students/);
+  assert.match(authenticatedHome, /state\.relationships/);
+  assert.match(authenticatedHome, /state\.invitations/);
 });

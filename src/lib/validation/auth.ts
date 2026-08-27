@@ -11,5 +11,14 @@ export function validateAuthInput(formData: FormData) {
 
 export function safeInternalPath(value: FormDataEntryValue | null, fallback: string) {
   const path = typeof value === "string" ? value : "";
-  return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\") || /[\u0000-\u001f\u007f]/.test(path)) {
+    return fallback;
+  }
+  if (/%(?:2f|5c)/i.test(path)) return fallback;
+  try {
+    const parsed = new URL(path, "https://pperfil.invalid");
+    return parsed.origin === "https://pperfil.invalid" ? `${parsed.pathname}${parsed.search}${parsed.hash}` : fallback;
+  } catch {
+    return fallback;
+  }
 }

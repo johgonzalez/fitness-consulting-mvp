@@ -18,13 +18,15 @@ test("default login destination respects Student-only and multi-role identities"
   assert.equal(defaultAuthenticatedHome(["student"]), "/student/today");
   assert.equal(defaultAuthenticatedHome(["trainer"]), "/dashboard");
   assert.equal(defaultAuthenticatedHome(["student", "trainer"]), "/dashboard");
-  assert.equal(defaultAuthenticatedHome(), "/dashboard");
+  assert.equal(defaultAuthenticatedHome(), "/onboarding");
 });
 
 test("auth redirect validation keeps internal invite routes and rejects external paths", () => {
   assert.equal(safeInternalPath("/invite/abc123", "/dashboard"), "/invite/abc123");
   assert.equal(safeInternalPath("//attacker.example/invite", "/dashboard"), "/dashboard");
   assert.equal(safeInternalPath("https://attacker.example/invite", "/dashboard"), "/dashboard");
+  assert.equal(safeInternalPath("/\\attacker.example/invite", "/dashboard"), "/dashboard");
+  assert.equal(safeInternalPath("/%2f%2fattacker.example/invite", "/dashboard"), "/dashboard");
 });
 
 test("the acceptance action and auth switch use the shared invitation route contract", () => {
