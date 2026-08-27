@@ -40,6 +40,7 @@ export async function signup(_state: AuthFormState, formData: FormData): Promise
     verificationRequired: true,
     email: validation.data.email,
     nextPath,
+    resendAvailableAt: Date.now() + 60_000,
   };
   await clearDemoWorkspaceSession();
   redirect(nextPath);
@@ -59,18 +60,18 @@ export async function login(_state: AuthFormState, formData: FormData): Promise<
   redirect(await resolveAuthenticatedHome(supabase));
 }
 
-export async function verifySignupOtp(_state: AuthFormState, formData: FormData): Promise<AuthFormState> {
+export async function verifySignupOtp(state: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const token = String(formData.get("token") ?? "").replace(/\s/g, "");
   const nextPath = safeInternalPath(formData.get("next"), "/onboarding");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^[0-9]{6,10}$/.test(token)) {
-    return { message: "Código inválido. Revise os números e tente novamente.", tone: "danger", verificationRequired: true, email, nextPath };
+    return { message: "Código inválido. Revise os números e tente novamente.", tone: "danger", verificationRequired: true, email, nextPath, resendAvailableAt: state.resendAvailableAt };
   }
   const supabase = await createClient();
   const { error } = await supabase.auth.verifyOtp({ email, token, type: "email" });
   if (error) {
     const expired = /expired/i.test(error.message);
-    return { message: expired ? "Este código expirou. Solicite um novo código." : "Código inválido. Revise os números e tente novamente.", tone: "danger", verificationRequired: true, email, nextPath };
+    return { message: expired ? "Este código expirou. Solicite um novo código." : "Código inválido. Revise os números e tente novamente.", tone: "danger", verificationRequired: true, email, nextPath, resendAvailableAt: state.resendAvailableAt };
   }
   await clearDemoWorkspaceSession();
   await finishInvitationIfPresent(nextPath);
@@ -82,7 +83,7 @@ export async function resendSignupOtp(_state: AuthFormState, formData: FormData)
   const nextPath = safeInternalPath(formData.get("next"), "/onboarding");
   const siteUrl = authSiteUrl();
   if (!siteUrl || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { message: "Não conseguimos enviar outro código agora.", tone: "danger", verificationRequired: true, email, nextPath };
+    return { message: "Não conseguimos reenviar o código agora.", tone: "danger", verificationRequired: true, email, nextPath, resendAttempted: true };
   }
   const supabase = await createClient();
   const { error } = await supabase.auth.resend({
@@ -93,14 +94,24 @@ export async function resendSignupOtp(_state: AuthFormState, formData: FormData)
   if (error) {
     const rateLimited = error.status === 429 || /rate|seconds|request/i.test(error.message);
     return {
-      message: rateLimited ? "Você solicitou outro código recentemente. Aguarde um pouco." : "Não conseguimos enviar outro código agora.",
+      message: rateLimited ? "Você solicitou um novo código recentemente. Aguarde um pouco e tente novamente." : "Não conseguimos reenviar o código agora.",
       tone: "danger",
       verificationRequired: true,
       email,
       nextPath,
+      resendAttempted: true,
+      resendAvailableAt: Date.now() + 60_000,
     };
   }
-  return { message: "Enviamos um novo código.", tone: "success", verificationRequired: true, email, nextPath };
+  return {
+    message: "Enviamos um novo código para seu e-mail.",
+    tone: "success",
+    verificationRequired: true,
+    email,
+    nextPath,
+    resendAttempted: true,
+    resendAvailableAt: Date.now() + 60_000,
+  };
 }
 
 export async function startGoogleOAuth(formData: FormData) {

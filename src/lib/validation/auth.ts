@@ -5,6 +5,8 @@ export type AuthFormState = {
   verificationRequired?: boolean;
   email?: string;
   nextPath?: string;
+  resendAttempted?: boolean;
+  resendAvailableAt?: number;
 };
 
 export function validateAuthInput(formData: FormData) {

@@ -28,6 +28,25 @@ test("password signup uses provider OTP verification and supported resend", () =
   assert.match(otp, /pattern="\[0-9\]\{6,10\}"/);
   assert.match(otp, /Reenviar código/);
   assert.doesNotMatch(auth, /Math\.random|create.*otp/i);
+  const resendBody = auth.slice(auth.indexOf("export async function resendSignupOtp"), auth.indexOf("export async function startGoogleOAuth"));
+  assert.match(resendBody, /type: "signup"/);
+  assert.doesNotMatch(resendBody, /auth\.signUp/);
+  assert.match(resendBody, /Enviamos um novo código para seu e-mail\./);
+  assert.match(resendBody, /Você solicitou um novo código recentemente\. Aguarde um pouco e tente novamente\./);
+  assert.match(resendBody, /Não conseguimos reenviar o código agora\./);
+  assert.match(otp, /secondsUntilResend/);
+});
+
+test("OTP continuation survives refresh and exposes contextual Back and safe Exit", () => {
+  assert.match(form, /useSyncExternalStore/);
+  assert.match(form, /window\.sessionStorage\.getItem/);
+  assert.match(form, /readPendingOtp/);
+  assert.match(otp, /window\.sessionStorage\.setItem/);
+  assert.match(otp, /window\.sessionStorage\.removeItem/);
+  assert.match(otp, /invitedFlow \? contextState\.nextPath! : "\/signup"/);
+  assert.match(otp, /authRouteWithNext\("\/login", contextState\.nextPath\)/);
+  assert.match(otp, />Voltar</);
+  assert.match(otp, />Sair</);
 });
 
 test("invitation creation is email-only and delivery failure preserves the invitation", () => {

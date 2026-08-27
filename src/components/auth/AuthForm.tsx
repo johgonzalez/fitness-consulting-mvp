@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useMemo, useSyncExternalStore } from "react";
 import type { AuthFormState } from "@/lib/validation/auth";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import { PasswordField } from "./PasswordField";
@@ -10,12 +10,38 @@ import { startGoogleOAuth } from "@/app/actions/auth";
 
 type AuthAction = (state: AuthFormState, formData: FormData) => Promise<AuthFormState>;
 
+const OTP_STORAGE_PREFIX = "pperfil:signup-otp:v1:";
+
+function otpStorageKey(nextPath?: string) {
+  return `${OTP_STORAGE_PREFIX}${encodeURIComponent(nextPath ?? "/onboarding")}`;
+}
+
+const subscribeToPendingOtp = () => () => undefined;
+
+function readPendingOtp(serialized: string | null): AuthFormState | null {
+  try {
+    const value = JSON.parse(serialized ?? "null") as AuthFormState | null;
+    if (!value?.verificationRequired || !value.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.email)) return null;
+    return value;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup"; action: AuthAction; nextPath?: string }) {
   const [state, formAction, pending] = useActionState(action, {});
   const signupMode = mode === "signup";
+  const storageKey = otpStorageKey(nextPath);
+  const serializedOtp = useSyncExternalStore(
+    subscribeToPendingOtp,
+    () => window.sessionStorage.getItem(storageKey),
+    () => null,
+  );
+  const restoredOtp = useMemo(() => signupMode ? readPendingOtp(serializedOtp) : null, [serializedOtp, signupMode]);
   const alternateAuthHref = authRouteWithNext(signupMode ? "/login" : "/signup", nextPath);
   const passwordErrorId = state.errors?.password ? `${mode}-password-error` : undefined;
-  if (signupMode && state.verificationRequired) return <OtpVerificationForm initialState={state} />;
+  const otpState = state.verificationRequired ? state : restoredOtp;
+  if (signupMode && otpState) return <OtpVerificationForm initialState={otpState} storageKey={storageKey} />;
   return <div className="pc-auth-stack"><form action={startGoogleOAuth} className="pc-auth-oauth">
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
     <button className="pp-button pp-button--secondary" type="submit">Continuar com Google</button>
