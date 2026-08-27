@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import type { AuthFormState } from "@/lib/validation/auth";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import { PasswordField } from "./PasswordField";
+import { OtpVerificationForm } from "./OtpVerificationForm";
+import { startGoogleOAuth } from "@/app/actions/auth";
 
 type AuthAction = (state: AuthFormState, formData: FormData) => Promise<AuthFormState>;
 
@@ -13,7 +15,11 @@ export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup";
   const signupMode = mode === "signup";
   const alternateAuthHref = authRouteWithNext(signupMode ? "/login" : "/signup", nextPath);
   const passwordErrorId = state.errors?.password ? `${mode}-password-error` : undefined;
-  return <form action={formAction} className="pc-auth-form" aria-busy={pending}>
+  if (signupMode && state.verificationRequired) return <OtpVerificationForm initialState={state} />;
+  return <div className="pc-auth-stack"><form action={startGoogleOAuth} className="pc-auth-oauth">
+    {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+    <button className="pp-button pp-button--secondary" type="submit">Continuar com Google</button>
+  </form><div className="pc-auth-divider"><span>ou</span></div><form action={formAction} className="pc-auth-form" aria-busy={pending}>
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
     <label htmlFor={`${mode}-email`}>E-mail</label>
     <input id={`${mode}-email`} name="email" type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com" required aria-describedby={state.errors?.email ? `${mode}-email-error` : undefined} />
@@ -25,5 +31,5 @@ export function AuthForm({ mode, action, nextPath }: { mode: "login" | "signup";
     <button className="pp-button pp-button--primary" type="submit" disabled={pending}>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</button>
     {!signupMode ? <span className="pc-auth-forgot" aria-disabled="true" title="Recuperação de senha será disponibilizada futuramente">Esqueci minha senha</span> : null}
     <p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar acesso"}</Link></p>
-  </form>;
+  </form></div>;
 }

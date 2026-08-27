@@ -149,3 +149,6 @@
 /* Keep the confirmed logout dialog above the sidebar navigation hit area. */
 .dashboard-header{position:relative;z-index:120}
 .dashboard-user-row{position:relative;z-index:110}
+
+/* Sprint 2 keeps Auth and optional Student profile controls inside canonical tokens. */
+.pc-auth-stack{display:grid}.pc-auth-oauth .pp-button{width:100%;min-height:46px}.pc-auth-divider{display:flex;align-items:center;gap:12px;margin:18px 0 2px;color:var(--pp-text-muted);font-size:.62rem}.pc-auth-divider::before,.pc-auth-divider::after{content:"";height:1px;flex:1;background:var(--pp-divider)}.pc-auth-otp{gap:14px}.pc-auth-otp>div p{margin:4px 0 0;color:var(--pp-text-muted);overflow-wrap:anywhere}.pc-auth-otp form{display:grid}.pc-auth-otp>a{text-align:center;color:var(--pp-text-secondary);font-size:.68rem}.pc-auth-otp input{text-align:center;font-size:1.1rem;letter-spacing:.25em}.pp-student-profile__photo{width:72px;height:72px;border-radius:50%;object-fit:cover}.pp-student-profile__form{display:grid;gap:12px}.pp-student-profile__form label{display:grid;gap:6px;color:var(--pp-text-secondary);font-size:.65rem}.pp-student-profile__form label small{color:var(--pp-text-muted)}.pp-student-profile__form input{min-height:44px;padding:8px 10px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-sm);background:var(--pp-surface-subtle);color:var(--pp-text-primary)}

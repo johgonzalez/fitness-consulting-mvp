@@ -16,7 +16,10 @@ export interface ManagedStudent {
 
 export interface ManagedInvitation {
   id: string; name: string | null; email: string; status: "pending" | "expired" | "revoked";
-  expiresAt: string; createdAt: string;
+  expiresAt: string; createdAt: string; lastDeliveryAttemptAt: string | null;
+  lastDeliveryStatus: "pending" | "sent" | "failed" | null;
 }
 
 export interface CreatedInvitation { invitationId: string; token: string; expiresAt: string; conversionId?: string }
+export interface PreparedInvitation extends CreatedInvitation { email: string }
+export type EditedInvitation = { status: "UNCHANGED"; invitationId: string; email: string; expiresAt: string } | ({ status: "CHANGED" } & PreparedInvitation);

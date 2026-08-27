@@ -57,6 +57,8 @@ export function createDemoInvitation(name: string, email: string) {
     status: "pending",
     expiresAt: new Date(Date.now() + 7 * 86_400_000).toISOString(),
     createdAt: new Date().toISOString(),
+    lastDeliveryAttemptAt: new Date().toISOString(),
+    lastDeliveryStatus: "pending",
   };
   state().invitations.unshift(invitation);
   return { invitation, token };

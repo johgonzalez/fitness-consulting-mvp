@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CalendarDays, Clock3, Mail, UserRoundPlus, UsersRound } from "lucide-react";
 import { InviteStudentForm } from "@/components/students/InviteStudentForm";
 import { RevokeInvitationAction } from "@/components/students/RevokeInvitationAction";
+import { InvitationManagementActions } from "@/components/students/InvitationManagementActions";
 import { ContextPanel, DataList, DataListRow, IdentityCell, OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { Avatar, EmptyState, Status } from "@/components/ui/PPerfilPrimitives";
 import type { RelationshipState } from "@/lib/domain/students";
@@ -46,6 +47,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         <span><Clock3 aria-hidden="true" />{invitation.status === "expired" ? "Convite expirado" : `Expira em ${new Date(invitation.expiresAt).toLocaleDateString("pt-BR")}`}</span>
         <Status tone={invitation.status === "expired" ? "danger" : "warning"}>{invitation.status === "expired" ? "Expirado" : "Aguardando aceite"}</Status>
         {invitation.status === "pending" ? <RevokeInvitationAction invitationId={invitation.id} /> : null}
+        {invitation.status === "pending" ? <InvitationManagementActions invitationId={invitation.id} email={invitation.email} /> : null}
       </article>)}</div>
     </section> : null}
 

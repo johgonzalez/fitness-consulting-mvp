@@ -107,8 +107,8 @@ const students: ManagedStudent[] = [
 ];
 
 const invitations: ManagedInvitation[] = [
-  { id: "76000000-0000-4000-8000-000000000001", name: "Fernanda Ribeiro", email: "fernanda.ribeiro@example.test", status: "pending", expiresAt: "2026-09-01T18:00:00.000Z", createdAt: "2026-08-20T13:00:00.000Z" },
-  { id: "76000000-0000-4000-8000-000000000002", name: "Paulo Henrique", email: "paulo.henrique@example.test", status: "pending", expiresAt: "2026-09-03T18:00:00.000Z", createdAt: "2026-08-22T10:00:00.000Z" },
+  { id: "76000000-0000-4000-8000-000000000001", name: "Fernanda Ribeiro", email: "fernanda.ribeiro@example.test", status: "pending", expiresAt: "2026-09-01T18:00:00.000Z", createdAt: "2026-08-20T13:00:00.000Z", lastDeliveryAttemptAt: null, lastDeliveryStatus: "sent" },
+  { id: "76000000-0000-4000-8000-000000000002", name: "Paulo Henrique", email: "paulo.henrique@example.test", status: "pending", expiresAt: "2026-09-03T18:00:00.000Z", createdAt: "2026-08-22T10:00:00.000Z", lastDeliveryAttemptAt: null, lastDeliveryStatus: "sent" },
 ];
 
 const dashboardMetrics: DashboardMetrics = { profile_views: 1264, whatsapp_clicks: 186, leads: leads.length };
