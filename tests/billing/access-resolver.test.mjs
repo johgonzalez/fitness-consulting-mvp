@@ -26,6 +26,39 @@ test("FREE fails closed for every paid capability", () => {
   assertAllCapabilities(decision, false);
 });
 
+test("active Founder Access grants capabilities without changing FREE Billing", () => {
+  const decision = resolveBillingAccess({
+    ...base,
+    productCode: "FREE",
+    billingState: "FREE",
+    market: null,
+    currency: null,
+    accessGrant: { grantType: "FOUNDER_ACCESS", status: "ACTIVE", expiresAt: null },
+  });
+  assert.equal(decision.effectiveState, "FREE");
+  assert.equal(decision.accessSource, "FOUNDER_ACCESS");
+  assertAllCapabilities(decision, true);
+});
+
+test("expired or revoked Founder Access grants nothing", () => {
+  for (const accessGrant of [
+    { grantType: "FOUNDER_ACCESS", status: "REVOKED", expiresAt: null },
+    { grantType: "FOUNDER_ACCESS", status: "ACTIVE", expiresAt: base.now },
+  ]) {
+    const decision = resolveBillingAccess({
+      ...base,
+      productCode: "FREE",
+      billingState: "FREE",
+      market: null,
+      currency: null,
+      accessGrant,
+    });
+    assert.equal(decision.effectiveState, "FREE");
+    assert.equal(decision.accessSource, "FREE");
+    assertAllCapabilities(decision, false);
+  }
+});
+
 test("ACTIVE enables canonical paid capabilities", () => {
   const decision = resolveBillingAccess(base);
   assert.equal(decision.effectiveState, "ACTIVE");

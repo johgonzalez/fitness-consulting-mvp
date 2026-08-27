@@ -63,6 +63,11 @@ export interface BillingAccessContext {
   suspendedAt?: string | Date | null;
   providerSnapshotRecognized: boolean;
   providerPriceRecognized: boolean;
+  accessGrant?: {
+    grantType: string;
+    status: string;
+    expiresAt?: string | Date | null;
+  } | null;
   student?: StudentContinuityContext;
 }
 
@@ -83,6 +88,7 @@ export interface BillingAccessDecision {
   trainerCanReadExistingData: boolean;
   studentContinuity: StudentContinuityDecision;
   reasons: string[];
+  accessSource: "FREE" | "BILLING" | "FOUNDER_ACCESS";
 }
 
 export interface NormalizedBillingProviderSnapshot {

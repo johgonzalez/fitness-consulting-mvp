@@ -14,15 +14,17 @@ const publicProfileColumns = `${legacyPublicProfileColumns},profile_status_enabl
 const testimonialColumns = "id,trainer_id,student_name,content,image_url,before_image_url,after_image_url,result_context,instagram_handle,instagram_url,published";
 const legacyEntitlementColumns = "trainer_id,can_build_site,can_preview_site,can_use_template_01,can_use_template_02,can_use_free_template,can_use_premium_templates,can_publish_site,can_receive_leads,can_use_matching";
 const templateFoundationEntitlementColumns = `${legacyEntitlementColumns},can_use_template_03`;
-const entitlementColumns = `${templateFoundationEntitlementColumns},can_use_template_04`;
+const entitlementColumns = `${templateFoundationEntitlementColumns},can_use_template_04,can_manage_students,can_use_assessments,can_use_workouts,can_manage_progress`;
 
 function isMissingTemplateFoundation(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return ["42703", "42P01", "PGRST202", "PGRST204", "PGRST205"].includes(error.code ?? "")
-    || /profile_status_|can_use_template_0[34]|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
+    || /profile_status_|can_use_template_0[34]|can_manage_students|can_use_assessments|can_use_workouts|can_manage_progress|get_my_effective_entitlements|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
 }
 
 async function selectTrainerEntitlements(supabase: Awaited<ReturnType<typeof createClient>>, trainerId: string) {
+  const effective = await supabase.rpc("get_my_effective_entitlements");
+  if (!effective.error && effective.data) return effective;
   const result = await supabase.from("trainer_entitlements").select(entitlementColumns).eq("trainer_id", trainerId).single();
   if (result.error && isMissingTemplateFoundation(result.error)) {
     const foundation = await supabase.from("trainer_entitlements").select(templateFoundationEntitlementColumns).eq("trainer_id", trainerId).single();

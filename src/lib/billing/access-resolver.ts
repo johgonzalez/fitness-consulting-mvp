@@ -94,6 +94,13 @@ export function resolveBillingAccess(context: BillingAccessContext): BillingAcce
     }
   }
 
+  const grantExpiresAt = timestamp(context.accessGrant?.expiresAt);
+  const founderAccess = now !== null
+    && context.accessGrant?.grantType === "FOUNDER_ACCESS"
+    && context.accessGrant.status === "ACTIVE"
+    && (context.accessGrant.expiresAt == null || (grantExpiresAt !== null && grantExpiresAt > now));
+  const fullAccess = paidAccess || founderAccess;
+
   const suspendedAt = timestamp(context.suspendedAt);
   const continuityEndsAt = suspendedAt === null ? null : suspendedAt + STUDENT_CONTINUITY_DAYS * DAY_MS;
   const continuityActive = effectiveState === "SUSPENDED"
@@ -104,21 +111,22 @@ export function resolveBillingAccess(context: BillingAccessContext): BillingAcce
   return {
     effectiveState,
     activeCanceling,
-    failClosed: reasons.length > 0,
-    capabilities: paidAccess ? allowAllCapabilities() : denyAllCapabilities(),
+    failClosed: reasons.length > 0 && !founderAccess,
+    capabilities: fullAccess ? allowAllCapabilities() : denyAllCapabilities(),
     trainerCanReadExistingData: true,
     studentContinuity: {
       active: continuityActive,
       endsAt: continuityEndsAt === null ? null : new Date(continuityEndsAt).toISOString(),
-      canCompleteAssignedWorkout: paidAccess || (
+      canCompleteAssignedWorkout: fullAccess || (
         continuityActive && wasAuthorizedBeforeSuspension(context.student?.assignedWorkoutPublishedAt, suspendedAt)
       ),
-      canRespondToSentAssessment: paidAccess || (
+      canRespondToSentAssessment: fullAccess || (
         continuityActive && wasAuthorizedBeforeSuspension(context.student?.assessmentSentAt, suspendedAt)
       ),
       canReadOwnHistory: true,
-      canUploadProgress: paidAccess,
+      canUploadProgress: fullAccess,
     },
     reasons,
+    accessSource: paidAccess ? "BILLING" : founderAccess ? "FOUNDER_ACCESS" : "FREE",
   };
 }

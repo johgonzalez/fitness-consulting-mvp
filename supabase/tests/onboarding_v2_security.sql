@@ -30,7 +30,7 @@ insert into onboarding_v2_results values
 
 set local role authenticated;
 set local request.jwt.claims='{"sub":"0b200000-0000-4000-8000-000000000001","role":"authenticated"}';
-select public.save_my_onboarding_identity('Trainer A','Personal A',null);
+select public.save_my_onboarding_identity('Trainer Adult A',date '1990-01-01','Trainer A',null,'Personal A',null);
 insert into onboarding_v2_results values ('Owner reads own draft',(select public.get_my_onboarding_draft()->>'display_name'='Trainer A'));
 select public.save_my_onboarding_professional('strength','Força','online',null,null);
 select public.save_my_onboarding_social('5511999990001','trainer.a',null,null);

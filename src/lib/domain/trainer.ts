@@ -10,6 +10,10 @@ export interface TrainerProfile {
   user_id: string;
   slug: string;
   display_name: string;
+  full_name?: string | null;
+  birth_date?: string | null;
+  preferred_name?: string | null;
+  pronouns?: string | null;
   headline: string;
   bio: string;
   specialty: string;
@@ -79,6 +83,11 @@ export interface TrainerEntitlements {
   can_publish_site: boolean;
   can_receive_leads: boolean;
   can_use_matching: boolean;
+  can_manage_students?: boolean;
+  can_use_assessments?: boolean;
+  can_use_workouts?: boolean;
+  can_manage_progress?: boolean;
+  access_source?: "FREE" | "BILLING" | "FOUNDER_ACCESS";
 }
 
 export interface CommercialOffer {
