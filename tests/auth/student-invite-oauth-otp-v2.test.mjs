@@ -59,7 +59,7 @@ test("invitation creation is email-only and delivery failure preserves the invit
   const createAction = studentActions.slice(studentActions.indexOf("export async function inviteStudentAction"), studentActions.indexOf("export async function resendInvitationAction"));
   assert.doesNotMatch(createAction, /form\.get\("name"\)/);
   assert.match(studentActions, /Convite criado, mas o e-mail não pôde ser enviado\./);
-  assert.match(studentActions, /markInvitationDelivery/);
+  assert.match(studentActions, /recordInvitationDelivery/);
 });
 
 test("resend and edit are owner RPC operations with atomic token rotation", () => {

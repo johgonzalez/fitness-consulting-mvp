@@ -17,7 +17,7 @@ export interface ManagedStudent {
 export interface ManagedInvitation {
   id: string; name: string | null; email: string; status: "pending" | "expired" | "revoked";
   expiresAt: string; createdAt: string; lastDeliveryAttemptAt: string | null;
-  lastDeliveryStatus: "pending" | "sent" | "failed" | null;
+  lastDeliveryStatus: "pending" | "provider_accepted" | "provider_rejected" | "delivery_unknown" | "delivery_failed" | "sent" | "failed" | null;
 }
 
 export interface CreatedInvitation { invitationId: string; token: string; expiresAt: string; conversionId?: string }
