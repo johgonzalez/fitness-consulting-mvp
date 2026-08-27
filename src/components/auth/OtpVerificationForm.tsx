@@ -62,7 +62,7 @@ export function OtpVerificationForm({ initialState, storageKey }: { initialState
       {resendState.message ? <p className={`pc-auth-feedback pc-auth-feedback--${resendState.tone ?? "danger"}`} role="status">{resendState.message}</p> : null}
     </form>
     <div className="pc-auth-otp-nav">
-      <Link href={backHref} onClick={clearPendingOtp}>Voltar</Link>
+      <Link href={backHref}>Voltar</Link>
       <Link href={exitHref}>Sair</Link>
     </div>
   </div>;

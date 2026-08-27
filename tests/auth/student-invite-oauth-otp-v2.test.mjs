@@ -49,7 +49,8 @@ test("OTP continuation survives refresh and exposes contextual Back and safe Exi
   assert.match(otp, /onSubmit=\{clearPendingOtp\}/);
   assert.match(otp, /invitedFlow \? contextState\.nextPath! : "\/signup"/);
   assert.match(otp, /authRouteWithNext\("\/login", contextState\.nextPath\)/);
-  assert.match(otp, />Voltar</);
+  assert.match(otp, /<Link href=\{backHref\}>Voltar<\/Link>/);
+  assert.doesNotMatch(otp, /href=\{backHref\} onClick=\{clearPendingOtp\}/);
   assert.match(otp, />Sair</);
 });
 
