@@ -62,6 +62,7 @@ test("trainer and student logout entry points require explicit confirmation", ()
   assert.match(logoutForm, /role="alertdialog"/);
   assert.match(logoutForm, /Encerrar esta sessão\?/);
   assert.match(logoutForm, /type="button" onClick=\{\(\) => setConfirmationOpen\(true\)\}/);
+  assert.match(logoutForm, /type="button" disabled=\{pending\} onClick=\{logoutWithLocalCleanup\}/);
   assert.match(logoutForm, /await logout\(\)/);
   assert.match(authActions, /redirect\("\/login"\)/);
 });
