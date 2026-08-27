@@ -35,6 +35,9 @@ test("password signup uses provider OTP verification and supported resend", () =
   assert.match(resendBody, /Você solicitou um novo código recentemente\. Aguarde um pouco e tente novamente\./);
   assert.match(resendBody, /Não conseguimos reenviar o código agora\./);
   assert.match(otp, /secondsUntilResend/);
+  assert.match(auth, /resendCooldownSeconds: 60/);
+  assert.match(otp, /setResendAvailableAt\(currentTime \+ \(result\.resendCooldownSeconds \?\? 0\) \* 1_000\)/);
+  assert.doesNotMatch(resendBody, /Date\.now/);
 });
 
 test("OTP continuation survives refresh and exposes contextual Back and safe Exit", () => {
@@ -43,6 +46,7 @@ test("OTP continuation survives refresh and exposes contextual Back and safe Exi
   assert.match(form, /readPendingOtp/);
   assert.match(otp, /window\.sessionStorage\.setItem/);
   assert.match(otp, /window\.sessionStorage\.removeItem/);
+  assert.match(otp, /onSubmit=\{clearPendingOtp\}/);
   assert.match(otp, /invitedFlow \? contextState\.nextPath! : "\/signup"/);
   assert.match(otp, /authRouteWithNext\("\/login", contextState\.nextPath\)/);
   assert.match(otp, />Voltar</);

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { resendSignupOtp, verifySignupOtp } from "@/app/actions/auth";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import type { AuthFormState } from "@/lib/validation/auth";
@@ -12,23 +12,31 @@ function hiddenContext(state: AuthFormState) {
 
 export function OtpVerificationForm({ initialState, storageKey }: { initialState: AuthFormState; storageKey: string }) {
   const [verifyState, verifyAction, verifying] = useActionState(verifySignupOtp, initialState);
-  const [resendState, resendAction, resending] = useActionState(resendSignupOtp, initialState);
+  const [resendAvailableAt, setResendAvailableAt] = useState(() => initialState.resendAvailableAt ?? Date.now() + (initialState.resendCooldownSeconds ?? 0) * 1_000);
+  const [now, setNow] = useState(() => Date.now());
+  const resendWithClientCooldown = useCallback(async (previousState: AuthFormState, formData: FormData) => {
+    const result = await resendSignupOtp(previousState, formData);
+    const currentTime = Date.now();
+    setNow(currentTime);
+    setResendAvailableAt(currentTime + (result.resendCooldownSeconds ?? 0) * 1_000);
+    return result;
+  }, []);
+  const [resendState, resendAction, resending] = useActionState(resendWithClientCooldown, initialState);
   const contextState = resendState.resendAttempted ? resendState : verifyState;
   const inputRef = useRef<HTMLInputElement>(null);
-  const [now, setNow] = useState(() => Date.now());
-  const secondsUntilResend = Math.max(0, Math.ceil(((contextState.resendAvailableAt ?? 0) - now) / 1000));
+  const secondsUntilResend = Math.max(0, Math.ceil((resendAvailableAt - now) / 1000));
   const invitedFlow = /^\/invite\/[a-f0-9]{64}$/.test(contextState.nextPath ?? "");
   const backHref = invitedFlow ? contextState.nextPath! : "/signup";
   const exitHref = authRouteWithNext("/login", contextState.nextPath);
 
   useEffect(() => {
-    window.sessionStorage.setItem(storageKey, JSON.stringify(contextState));
-  }, [contextState, storageKey]);
+    window.sessionStorage.setItem(storageKey, JSON.stringify({ ...contextState, resendAvailableAt }));
+  }, [contextState, resendAvailableAt, storageKey]);
   useEffect(() => {
-    if (!contextState.resendAvailableAt || secondsUntilResend === 0) return;
+    if (secondsUntilResend === 0) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(timer);
-  }, [secondsUntilResend, contextState.resendAvailableAt]);
+  }, [secondsUntilResend]);
   useEffect(() => {
     if (!resendState.resendAttempted || resendState.tone !== "success") return;
     inputRef.current?.form?.reset();
@@ -41,7 +49,7 @@ export function OtpVerificationForm({ initialState, storageKey }: { initialState
 
   return <div className="pc-auth-form pc-auth-otp">
     <div><strong>Digite o código enviado ao seu e-mail</strong><p>{contextState.email}</p></div>
-    <form action={verifyAction} aria-busy={verifying}>
+    <form action={verifyAction} aria-busy={verifying} onSubmit={clearPendingOtp}>
       {hiddenContext(contextState)}
       <label htmlFor="signup-otp">Código</label>
       <input ref={inputRef} id="signup-otp" name="token" type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,10}" minLength={6} maxLength={10} required autoFocus aria-describedby="signup-otp-feedback" />

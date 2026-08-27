@@ -6,6 +6,7 @@ export type AuthFormState = {
   email?: string;
   nextPath?: string;
   resendAttempted?: boolean;
+  resendCooldownSeconds?: number;
   resendAvailableAt?: number;
 };
 
