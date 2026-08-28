@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [actions, aiProvider, aiContract, creationPage, creationFlow, dashboard, studentDetail, migration, workoutSecurity, studentMedia, exerciseMedia, environment] = await Promise.all([
+const [actions, aiProvider, aiContract, creationPage, creationFlow, dashboard, studentDetail, migration, workoutSecurity, studentMedia, exerciseMedia, environment, workoutParser] = await Promise.all([
   read("../../src/app/actions/workouts.ts"),
   read("../../src/lib/workouts/ai-provider.ts"),
   read("../../src/lib/workouts/ai-contract.ts"),
@@ -16,6 +16,7 @@ const [actions, aiProvider, aiContract, creationPage, creationFlow, dashboard, s
   read("../../src/components/student/StudentWorkoutMedia.tsx"),
   read("../../src/components/workouts/ExerciseMedia.tsx"),
   read("../../.env.example"),
+  read("../../src/lib/validation/workouts.ts"),
 ]);
 
 test("Dashboard and Student Detail converge on the canonical creation route", () => {
@@ -74,4 +75,9 @@ test("Student gets a safe external video reference and images never render video
   assert.match(studentMedia, /normalizeYoutubeUrl/);
   assert.match(studentMedia, /item\.mediaType !== "IMAGE"/);
   assert.match(exerciseMedia, /item\.mediaType === "IMAGE"/);
+});
+
+test("Hosted workout projection accepts exercise media from the canonical RPC shape", () => {
+  assert.match(workoutParser, /Array\.isArray\(prescribedValue\.media\)/);
+  assert.match(workoutParser, /exercise: parseExercise\(exerciseWithMedia/);
 });

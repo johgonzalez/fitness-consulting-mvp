@@ -225,6 +225,16 @@ export function parseWorkoutVersionProjection(value: unknown): WorkoutVersionPro
             sortOrder: requiredNumber(sectionValue.sort_order, `sections[${sectionIndex}].sort_order`),
             exercises: sectionValue.exercises.map((prescribedValue, prescribedIndex) => {
               if (!isRecord(prescribedValue) || !Array.isArray(prescribedValue.sets)) throw new Error(`exercises[${prescribedIndex}] is invalid.`);
+              const exerciseValue = prescribedValue.exercise;
+              if (!isRecord(exerciseValue)) throw new Error(`exercises[${prescribedIndex}].exercise is invalid.`);
+              const exerciseWithMedia = {
+                ...exerciseValue,
+                media: Array.isArray(exerciseValue.media)
+                  ? exerciseValue.media
+                  : Array.isArray(prescribedValue.media)
+                    ? prescribedValue.media
+                    : [],
+              };
               return {
                 id: requiredString(prescribedValue.id, `exercises[${prescribedIndex}].id`, 36, 36),
                 sortOrder: requiredNumber(prescribedValue.sort_order, `exercises[${prescribedIndex}].sort_order`),
@@ -232,7 +242,7 @@ export function parseWorkoutVersionProjection(value: unknown): WorkoutVersionPro
                 ...(prescribedValue.trainer_note === undefined ? {} : { trainerNote: nullableString(prescribedValue.trainer_note, `exercises[${prescribedIndex}].trainer_note`, 2000) }),
                 studentInstruction: nullableString(prescribedValue.student_instruction, `exercises[${prescribedIndex}].student_instruction`, 2000),
                 tempo: nullableString(prescribedValue.tempo, `exercises[${prescribedIndex}].tempo`, 32),
-                exercise: parseExercise(prescribedValue.exercise, `exercises[${prescribedIndex}].exercise`),
+                exercise: parseExercise(exerciseWithMedia, `exercises[${prescribedIndex}].exercise`),
                 sets: prescribedValue.sets.map((setValue, setIndex) => parseSet(setValue, `sets[${setIndex}]`)),
               };
             }),
