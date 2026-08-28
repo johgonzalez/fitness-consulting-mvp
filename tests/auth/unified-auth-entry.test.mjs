@@ -74,3 +74,10 @@ test("auth pages reject unsafe next values before rendering links or forms", () 
   assert.match(loginPage, /safeInternalPath\(rawNext \?\? null, ""\)/);
   assert.match(signupPage, /safeInternalPath\(rawNext \?\? null, ""\)/);
 });
+
+test("authenticated auth pages resolve context server-side even if proxy resolution is unavailable", () => {
+  assert.match(loginPage, /supabase\.auth\.getUser\(\)/);
+  assert.match(loginPage, /resolveAuthenticatedHome\(supabase, \{ context, nextPath: next \}\)/);
+  assert.match(signupPage, /supabase\.auth\.getUser\(\)/);
+  assert.match(signupPage, /resolveAuthenticatedHome\(supabase, \{ context, nextPath: next \}\)/);
+});
