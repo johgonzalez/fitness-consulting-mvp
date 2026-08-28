@@ -81,7 +81,14 @@ insert into sprint1_results values
 ('redemption counted once',(select redemption_count=1 from public.access_codes where metadata->>'campaign'='qa')),
 ('waitlist duplicate is idempotent',(select count(*)=1 from public.waitlist_entries where email='founder-a@example.test' and audience='trainer')),
 ('WhatsApp normalized',(select whatsapp='+5511999990001' from public.waitlist_entries where email='founder-a@example.test')),
-('waitlist grants nothing',(select count(*)=1 from public.access_grants)),
+('waitlist grants nothing',(
+  select count(*)=1
+  from public.access_grants
+  where trainer_user_id='f1000000-0000-4000-8000-000000000001'
+) and not exists(
+  select 1 from public.access_grants
+  where trainer_user_id='f1000000-0000-4000-8000-000000000002'
+)),
 ('publication intent retained',(select publication_requested_at is not null and published from public.trainer_profiles where user_id='f1000000-0000-4000-8000-000000000001'));
 
 set local role authenticated;

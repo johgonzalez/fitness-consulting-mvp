@@ -29,6 +29,9 @@ insert into public.trainer_profiles(
   ('f1a10000-0000-4000-8000-000000000001','f1a00000-0000-4000-8000-000000000001','template-v1a-a','Trainer A','Headline A','Bio A','Treino','online','5511000000001',false),
   ('f1a10000-0000-4000-8000-000000000002','f1a00000-0000-4000-8000-000000000002','template-v1a-b','Trainer B','Headline B','Bio B','Treino','online','5511000000002',true);
 
+insert into public.access_grants(trainer_user_id, grant_type, metadata)
+values ('f1a00000-0000-4000-8000-000000000002','FOUNDER_ACCESS','{"source":"template_security_gate"}'::jsonb);
+
 update public.trainer_entitlements
 set can_publish_site = true
 where trainer_id = 'f1a10000-0000-4000-8000-000000000002';
@@ -152,6 +155,9 @@ insert into template_v1a_results values
   ));
 
 reset role;
+insert into public.access_grants(trainer_user_id, grant_type, metadata)
+values ('f1a00000-0000-4000-8000-000000000001','FOUNDER_ACCESS','{"source":"template_security_gate"}'::jsonb);
+
 update public.trainer_entitlements
 set can_use_template_03 = true,
     can_publish_site = true
@@ -174,7 +180,7 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"f1a00000-0000-4000-8000-000000000002","role":"authenticated"}';
 select public.set_my_site_template('template_03');
 insert into template_v1a_results values
-  ('FREE trainer can select rollout-enabled template_03', (
+  ('Trainer can select rollout-enabled template_03', (
     select template_id = 'template_03'
     from public.trainer_profiles
     where id = 'f1a10000-0000-4000-8000-000000000002'

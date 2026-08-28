@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { Check, Copy, MessageCircle, Share2, TrendingUp } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+
+const subscribeToBrowserCapabilities = () => () => {};
 
 export function WorkoutCompletionShare({
   durationMinutes,
@@ -13,7 +15,11 @@ export function WorkoutCompletionShare({
   completedExercises: number;
   completedSets: number;
 }) {
-  const [webShareAvailable, setWebShareAvailable] = useState(false);
+  const webShareAvailable = useSyncExternalStore(
+    subscribeToBrowserCapabilities,
+    () => typeof navigator.share === "function",
+    () => false,
+  );
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const shareText = useMemo(
@@ -21,10 +27,6 @@ export function WorkoutCompletionShare({
     [completedExercises, completedSets, durationMinutes],
   );
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-
-  useEffect(() => {
-    setWebShareAvailable(typeof navigator.share === "function");
-  }, []);
 
   async function share() {
     try {

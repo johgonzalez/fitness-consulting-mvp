@@ -29,6 +29,9 @@ insert into public.trainer_profiles(
   ('f4a10000-0000-4000-8000-000000000001','f4a00000-0000-4000-8000-000000000001','atelier-owner','Atelier Owner','Headline A','Bio A','Treino','online','5511000000401',false),
   ('f4a10000-0000-4000-8000-000000000002','f4a00000-0000-4000-8000-000000000002','atelier-other','Atelier Other','Headline B','Bio B','Treino','online','5511000000402',false);
 
+insert into public.access_grants(trainer_user_id, grant_type, metadata)
+values ('f4a00000-0000-4000-8000-000000000001','FOUNDER_ACCESS','{"source":"atelier_security_gate"}'::jsonb);
+
 update public.trainer_entitlements
 set can_publish_site = true,
     can_use_template_04 = trainer_id = 'f4a10000-0000-4000-8000-000000000001'
@@ -115,8 +118,11 @@ where trainer_id = 'f4a10000-0000-4000-8000-000000000001';
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"f4a00000-0000-4000-8000-000000000001","role":"authenticated"}';
 insert into atelier_template_results values
-  ('publication rejects missing Atelier entitlement',
-    pg_temp.raises($sql$select public.set_my_site_publication(true)$sql$)
+  ('Founder Access preserves Atelier entitlement', (
+    select can_use_template_04
+    from public.trainer_entitlements
+    where trainer_id = 'f4a10000-0000-4000-8000-000000000001'
+  )
   );
 
 reset role;

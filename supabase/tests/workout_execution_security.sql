@@ -205,7 +205,7 @@ insert into execution_gate_results values
   ('Previous performance returns completed actuals', public.get_previous_exercise_performance('5a400000-0000-4000-8000-000000000001',null) #>> '{sets,0,actual_reps}'='10'),
   ('Execution events are append only', pg_temp.raises(format(
     'update public.workout_execution_events set metadata=%L::jsonb where workout_execution_id=%L::uuid','{}',(select value from execution_gate_context where key='execution_a1')
-  )),
+  ))),
   ('Student cannot read Trainer completion notification',
     not exists(select 1 from public.trainer_workout_notifications where workout_execution_id=(select value from execution_gate_context where key='execution_a1'))
     and pg_temp.raises('select public.list_trainer_workout_notifications(8)')

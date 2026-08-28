@@ -15,6 +15,9 @@ values
   ('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','trainer-a-test','Trainer A','A','A','Teste','Cidade A','online','5511000000000',false),
   ('22222222-2222-4222-8222-222222222222','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','trainer-b-test','Trainer B','B','B','Teste','Cidade B','online','5522000000000',true);
 
+insert into public.access_grants(trainer_user_id, grant_type, metadata)
+values ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb','FOUNDER_ACCESS','{"source":"rls_security_gate"}'::jsonb);
+
 update public.trainer_entitlements
 set can_publish_site = true
 where trainer_id = '22222222-2222-4222-8222-222222222222';
@@ -24,8 +27,13 @@ set local request.jwt.claims = '{"sub":"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa","r
 insert into rls_results values ('A reads own private profile', (select count(*) = 1 from public.trainer_profiles where id='11111111-1111-4111-8111-111111111111'));
 update public.trainer_profiles set city='Cidade A atualizada' where id='11111111-1111-4111-8111-111111111111';
 insert into rls_results values ('A updates own private profile', (select city = 'Cidade A atualizada' from public.trainer_profiles where id='11111111-1111-4111-8111-111111111111'));
-update public.trainer_profiles set city='Ataque' where id='22222222-2222-4222-8222-222222222222';
-insert into rls_results values ('A cannot update B', (select city = 'Cidade B' from public.trainer_profiles where id='22222222-2222-4222-8222-222222222222'));
+with attempted as (
+  update public.trainer_profiles set city='Ataque'
+  where id='22222222-2222-4222-8222-222222222222'
+  returning id
+)
+insert into rls_results
+select 'A cannot update B', count(*) = 0 from attempted;
 
 reset role;
 set local role authenticated;
