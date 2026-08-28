@@ -92,6 +92,18 @@ select 'custom_media_a', public.add_custom_exercise_media(
   (select value from workout_gate_context where key='custom_a'),
   'VIDEO','trainer-library/workout-a/lunge.mp4',null,'TRAINER_UPLOAD',null,null,null
 );
+insert into workout_gate_context
+select 'custom_youtube_a', public.add_custom_exercise_media(
+  (select value from workout_gate_context where key='custom_a'),
+  'VIDEO','https://www.youtube.com/watch?v=AbCdEf_1234',null,'YOUTUBE',
+  'https://www.youtube.com/watch?v=AbCdEf_1234',null,null
+);
+insert into workout_gate_results values
+  ('Unsafe YouTube URL is rejected', pg_temp.raises(format(
+    'select public.add_custom_exercise_media(%L::uuid,%L,%L,null,%L,%L,null,null)',
+    (select value from workout_gate_context where key='custom_a'),
+    'VIDEO','https://evil.example.test/watch?v=AbCdEf_1234','YOUTUBE','https://evil.example.test/watch?v=AbCdEf_1234'
+  )));
 
 insert into workout_gate_context
 select 'draft_plan_a', public.create_workout_plan(
@@ -382,6 +394,11 @@ insert into workout_gate_results values
     select 1 from public.exercises
     where id = (select value from workout_gate_context where key='custom_a')
   )),
+  ('Trainer B cannot attach media to Trainer A custom exercise', pg_temp.raises(format(
+    'select public.add_custom_exercise_media(%L::uuid,%L,%L,null,%L,%L,null,null)',
+    (select value from workout_gate_context where key='custom_a'),
+    'VIDEO','https://www.youtube.com/watch?v=ZyXwVu_9876','YOUTUBE','https://www.youtube.com/watch?v=ZyXwVu_9876'
+  ))),
   ('AI_DRAFT has no broader authorization', not exists(
     select 1 from public.workout_plan_versions
     where id = (select value from workout_gate_context where key='ai_version_a')
@@ -421,6 +438,17 @@ insert into workout_gate_results values
   ('Assigned student sees only approved exercise media', not exists(
     select 1 from public.exercise_media
     where id = (select value from workout_gate_context where key='custom_media_a')
+  )),
+  ('Assigned student sees approved Trainer YouTube reference', exists(
+    select 1 from public.exercise_media
+    where id = (select value from workout_gate_context where key='custom_youtube_a')
+      and production_status = 'APPROVED'
+      and provider = 'YOUTUBE'
+  )),
+  ('Student projection contains Trainer YouTube reference', (
+    select public.get_student_workout_version(
+      (select value from workout_gate_context where key='published_v1_a')
+    )::text like '%youtube.com%'
   )),
   ('Student cannot mutate workout prescription',
     not has_table_privilege('authenticated','public.workout_sessions','INSERT,UPDATE,DELETE')

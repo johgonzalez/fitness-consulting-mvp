@@ -214,6 +214,10 @@ const PLAN_IDS = {
   ai: "f4100000-0000-4000-8000-000000000002",
   approved: "f4100000-0000-4000-8000-000000000003",
   published: "f4100000-0000-4000-8000-000000000004",
+  manualBruno: "f4100000-0000-4000-8000-000000000005",
+  manualMariana: "f4100000-0000-4000-8000-000000000006",
+  aiJuliana: "f4100000-0000-4000-8000-000000000007",
+  aiMariana: "f4100000-0000-4000-8000-000000000008",
 } as const;
 
 const VERSION_IDS = {
@@ -222,6 +226,10 @@ const VERSION_IDS = {
   approved: "f4200000-0000-4000-8000-000000000003",
   archived: "f4200000-0000-4000-8000-000000000004",
   published: "f4200000-0000-4000-8000-000000000005",
+  manualBruno: "f4200000-0000-4000-8000-000000000006",
+  manualMariana: "f4200000-0000-4000-8000-000000000007",
+  aiJuliana: "f4200000-0000-4000-8000-000000000008",
+  aiMariana: "f4200000-0000-4000-8000-000000000009",
 } as const;
 
 function lowerSession(prefix: string): WorkoutSession {
@@ -308,6 +316,32 @@ export const workoutDemoVersions: WorkoutVersionProjection[] = [
     sessions: [upperSession("b410")],
   },
   {
+    plan: plan(PLAN_IDS.manualBruno, RELATIONSHIPS.bruno, "Base de força", "Ganhar força com técnica consistente"),
+    version: version(VERSION_IDS.manualBruno, PLAN_IDS.manualBruno, 1, "DRAFT", "MANUAL"),
+    sessions: [lowerSession("8410")],
+  },
+  {
+    plan: plan(PLAN_IDS.manualMariana, RELATIONSHIPS.mariana, "Base de força", "Ganhar força com técnica consistente"),
+    version: version(VERSION_IDS.manualMariana, PLAN_IDS.manualMariana, 1, "DRAFT", "MANUAL"),
+    sessions: [lowerSession("9410")],
+  },
+  {
+    plan: plan(PLAN_IDS.aiJuliana, RELATIONSHIPS.juliana, "Condicionamento 3x", "Aumentar condicionamento geral"),
+    version: version(VERSION_IDS.aiJuliana, PLAN_IDS.aiJuliana, 1, "DRAFT", "AI_DRAFT", {
+      trainerPrompt: "Criar uma base de três dias com progressão conservadora.",
+      generationMetadata: { schema_version: WORKOUT_AI_SCHEMA_VERSION, provider: "LOCAL_FIXTURE_ONLY" },
+    }),
+    sessions: [upperSession("a510")],
+  },
+  {
+    plan: plan(PLAN_IDS.aiMariana, RELATIONSHIPS.mariana, "Condicionamento 3x", "Aumentar condicionamento geral"),
+    version: version(VERSION_IDS.aiMariana, PLAN_IDS.aiMariana, 1, "DRAFT", "AI_DRAFT", {
+      trainerPrompt: "Criar uma base de três dias com progressão conservadora.",
+      generationMetadata: { schema_version: WORKOUT_AI_SCHEMA_VERSION, provider: "LOCAL_FIXTURE_ONLY" },
+    }),
+    sessions: [upperSession("b510")],
+  },
+  {
     plan: plan(PLAN_IDS.approved, RELATIONSHIPS.mariana, "Retorno progressivo", "Retomar consistência sem elevar o volume rapidamente"),
     version: version(VERSION_IDS.approved, PLAN_IDS.approved, 1, "APPROVED", "MANUAL"),
     sessions: [lowerSession("c410")],
@@ -323,6 +357,16 @@ export const workoutDemoVersions: WorkoutVersionProjection[] = [
     sessions: [lowerSession("e410"), upperSession("f410"), recoverySession("g410")],
   },
 ];
+
+export function getWorkoutDemoDraftVersionId(
+  relationshipId: string,
+  sourceType: "MANUAL" | "AI_DRAFT",
+) {
+  return workoutDemoVersions.find((item) =>
+    item.plan.trainerStudentRelationshipId === relationshipId
+      && item.version.status === "DRAFT"
+      && item.version.sourceType === sourceType)?.version.id ?? null;
+}
 
 export const workoutDemoStudentPublished: StudentPublishedWorkoutSummary[] = [
   {

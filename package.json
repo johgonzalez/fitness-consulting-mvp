@@ -22,7 +22,8 @@
     "exercise-media:verify": "node scripts/exercises/verify-media-pack-v1.mjs",
     "qa:trainer:create": "node --env-file-if-exists=.env.local scripts/create-qa-trainer.mjs",
     "qa:trainer:delete": "node --env-file-if-exists=.env.local scripts/delete-qa-trainer.mjs",
-    "qa:trainer:test": "node --no-warnings --test tests/qa/qa-trainer-utility.test.mjs"
+    "qa:trainer:test": "node --no-warnings --test tests/qa/qa-trainer-utility.test.mjs",
+    "workouts:sprint3:test": "node --no-warnings --test tests/workouts/trainer-workout-creation-sprint3.test.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

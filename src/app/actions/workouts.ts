@@ -2,7 +2,7 @@
 
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
-import { workoutDemoExerciseLibrary } from "@/data/demo/workouts";
+import { getWorkoutDemoDraftVersionId, workoutDemoExerciseLibrary } from "@/data/demo/workouts";
 import { getTrainerAssessmentRecord } from "@/lib/assessments/workspace";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import type {
@@ -16,6 +16,7 @@ import { buildWorkoutAiContext, validateWorkoutAiDraftOutput, type WorkoutAiDraf
 import { getWorkoutAiProvider } from "@/lib/workouts/ai-provider";
 import { WorkoutService } from "@/lib/workouts/service";
 import { getWorkoutCreationWorkspace } from "@/lib/workouts/workspace";
+import { normalizeYoutubeUrl } from "@/lib/workouts/youtube";
 
 export type WorkoutActionResult = {
   ok: boolean;
@@ -23,6 +24,8 @@ export type WorkoutActionResult = {
   resultId?: string;
   generated?: WorkoutAiDraftOutput;
   providerAvailable?: boolean;
+  providerId?: string;
+  exercise?: Exercise;
 };
 
 export type ExerciseLibrarySearchResult = {
@@ -65,6 +68,9 @@ function friendlyWorkoutError(error: unknown, fallback: string) {
   if (message.includes("workout_structure_invalid")) return "Complete a estrutura do treino antes de avançar.";
   if (message.includes("exercise_not_available")) return "O exercício não está mais disponível para este Personal.";
   if (message.includes("workout_ai_provider_unavailable")) return "A geração com IA não está configurada neste ambiente.";
+  if (message.includes("workout_ai_provider_timeout")) return "A geração demorou mais que o esperado. Tente novamente.";
+  if (message.includes("workout_ai_provider_")) return "A geração não pôde ser concluída. Tente novamente.";
+  if (message.includes("invalid_youtube_url")) return "Use uma URL HTTPS válida do YouTube.";
   if (message.includes("fetch") || message.includes("timeout") || message.includes("network")) return "A conexão falhou. Revise sua internet e tente novamente.";
   return fallback;
 }
@@ -124,9 +130,11 @@ export async function createManualWorkoutAction(input: {
   if (!uuidPattern.test(input.relationshipId)) return { ok: false, message: "Selecione um aluno ativo." };
   if (input.name.trim().length < 2 || input.name.trim().length > 160) return { ok: false, message: "Informe um nome de treino com 2 a 160 caracteres." };
   if (await isDemoWorkspaceRequest()) {
+    const resultId = getWorkoutDemoDraftVersionId(input.relationshipId, "MANUAL");
+    if (!resultId) return { ok: false, message: "Não há um Draft demo disponível para este aluno." };
     return {
       ok: true,
-      resultId: "f4200000-0000-4000-8000-000000000001",
+      resultId,
       message: "Draft manual aberto no workspace demo. Nenhum dado remoto foi alterado.",
     };
   }
@@ -186,14 +194,44 @@ export async function generateWorkoutAiDraftAction(input: {
     const providerOutput = await provider.generate({ context: aiContext, exercises: workspace.exerciseLibrary });
     const generated = validateWorkoutAiDraftOutput(providerOutput, new Set(workspace.exerciseLibrary.map((exercise) => exercise.id)));
 
+    const unresolvedCount = generated.sessions.reduce((total, session) => total + session.sections.reduce((sectionTotal, section) =>
+      sectionTotal + section.exercises.filter((exercise) => exercise.exerciseId === null).length, 0), 0);
+    return {
+      ok: true,
+      providerAvailable: true,
+      providerId: provider.id,
+      generated,
+      message: unresolvedCount
+        ? `Draft validado com ${unresolvedCount} exercício(s) para resolver antes de abrir o Builder.`
+        : "Draft validado. Abra no Builder para revisar cada detalhe.",
+    };
+  } catch (error) {
+    return { ok: false, message: friendlyWorkoutError(error, "A geração falhou antes de concluir o Draft. Tente novamente.") };
+  }
+}
+
+export async function materializeWorkoutAiDraftAction(input: {
+  relationshipId: string;
+  prompt: string;
+  draft: WorkoutAiDraftOutput;
+  providerId?: string;
+}): Promise<WorkoutActionResult> {
+  if (!uuidPattern.test(input.relationshipId)) return { ok: false, message: "Selecione um aluno ativo." };
+  if (input.prompt.trim().length < 2 || input.prompt.trim().length > 5000) return { ok: false, message: "O contexto da geração é inválido." };
+
+  try {
+    const workspace = await getWorkoutCreationWorkspace();
+    const studentContext = workspace.contexts.find((context) => context.student.id === input.relationshipId);
+    if (!studentContext) return { ok: false, message: "O aluno selecionado não está disponível." };
+    const generated = validateWorkoutAiDraftOutput(input.draft, new Set(workspace.exerciseLibrary.map((exercise) => exercise.id)));
+    const hasUnresolved = generated.sessions.some((session) => session.sections.some((section) =>
+      section.exercises.some((exercise) => exercise.exerciseId === null)));
+    if (hasUnresolved) return { ok: false, generated, message: "Resolva todos os exercícios não encontrados." };
+
     if (workspace.demoMode) {
-      return {
-        ok: true,
-        providerAvailable: true,
-        resultId: "f4200000-0000-4000-8000-000000000002",
-        generated,
-        message: "Draft local validado. Revise cada detalhe antes de aprovar.",
-      };
+      const resultId = getWorkoutDemoDraftVersionId(input.relationshipId, "AI_DRAFT");
+      if (!resultId) return { ok: false, generated, message: "Não há um Draft demo disponível para este aluno." };
+      return { ok: true, resultId, generated, message: "Draft local validado para revisão." };
     }
 
     const service = workoutService();
@@ -206,13 +244,16 @@ export async function generateWorkoutAiDraftAction(input: {
       workoutPlanId: planId,
       sourceAssessmentId: studentContext.latestCompletedAssessment?.id ?? null,
       trainerPrompt: input.prompt,
-      generationMetadata: { provider: provider.id },
+      generationMetadata: {
+        provider: input.providerId?.trim().slice(0, 120) || "trainer-reviewed-ai-draft",
+        trainer_review_required: true,
+      },
       output: generated,
     });
     revalidateWorkout(resultId);
-    return { ok: true, providerAvailable: true, resultId, generated, message: "Draft gerado e validado. Revise cada detalhe." };
+    return { ok: true, resultId, generated, message: "Draft validado. Revise cada detalhe antes de publicar." };
   } catch (error) {
-    return { ok: false, message: friendlyWorkoutError(error, "A geração falhou antes de concluir o Draft. Tente novamente.") };
+    return { ok: false, message: friendlyWorkoutError(error, "Não foi possível abrir o Draft no Builder.") };
   }
 }
 
@@ -271,11 +312,53 @@ export async function changeWorkoutLifecycleAction(input: {
   }
 }
 
-export async function createCustomExerciseAction(input: CreateCustomExerciseInput): Promise<WorkoutActionResult> {
-  if (await isDemoWorkspaceRequest()) return { ok: true, resultId: randomUUID(), message: "Exercício criado apenas na biblioteca demo local." };
+export async function createCustomExerciseAction(input: CreateCustomExerciseInput & { youtubeUrl?: string | null }): Promise<WorkoutActionResult> {
+  const youtubeUrl = input.youtubeUrl?.trim() ? normalizeYoutubeUrl(input.youtubeUrl) : null;
+  if (input.youtubeUrl?.trim() && !youtubeUrl) return { ok: false, message: "Use uma URL HTTPS válida do YouTube." };
+  const exerciseInput: CreateCustomExerciseInput = {
+    name: input.name,
+    description: input.description,
+    primaryMuscleGroup: input.primaryMuscleGroup,
+    secondaryMuscleGroups: input.secondaryMuscleGroups,
+    equipment: input.equipment,
+    movementPattern: input.movementPattern,
+    instructions: input.instructions.trim() || "Siga as orientações do seu Personal.",
+    coachingCues: input.coachingCues,
+    locale: input.locale,
+  };
+  if (await isDemoWorkspaceRequest()) {
+    const resultId = randomUUID();
+    const exercise: Exercise = {
+      id: resultId,
+      sourceType: "TRAINER_CUSTOM",
+      ...exerciseInput,
+      media: youtubeUrl ? [{ id: randomUUID(), mediaType: "VIDEO", urlOrStoragePath: youtubeUrl, thumbnailUrlOrPath: null, provider: "YOUTUBE", sourceUrl: youtubeUrl, licenseType: null, creatorCredit: null, productionStatus: "DEVELOPMENT", sortOrder: 0 }] : [],
+    };
+    return { ok: true, resultId, exercise, message: "Exercício criado apenas na biblioteca demo local." };
+  }
   try {
-    const resultId = await workoutService().createCustomExercise(input);
-    return { ok: true, resultId, message: "Exercício personalizado criado." };
+    const service = workoutService();
+    const resultId = await service.createCustomExercise(exerciseInput);
+    let mediaId: string | null = null;
+    if (youtubeUrl) {
+      mediaId = await service.addCustomExerciseMedia({
+        exerciseId: resultId,
+        mediaType: "VIDEO",
+        urlOrStoragePath: youtubeUrl,
+        thumbnailUrlOrPath: null,
+        provider: "YOUTUBE",
+        sourceUrl: youtubeUrl,
+        licenseType: null,
+        creatorCredit: null,
+      });
+    }
+    const exercise: Exercise = {
+      id: resultId,
+      sourceType: "TRAINER_CUSTOM",
+      ...exerciseInput,
+      media: youtubeUrl && mediaId ? [{ id: mediaId, mediaType: "VIDEO", urlOrStoragePath: youtubeUrl, thumbnailUrlOrPath: null, provider: "YOUTUBE", sourceUrl: youtubeUrl, licenseType: null, creatorCredit: null, productionStatus: "APPROVED", sortOrder: 0 }] : [],
+    };
+    return { ok: true, resultId, exercise, message: "Exercício personalizado criado." };
   } catch (error) {
     return { ok: false, message: friendlyWorkoutError(error, "Não foi possível criar o exercício.") };
   }

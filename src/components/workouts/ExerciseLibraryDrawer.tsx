@@ -36,6 +36,7 @@ export function ExerciseLibraryDrawer({
   const [customInstructions, setCustomInstructions] = useState("");
   const [customMuscle, setCustomMuscle] = useState("full_body");
   const [customEquipment, setCustomEquipment] = useState("");
+  const [customYoutube, setCustomYoutube] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [searchResult, setSearchResult] = useState<{ signature: string; exercises: Exercise[]; message: string | null }>({
@@ -88,29 +89,18 @@ export function ExerciseLibraryDrawer({
         instructions: customInstructions,
         coachingCues: [],
         locale: "pt-BR",
+        youtubeUrl: customYoutube,
       });
       setMessage(result.message);
-      if (result.ok && result.resultId) {
-        const created: Exercise = {
-          id: result.resultId,
-          sourceType: "TRAINER_CUSTOM",
-          name: customName.trim(),
-          description: null,
-          primaryMuscleGroup: customMuscle,
-          secondaryMuscleGroups: [],
-          equipment: customEquipment.split(",").map((item) => item.trim()).filter(Boolean),
-          movementPattern: null,
-          instructions: customInstructions.trim(),
-          coachingCues: [],
-          locale: "pt-BR",
-          media: [],
-        };
+      if (result.ok && result.exercise) {
+        const created = result.exercise;
         onCustomCreated(created);
         setSelectedId(created.id);
         setCreating(false);
         setCustomName("");
         setCustomInstructions("");
         setCustomEquipment("");
+        setCustomYoutube("");
       }
     });
   }
@@ -133,7 +123,7 @@ export function ExerciseLibraryDrawer({
           <button type="button" className={styles.createExerciseButton} onClick={() => setCreating(true)}><Plus aria-hidden="true" />Criar exercício personalizado</button>
         </div>
         <div className={styles.exercisePreview}>
-          {creating ? <div className={styles.customExerciseForm}><button type="button" onClick={() => setCreating(false)}><ChevronLeft aria-hidden="true" />Voltar à biblioteca</button><h3>Novo exercício</h3><label>Nome<input value={customName} onChange={(event) => setCustomName(event.target.value)} maxLength={160} /></label><label>Grupo muscular<select value={customMuscle} onChange={(event) => setCustomMuscle(event.target.value)}>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><label>Equipamentos<input value={customEquipment} onChange={(event) => setCustomEquipment(event.target.value)} placeholder="dumbbell, bench" /></label><label>Instruções<textarea value={customInstructions} onChange={(event) => setCustomInstructions(event.target.value)} maxLength={5000} /></label>{message ? <p role="status">{message}</p> : null}<button type="button" className="pp-button pp-button--primary" disabled={pending || customName.trim().length < 2 || customInstructions.trim().length < 2} onClick={createCustom}>Criar exercício</button></div> : selected ? <>
+          {creating ? <div className={styles.customExerciseForm}><button type="button" onClick={() => setCreating(false)}><ChevronLeft aria-hidden="true" />Voltar à biblioteca</button><h3>Novo exercício</h3><label>Nome<input value={customName} onChange={(event) => setCustomName(event.target.value)} maxLength={160} /></label><label>Grupo muscular <small>opcional</small><select value={customMuscle} onChange={(event) => setCustomMuscle(event.target.value)}>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><label>Equipamentos <small>opcional</small><input value={customEquipment} onChange={(event) => setCustomEquipment(event.target.value)} placeholder="dumbbell, bench" /></label><label>Instruções <small>opcional</small><textarea value={customInstructions} onChange={(event) => setCustomInstructions(event.target.value)} maxLength={5000} /></label><label>URL do YouTube <small>opcional</small><input type="url" value={customYoutube} onChange={(event) => setCustomYoutube(event.target.value)} placeholder="https://www.youtube.com/watch?v=..." /></label>{message ? <p role="status">{message}</p> : null}<button type="button" className="pp-button pp-button--primary" disabled={pending || customName.trim().length < 2} onClick={createCustom}>Criar exercício</button></div> : selected ? <>
             <ExerciseMedia exercise={selected} demoMode={demoMode} priority />
             <div className={styles.previewIdentity}><small>{selected.sourceType === "PPERFIL_LIBRARY" ? "Biblioteca PPerfil" : "Meu exercício"}</small><h3>{selected.name}</h3><p>{selected.primaryMuscleGroup} · {selected.equipment.join(" · ") || "Sem equipamento"}</p></div>
             <section><h4>Instruções</h4><p>{selected.instructions}</p></section>

@@ -10,6 +10,7 @@ import styles from "./workouts.module.css";
 export function ExerciseMedia({ exercise, demoMode, priority = false }: { exercise: Exercise; demoMode: boolean; priority?: boolean }) {
   const [failedUrls, setFailedUrls] = useState<Set<string>>(() => new Set());
   const media = exerciseMediaItems(exercise, demoMode)
+    .filter((item) => item.mediaType === "IMAGE")
     .slice(0, 2)
     .map((item) => ({ ...item, displayUrl: item.thumbnailUrl ?? item.url }))
     .filter((item) => !failedUrls.has(item.displayUrl));
