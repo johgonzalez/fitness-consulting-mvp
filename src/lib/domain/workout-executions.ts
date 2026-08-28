@@ -237,3 +237,17 @@ export type TrainerWorkoutExecutionSummary = {
   completedSets: number;
   skippedSets: number;
 };
+
+export type TrainerWorkoutCompletionNotification = {
+  id: string;
+  workoutExecutionId: string;
+  trainerStudentRelationshipId: string;
+  createdAt: string;
+  studentName: string;
+  planName: string;
+  sessionName: string;
+  completedAt: string;
+  activeDurationSeconds: number;
+  completedSets: number;
+  skippedSets: number;
+};

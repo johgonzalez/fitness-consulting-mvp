@@ -2,6 +2,7 @@ import type {
   PreviousExercisePerformance,
   StudentWorkoutHistoryItem,
   StudentWorkoutOverview,
+  TrainerWorkoutCompletionNotification,
   TrainerWorkoutExecutionSummary,
   WorkoutDifficulty,
   WorkoutExecutionMutation,
@@ -29,4 +30,5 @@ export interface WorkoutExecutionRepository {
   getPreviousPerformance(exerciseId: string, beforeExecutionId?: string | null): Promise<PreviousExercisePerformance>;
   listStudentHistory(limit?: number): Promise<StudentWorkoutHistoryItem[]>;
   listTrainerExecutions(relationshipId: string, limit?: number): Promise<TrainerWorkoutExecutionSummary[]>;
+  listTrainerNotifications(limit?: number): Promise<TrainerWorkoutCompletionNotification[]>;
 }

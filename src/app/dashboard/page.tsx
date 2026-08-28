@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, ClipboardCheck, Dumbbell, ExternalLink, Globe2, Send, Share2, UserPlus, UsersRound } from "lucide-react";
+import { ArrowRight, Bell, ClipboardCheck, Dumbbell, ExternalLink, Globe2, Send, Share2, UserPlus, UsersRound } from "lucide-react";
 import { getTrainerAssessmentIndex } from "@/lib/assessments/workspace";
 import { getWorkoutIndex } from "@/lib/workouts/workspace";
 import { Avatar, Status } from "@/components/ui/PPerfilPrimitives";
 import { getLeadsWorkspace } from "@/lib/supabase/leads";
 import { getStudentsWorkspace } from "@/lib/supabase/students";
 import { findDashboardMetrics, findOwnerProfile } from "@/lib/supabase/trainers";
+import { SupabaseWorkoutExecutionRepository } from "@/lib/supabase/workout-executions";
+import { WorkoutExecutionService } from "@/lib/workouts/execution-service";
 
 const dayFormatter = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
@@ -15,8 +17,9 @@ function countLabel(count: number, singular: string, plural: string) {
 }
 
 export default async function DashboardPage() {
-  const [profile, metrics, studentData, leadData, assessmentData, workoutData] = await Promise.all([
-    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null),
+  const executionService = new WorkoutExecutionService(new SupabaseWorkoutExecutionRepository());
+  const [profile, metrics, studentData, leadData, assessmentData, workoutData, workoutNotifications] = await Promise.all([
+    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null), executionService.listTrainerNotifications(3).catch(() => []),
   ]);
   if (!profile) redirect("/onboarding");
 
@@ -29,6 +32,13 @@ export default async function DashboardPage() {
   const siteHref = `/p/${profile.slug}`;
   const siteUrl = `pperfil.com/p/${profile.slug}`;
   const priorities = [
+    ...workoutNotifications.map((notification) => ({
+      label: `${notification.studentName} concluiu ${notification.sessionName}`,
+      href: `/dashboard/students/${notification.trainerStudentRelationshipId}`,
+      action: "Ver aluno",
+      icon: Bell,
+      tone: "success",
+    })),
     reviewAssessments.length ? { label: `${countLabel(reviewAssessments.length, "avaliação", "avaliações")} para revisar`, href: "/dashboard/assessments", action: "Revisar", icon: ClipboardCheck, tone: "warning" } : null,
     draftWorkouts.length ? { label: `${countLabel(draftWorkouts.length, "treino", "treinos")} em rascunho`, href: "/dashboard/workouts", action: "Continuar", icon: Dumbbell, tone: "accent" } : null,
     attentionLeads.length ? { label: `${countLabel(attentionLeads.length, "lead", "leads")} aguardando ação`, href: "/dashboard/leads", action: "Ver leads", icon: UsersRound, tone: "info" } : null,

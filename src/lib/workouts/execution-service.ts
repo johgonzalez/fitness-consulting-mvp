@@ -96,6 +96,11 @@ export class WorkoutExecutionService {
     return this.executions.listTrainerExecutions(relationshipId, limit);
   }
 
+  listTrainerNotifications(limit = 8) {
+    this.assertLimit(limit);
+    return this.executions.listTrainerNotifications(limit);
+  }
+
   private assertMutationEnvelope(executionId: string, expectedServerRevision: number, clientMutationId?: string): void {
     assertExecutionUuid(executionId, "executionId");
     assertServerRevision(expectedServerRevision);

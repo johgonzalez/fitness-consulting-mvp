@@ -30,6 +30,7 @@ import {
   syncStudentWorkoutAction,
 } from "@/app/actions/workout-executions";
 import { StudentWorkoutMedia, resolveStudentWorkoutMedia } from "@/components/student/StudentWorkoutMedia";
+import { WorkoutCompletionShare } from "@/components/student/WorkoutCompletionShare";
 import { TrainerPresence } from "@/components/student/TrainerPresence";
 import type {
   PreviousExercisePerformance,
@@ -809,12 +810,17 @@ export function WorkoutExecutionExperience({
       <p>Ótimo trabalho</p><h1>Treino concluído</h1><span>Você manteve o foco e finalizou a sessão.</span>
       <dl><div><Clock3 aria-hidden="true" /><dd>{activeMinutes(snapshot)} min</dd><dt>Duração</dt></div><div><Dumbbell aria-hidden="true" /><dd>{snapshot.metrics.completedExercises}</dd><dt>Exercícios</dt></div><div><Check aria-hidden="true" /><dd>{snapshot.metrics.completedSets}</dd><dt>Séries</dt></div></dl>
       <TrainerPresence {...identity.trainer} compact />
-      {feedbackSent ? <div className="pp-feedback-sent"><Check aria-hidden="true" /><strong>Feedback enviado</strong><p>Seu Personal recebeu como foi a sessão.</p><Link href="/student/today">Voltar para Hoje</Link></div> : <div className="pp-workout-feedback">
+      {feedbackSent ? <div className="pp-feedback-sent"><Check aria-hidden="true" /><strong>Feedback enviado</strong><p>Seu Personal recebeu como foi a sessão.</p></div> : <div className="pp-workout-feedback">
         <h2>Como foi o treino hoje?</h2>
         <div>{feedbackOptions.map((option) => <button type="button" key={option.value} aria-pressed={feedback === option.value} onClick={() => setFeedback(option.value)}>{option.label}</button>)}</div>
         <label><span>Algo que seu Personal deveria saber?</span><textarea value={feedbackNote} maxLength={2000} onChange={(event) => setFeedbackNote(event.target.value)} placeholder="Dor, fadiga ou uma observação importante…" /></label>
         <button className="pp-workout-primary" type="button" onClick={sendFeedback} disabled={!feedback || busy}><Send aria-hidden="true" />Enviar feedback</button>
       </div>}
+      <WorkoutCompletionShare
+        durationMinutes={activeMinutes(snapshot)}
+        completedExercises={snapshot.metrics.completedExercises}
+        completedSets={snapshot.metrics.completedSets}
+      />
     </section>;
   }
 

@@ -7,6 +7,7 @@ import {
   type PreviousExercisePerformance,
   type StudentWorkoutHistoryItem,
   type StudentWorkoutOverview,
+  type TrainerWorkoutCompletionNotification,
   type TrainerWorkoutExecutionSummary,
   type WorkoutExecutionMutation,
   type WorkoutExecutionSnapshot,
@@ -327,6 +328,25 @@ export function parseTrainerWorkoutExecutions(value: unknown): TrainerWorkoutExe
       sessionName: string(item.session_name, "trainer execution.session_name"),
       completedSets: number(item.completed_sets, "trainer execution.completed_sets"),
       skippedSets: number(item.skipped_sets, "trainer execution.skipped_sets"),
+    };
+  });
+}
+
+export function parseTrainerWorkoutNotifications(value: unknown): TrainerWorkoutCompletionNotification[] {
+  return array(value, "trainer workout notifications").map((itemValue) => {
+    const item = object(itemValue, "trainer workout notification");
+    return {
+      id: string(item.id, "notification.id"),
+      workoutExecutionId: string(item.workout_execution_id, "notification.workout_execution_id"),
+      trainerStudentRelationshipId: string(item.trainer_student_relationship_id, "notification.trainer_student_relationship_id"),
+      createdAt: string(item.created_at, "notification.created_at"),
+      studentName: string(item.student_name, "notification.student_name"),
+      planName: string(item.plan_name, "notification.plan_name"),
+      sessionName: string(item.session_name, "notification.session_name"),
+      completedAt: string(item.completed_at, "notification.completed_at"),
+      activeDurationSeconds: number(item.active_duration_seconds, "notification.active_duration_seconds"),
+      completedSets: number(item.completed_sets, "notification.completed_sets"),
+      skippedSets: number(item.skipped_sets, "notification.skipped_sets"),
     };
   });
 }

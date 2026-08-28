@@ -185,6 +185,7 @@ insert into execution_gate_results values
   ));
 
 select public.complete_workout_execution((select value from execution_gate_context where key='execution_a1'),'5a500000-0000-4000-8000-000000000007',4);
+select public.complete_workout_execution((select value from execution_gate_context where key='execution_a1'),'5a500000-0000-4000-8000-000000000007',4);
 select public.record_workout_execution_feedback((select value from execution_gate_context where key='execution_a1'),'GOOD','Treino consistente.','5a500000-0000-4000-8000-000000000008',5);
 select public.record_workout_execution_feedback((select value from execution_gate_context where key='execution_a1'),'CHALLENGING','Correção dentro da janela.','5a500000-0000-4000-8000-000000000009',6);
 insert into execution_gate_results values
@@ -204,7 +205,11 @@ insert into execution_gate_results values
   ('Previous performance returns completed actuals', public.get_previous_exercise_performance('5a400000-0000-4000-8000-000000000001',null) #>> '{sets,0,actual_reps}'='10'),
   ('Execution events are append only', pg_temp.raises(format(
     'update public.workout_execution_events set metadata=%L::jsonb where workout_execution_id=%L::uuid','{}',(select value from execution_gate_context where key='execution_a1')
-  )));
+  )),
+  ('Student cannot read Trainer completion notification',
+    not exists(select 1 from public.trainer_workout_notifications where workout_execution_id=(select value from execution_gate_context where key='execution_a1'))
+    and pg_temp.raises('select public.list_trainer_workout_notifications(8)')
+  );
 
 -- Trainer reads the owned projection but cannot mutate student facts.
 set local role postgres;
@@ -212,6 +217,14 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"5a000000-0000-4000-8000-000000000001","role":"authenticated"}';
 insert into execution_gate_results values
   ('Owning trainer reads execution projection', public.get_trainer_workout_execution((select value from execution_gate_context where key='execution_a1')) #>> '{execution,status}'='COMPLETED'),
+  ('Owning trainer receives one factual completion notification',
+    public.list_trainer_workout_notifications(8) #>> '{0,workout_execution_id}'=(select value::text from execution_gate_context where key='execution_a1')
+    and public.list_trainer_workout_notifications(8) #>> '{0,completed_sets}'='1'
+  ),
+  ('Completion notification is idempotent', (
+    select count(*)=1 from public.trainer_workout_notifications
+    where workout_execution_id=(select value from execution_gate_context where key='execution_a1')
+  )),
   ('Trainer cannot mutate execution', pg_temp.raises(format(
     'select public.sync_workout_execution(%L::uuid,7,%L::jsonb)',
     (select value from execution_gate_context where key='execution_a1'),
@@ -230,6 +243,10 @@ insert into execution_gate_results values
   ('Trainer A execution hidden from Trainer B',
     not exists(select 1 from public.workout_executions where id=(select value from execution_gate_context where key='execution_a1'))
     and pg_temp.raises(format('select public.get_trainer_workout_execution(%L::uuid)',(select value from execution_gate_context where key='execution_a1')))
+  ),
+  ('Trainer A notification hidden from Trainer B',
+    not exists(select 1 from public.trainer_workout_notifications where workout_execution_id=(select value from execution_gate_context where key='execution_a1'))
+    and public.list_trainer_workout_notifications(8)='[]'::jsonb
   );
 
 set local role postgres;

@@ -12,6 +12,7 @@ import {
   parseStudentWorkoutOverview,
   parseStudentWorkoutOverviews,
   parseTrainerWorkoutExecutions,
+  parseTrainerWorkoutNotifications,
   parseWorkoutExecutionSnapshot,
 } from "@/lib/validation/workout-executions";
 
@@ -163,6 +164,13 @@ export class SupabaseWorkoutExecutionRepository implements WorkoutExecutionRepos
     });
     throwRpcError(error);
     return parseTrainerWorkoutExecutions(data);
+  }
+
+  async listTrainerNotifications(limit = 8) {
+    const supabase = await requireAuthenticatedClient();
+    const { data, error } = await supabase.rpc("list_trainer_workout_notifications", { p_limit: limit });
+    throwRpcError(error);
+    return parseTrainerWorkoutNotifications(data);
   }
 
   private async lifecycle(
