@@ -3,13 +3,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { DEMO_COOKIE_NAME, isActiveDemoCookie } from "@/lib/demo/config";
 import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { getSupabaseConfig } from "@/lib/supabase/config";
-import { safeInternalPath } from "@/lib/validation/auth";
+import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
 
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const trainerRoute = pathname.startsWith("/dashboard");
   const studentRoute = pathname.startsWith("/student");
-  const protectedRoute = trainerRoute || studentRoute || pathname.startsWith("/onboarding");
+  const studentAccessRoute = pathname === "/access/student";
+  const protectedRoute = trainerRoute || studentRoute || studentAccessRoute || pathname.startsWith("/onboarding");
   const authRoute = pathname === "/login" || pathname === "/signup";
   const demoWorkspace = isActiveDemoCookie(request.cookies.get(DEMO_COOKIE_NAME)?.value);
 
@@ -53,9 +54,10 @@ export async function updateSession(request: NextRequest) {
     }
   }
   if (authRoute && authenticated) {
+    if (pathname === "/login" && request.nextUrl.searchParams.get("choose") === "1") return response;
     const explicitNext = safeInternalPath(request.nextUrl.searchParams.get("next"), "");
-    if (explicitNext) return NextResponse.redirect(new URL(explicitNext, request.url));
-    return NextResponse.redirect(new URL(await resolveAuthenticatedHome(supabase), request.url));
+    const context = normalizeAuthContext(request.nextUrl.searchParams.get("context"));
+    return NextResponse.redirect(new URL(await resolveAuthenticatedHome(supabase, { context, nextPath: explicitNext }), request.url));
   }
   return response;
 }

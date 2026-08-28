@@ -7,7 +7,7 @@ import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import type { AuthFormState } from "@/lib/validation/auth";
 
 function hiddenContext(state: AuthFormState) {
-  return <><input type="hidden" name="email" value={state.email ?? ""} /><input type="hidden" name="next" value={state.nextPath ?? ""} /></>;
+  return <><input type="hidden" name="email" value={state.email ?? ""} /><input type="hidden" name="next" value={state.nextPath ?? ""} />{state.context ? <input type="hidden" name="context" value={state.context} /> : null}</>;
 }
 
 export function OtpVerificationForm({ initialState, storageKey }: { initialState: AuthFormState; storageKey: string }) {
@@ -26,8 +26,8 @@ export function OtpVerificationForm({ initialState, storageKey }: { initialState
   const inputRef = useRef<HTMLInputElement>(null);
   const secondsUntilResend = Math.max(0, Math.ceil((resendAvailableAt - now) / 1000));
   const invitedFlow = /^\/invite\/[a-f0-9]{64}$/.test(contextState.nextPath ?? "");
-  const backHref = invitedFlow ? contextState.nextPath! : "/signup";
-  const exitHref = authRouteWithNext("/login", contextState.nextPath);
+  const backHref = invitedFlow ? contextState.nextPath! : authRouteWithNext("/signup", contextState.nextPath, contextState.context);
+  const exitHref = authRouteWithNext("/login", undefined, contextState.context);
 
   useEffect(() => {
     window.sessionStorage.setItem(storageKey, JSON.stringify({ ...contextState, resendAvailableAt }));

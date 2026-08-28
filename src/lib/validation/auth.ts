@@ -8,7 +8,14 @@ export type AuthFormState = {
   resendAttempted?: boolean;
   resendCooldownSeconds?: number;
   resendAvailableAt?: number;
+  context?: AuthContext;
 };
+
+export type AuthContext = "trainer" | "student";
+
+export function normalizeAuthContext(value: FormDataEntryValue | null): AuthContext | undefined {
+  return value === "trainer" || value === "student" ? value : undefined;
+}
 
 export function validateAuthInput(formData: FormData) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();

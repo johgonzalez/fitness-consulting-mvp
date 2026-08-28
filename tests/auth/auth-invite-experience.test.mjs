@@ -22,17 +22,18 @@ test("login and signup share the canonical auth shell and preserve safe next", (
   assert.match(authShell, /pc-auth-page/);
   assert.match(authShell, /ThemeToggle/);
   assert.match(authForm, /name="next" value=\{nextPath\}/);
+  assert.match(authForm, /name="context" value=\{context\}/);
   assert.match(authForm, /authRouteWithNext/);
   assert.match(authActions, /safeInternalPath\(formData\.get\("next"\), ""\)/);
-  assert.match(authActions, /redirect\(await resolveAuthenticatedHome\(supabase\)\)/);
+  assert.match(authActions, /resolveAuthenticatedHome\(supabase, \{ context, nextPath:/);
 });
 
 test("invitation bridge prioritizes account creation and keeps next on both auth paths", () => {
   const createIndex = invitePage.indexOf("Criar acesso");
   const loginIndex = invitePage.indexOf("Já tem uma conta? Entrar");
   assert.ok(createIndex >= 0 && loginIndex > createIndex);
-  assert.match(invitePage, /authRouteWithNext\("\/signup", next\)/);
-  assert.match(invitePage, /authRouteWithNext\("\/login", next\)/);
+  assert.match(invitePage, /authRouteWithNext\("\/signup", next, "student"\)/);
+  assert.match(invitePage, /authRouteWithNext\("\/login", next, "student"\)/);
 });
 
 test("invitation token is server-bound instead of rendered in a hidden form field", () => {
@@ -70,7 +71,7 @@ test("trainer and student logout entry points require explicit confirmation", ()
 
 test("authenticated auth-route redirect respects explicit next and role-aware home", () => {
   assert.match(proxy, /safeInternalPath\(request\.nextUrl\.searchParams\.get\("next"\), ""\)/);
-  assert.match(proxy, /resolveAuthenticatedHome\(supabase\)/);
+  assert.match(proxy, /resolveAuthenticatedHome\(supabase, \{ context, nextPath: explicitNext \}\)/);
   assert.doesNotMatch(proxy, /authRoute && authenticated\) return NextResponse\.redirect\(new URL\("\/dashboard"/);
 });
 

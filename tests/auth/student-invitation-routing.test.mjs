@@ -12,6 +12,7 @@ test("login and signup preserve the invitation route", () => {
   const next = "/invite/abc123";
   assert.equal(authRouteWithNext("/login", next), "/login?next=%2Finvite%2Fabc123");
   assert.equal(authRouteWithNext("/signup", next), "/signup?next=%2Finvite%2Fabc123");
+  assert.equal(authRouteWithNext("/login", next, "student"), "/login?next=%2Finvite%2Fabc123&context=student");
 });
 
 test("default login destination respects Student-only and multi-role identities", () => {
@@ -34,5 +35,5 @@ test("the acceptance action and auth switch use the shared invitation route cont
   const authFormSource = readFileSync(new URL("../../src/components/auth/AuthForm.tsx", import.meta.url), "utf8");
   assert.match(actionSource, /redirect\(STUDENT_APP_HOME\)/);
   assert.doesNotMatch(actionSource, /acceptInvitationAction[\s\S]*redirect\("\/dashboard"\)/);
-  assert.match(authFormSource, /authRouteWithNext\(signupMode \? "\/login" : "\/signup", nextPath\)/);
+  assert.match(authFormSource, /authRouteWithNext\(signupMode \? "\/login" : "\/signup", nextPath, context\)/);
 });

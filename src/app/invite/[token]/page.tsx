@@ -23,8 +23,8 @@ export default async function InvitePage({ params, searchParams }: { params: Pro
     <div className="pc-invite-context"><span><ShieldCheck aria-hidden="true" /></span><div><strong>Convite protegido</strong><p>O vínculo só será criado depois que você confirmar o acesso.</p></div></div>
     {query.auth_error === "invited_account_required" ? <div className="pc-auth-state pc-auth-state--danger"><AlertCircle aria-hidden="true" /><p>Entre com a mesma conta que recebeu o convite.</p>{data.user ? <SecureLogoutForm /> : null}</div> : null}
     {query.auth_error === "invited_account_required" && data.user ? null : data.user ? <><div className="pc-invite-authenticated"><UserRoundPlus aria-hidden="true" /><p>Você já está conectado. Confirme para aceitar o convite.</p></div><AcceptInvitationForm action={acceptAction} /></> : <div className="pc-invite-actions">
-      <Link className="pp-button pp-button--primary" href={authRouteWithNext("/signup", next)}>Criar acesso<ArrowRight aria-hidden="true" /></Link>
-      <Link className="pp-button pp-button--secondary" href={authRouteWithNext("/login", next)}>Já tem uma conta? Entrar</Link>
+      <Link className="pp-button pp-button--primary" href={authRouteWithNext("/signup", next, "student")}>Criar acesso<ArrowRight aria-hidden="true" /></Link>
+      <Link className="pp-button pp-button--secondary" href={authRouteWithNext("/login", next, "student")}>Já tem uma conta? Entrar</Link>
     </div>}
   </AuthShell>;
 }

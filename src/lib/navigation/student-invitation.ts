@@ -6,6 +6,10 @@ export function defaultAuthenticatedHome(roles?: readonly unknown[]) {
   return "/onboarding";
 }
 
-export function authRouteWithNext(route: "/login" | "/signup", nextPath?: string) {
-  return nextPath ? `${route}?next=${encodeURIComponent(nextPath)}` : route;
+export function authRouteWithNext(route: "/login" | "/signup", nextPath?: string, context?: "trainer" | "student") {
+  const params = new URLSearchParams();
+  if (nextPath) params.set("next", nextPath);
+  if (context) params.set("context", context);
+  const query = params.toString();
+  return query ? `${route}?${query}` : route;
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
-import { safeInternalPath } from "@/lib/validation/auth";
+import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
 
 const invitePattern = /^\/invite\/([a-f0-9]{64})$/;
 
@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const nextPath = safeInternalPath(url.searchParams.get("next"), "");
+  const context = normalizeAuthContext(url.searchParams.get("context"));
   if (!code) return NextResponse.redirect(new URL("/login?oauth=failed", url));
 
   const supabase = await createClient();
@@ -29,6 +30,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/student/today", url));
   }
 
-  if (nextPath) return NextResponse.redirect(new URL(nextPath, url));
-  return NextResponse.redirect(new URL(await resolveAuthenticatedHome(supabase), url));
+  return NextResponse.redirect(new URL(await resolveAuthenticatedHome(supabase, { context, nextPath }), url));
 }
