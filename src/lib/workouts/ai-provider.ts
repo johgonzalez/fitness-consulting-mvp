@@ -94,6 +94,11 @@ class OpenAiWorkoutProvider implements WorkoutAiProvider {
               "Não diagnostique, não faça alegações médicas e não invente lesões ou condições.",
               "Use exerciseId apenas quando ele existir no catálogo autorizado fornecido.",
               "Para outro exercício, use exerciseId null e unresolvedExerciseName com um nome factual.",
+              "Em cada série, use targetReps OU targetRepsMin e targetRepsMax; nunca preencha os três ao mesmo tempo.",
+              "Quando usar targetReps, deixe targetRepsMin e targetRepsMax null; quando usar faixa, deixe targetReps null.",
+              "Mantenha em null todo campo de prescrição não utilizado e sempre forneça reps, duração ou distância.",
+              "Preencha targetLoad e loadUnit juntos ou deixe ambos null; faça o mesmo com distanceValue e distanceUnit.",
+              "Use setNumber positivo e único por exercício, targetRpe entre 0 e 10 e valores de reps, duração e descanso não negativos.",
               "Nunca publique; retorne exclusivamente JSON compatível com workout-ai-draft-v1.",
             ].join(" ") },
             { role: "user", content: JSON.stringify({
