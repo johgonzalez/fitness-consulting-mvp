@@ -355,8 +355,8 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
     });
   }
 
-  return <main className={`${styles.builderPage}${reviewMode ? ` ${styles.reviewPage}` : ""}`}>
-    <header className={styles.builderTopbar}>
+  return <main className={`pp-workout-builder-shell ${styles.builderPage}${reviewMode ? ` ${styles.reviewPage}` : ""}`}>
+    <header className={`pp-workout-builder-topbar ${styles.builderTopbar}`}>
       <Link href={backHref} aria-label="Voltar para treinos"><ArrowLeft aria-hidden="true" /></Link>
       <div className={styles.builderTitle}><span><strong>{projection.plan.name}</strong><small>{record.studentContext?.student.name ?? "Aluno"} · v{projection.version.versionNumber}</small></span></div>
       <div className={styles.saveState} data-state={saveState}>{saveState === "saving" ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : saveState === "error" ? <X aria-hidden="true" /> : <Check aria-hidden="true" />}<span>{saveState === "saving" ? "Salvando" : saveState === "error" ? "Falha ao salvar" : "Salvo"}</span>{saveState === "error" ? <button type="button" onClick={retryFailed}>Tentar de novo</button> : null}</div>

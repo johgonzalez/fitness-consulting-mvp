@@ -1,5 +1,5 @@
 import { BottomNavigation } from "@/components/dashboard/BottomNavigation";
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardHeader, DashboardUserUtility } from "@/components/dashboard/DashboardHeader";
 import { requireUser } from "@/lib/auth/user";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
 import { createClient } from "@/lib/supabase/server";
@@ -20,5 +20,5 @@ export default async function DashboardLayout({ children }: { children: React.Re
     if (access?.waitlist_joined === true && access.founder_access_active !== true) redirect("/onboarding");
   }
   const name = profile?.display_name ?? user.email?.split("@")[0] ?? "Personal";
-  return <div className="dashboard-shell pp-trainer-shell--premium"><aside className="dashboard-sidebar"><DashboardHeader name={name} imageUrl={profile?.profile_image_url} demoMode={demoMode} /><BottomNavigation leadCount={metrics.leads} /></aside><div className="dashboard-content">{children}</div></div>;
+  return <div className="dashboard-shell pp-app-shell-v1 pp-trainer-shell--premium"><aside className="dashboard-sidebar"><DashboardHeader demoMode={demoMode} /><BottomNavigation leadCount={metrics.leads} /><DashboardUserUtility name={name} imageUrl={profile?.profile_image_url} /></aside><div className="dashboard-content">{children}</div></div>;
 }

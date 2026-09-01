@@ -192,6 +192,10 @@ export async function getStudentTodayWorkspace(): Promise<StudentTodayWorkspace>
   return { identity: await liveIdentity(relationshipId), workouts, history, demoMode };
 }
 
+export async function getStudentShellIdentity(): Promise<StudentWorkoutIdentity> {
+  return await isDemoWorkspaceRequest() ? demoIdentity() : liveIdentity();
+}
+
 export async function getStudentWorkoutRecord(sessionId: string): Promise<StudentWorkoutRecord | null> {
   const demoMode = await isDemoWorkspaceRequest();
   if (demoMode) {

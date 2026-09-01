@@ -1,10 +1,11 @@
 "use client";
 
+import { BarChart3, Dumbbell, House, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Dumbbell, House, MessageCircle, UserRound } from "lucide-react";
-import { BrandLogo } from "@/components/dashboard/BrandLogo";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
+import { Avatar } from "@/components/ui/PPerfilPrimitives";
+import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
 
 const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
@@ -13,17 +14,18 @@ const navigation = [
   { label: "Perfil", href: "/student/profile", icon: UserRound },
 ] as const;
 
-const futureNavigation = [
-  { label: "Chat", icon: MessageCircle },
-] as const;
-
-export function StudentAppShell({ children, demoMode }: { children: React.ReactNode; demoMode: boolean }) {
+export function StudentAppShell({ children, demoMode, identity }: { children: React.ReactNode; demoMode: boolean; identity: StudentWorkoutIdentity }) {
   const pathname = usePathname();
   const immersive = pathname.endsWith("/execute") || pathname.includes("/execute/");
+  const trainerLabel = identity.trainer.name === "Seu Personal" ? "Acompanhamento" : "Seu Personal";
 
-  return <div className={`pp-student-shell pp-student-app${immersive ? " pp-student-app--immersive" : ""}`}>
+  return <div className={`pp-student-shell pp-app-shell-v1 pp-student-app${immersive ? " pp-student-app--immersive" : ""}`}>
     <header className="pp-student-app__bar">
-      <BrandLogo href="/student/today" />
+      <Link href="/student/today" className="pp-student-coach" aria-label={`${identity.trainer.name}, ${trainerLabel}`}>
+        <Avatar name={identity.trainer.name} imageUrl={identity.trainer.imageUrl} size="small" loading="eager" />
+        <span><strong>{identity.trainer.name}</strong><small>{trainerLabel}</small></span>
+      </Link>
+      <span className="pp-student-brand" aria-label="PPerfil">PPerfil</span>
       <div className="pp-student-app__tools">
         {demoMode ? <Link href="/demo?next=/dashboard" className="pp-student-demo-indicator" title="Voltar ao portal demo do Personal"><i aria-hidden="true" />Demo aluno · Ver como Personal</Link> : null}
         <ThemeToggle />
@@ -33,13 +35,8 @@ export function StudentAppShell({ children, demoMode }: { children: React.ReactN
     <nav className="pp-student-nav" aria-label="Navegação do aluno">
       {navigation.map(({ label, href, icon: Icon }) => {
         const active = pathname === href || (href === "/student/workouts" && pathname.startsWith(`${href}/`));
-        return <Link key={href} href={href} aria-current={active ? "page" : undefined}>
-          <Icon aria-hidden="true" /><span>{label}</span>
-        </Link>;
+        return <Link key={href} href={href} aria-current={active ? "page" : undefined}><Icon aria-hidden="true" /><span>{label}</span></Link>;
       })}
-      {futureNavigation.map(({ label, icon: Icon }) => <button key={label} type="button" disabled aria-label={`${label} — em breve`}>
-        <Icon aria-hidden="true" /><span>{label}</span>
-      </button>)}
     </nav>
   </div>;
 }
