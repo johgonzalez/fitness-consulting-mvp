@@ -50,3 +50,19 @@ Preencher somente após revisão humana:
 - Direção final de motion por template público.
 
 Não há decisões automaticamente aprovadas neste Sprint.
+
+<!-- GATE_1B:START -->
+## GATE 1B
+
+STATUS: **REOPENED — INSUFFICIENT DIFFERENTIATION**
+
+Visual Territory: —
+
+Primary Button: —
+
+Field System: —
+
+Iconography: —
+
+Approved At: —
+<!-- GATE_1B:END -->

@@ -252,3 +252,12 @@ Princípio: **Alive, not animated.**
 - Não forçar Student Workout para dentro da gramática do Dashboard Trainer.
 - Não simplificar Workout Builder removendo capacidade ou contexto prescritivo.
 - Não propagar aliases e classes legadas como padrão para novas telas.
+
+## Gate visual canônico
+
+Todo sprint visual futuro deve começar lendo `docs/design/approvals/GATE_1B.json`.
+
+- `APPROVED`: as quatro decisões registradas são a especificação canônica; não pedir repetição, reinterpretar ou alterar silenciosamente.
+- Arquivo ausente ou status `REOPENED`: interromper antes de qualquer migração visual para telas de produção.
+- Aprovação com `labVersion` ou `labFingerprint` divergente: informar `APPROVED — REVIEW RECOMMENDED` antes de uma migração material; a divergência não revoga automaticamente a decisão humana.
+- O artefato não contém identidade, conta, e-mail, IP ou qualquer PII.

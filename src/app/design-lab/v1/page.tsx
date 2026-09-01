@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 };
 
-export default function DesignLabV1Page() {
+export const dynamic = "force-dynamic";
+
+export default async function DesignLabV1Page() {
   if (process.env.NODE_ENV === "production") notFound();
-  return <DesignLabClient />;
+  const { readApprovalState } = await import("./approval-server");
+  const approval = await readApprovalState();
+  return <DesignLabClient repositoryArtifact={approval.artifact} stale={approval.stale} />;
 }
