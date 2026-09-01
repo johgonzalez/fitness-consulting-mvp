@@ -66,3 +66,15 @@ Iconography: I01
 
 Approved At: 2026-09-01T20:26:19.118Z
 <!-- GATE_1B:END -->
+
+<!-- GATE_2_APP_SHELL:START -->
+## GATE 2 — APP SHELL
+
+STATUS: **NOT_STARTED**
+
+Trainer Mobile Navigation: awaiting Product Owner
+
+Student Identity: awaiting Product Owner
+
+Inherited Foundation: D / B01 / F02 / I01
+<!-- GATE_2_APP_SHELL:END -->
