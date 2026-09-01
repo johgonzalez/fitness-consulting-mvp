@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "gateId": "GATE_1B",
+  "revision": 1,
+  "status": "APPROVED",
+  "approvedAt": "2026-09-01T20:26:19.118Z",
+  "branch": "codex/product-visual-foundation-v1",
+  "sourceCommit": "034a0fd79fc2ccf16382d3a335c7142bb2e12363",
+  "labVersion": "gate-1b.v1",
+  "labFingerprint": "f2f8f8c5b642e19f0c3051ebed31d49ec39fee401923e5e1f3c726f928a05af9",
+  "decisions": {
+    "visualTerritory": "D",
+    "primaryButton": "B01",
+    "fieldSystem": "F02",
+    "iconography": "I01"
+  },
+  "preservedDecisions": {
+    "operationalRows": true,
+    "feedbackArchitecture": true,
+    "navigationArchitecture": true,
+    "motionDirection": true
+  }
+}

@@ -54,15 +54,15 @@ Não há decisões automaticamente aprovadas neste Sprint.
 <!-- GATE_1B:START -->
 ## GATE 1B
 
-STATUS: **REOPENED — INSUFFICIENT DIFFERENTIATION**
+STATUS: **APPROVED**
 
-Visual Territory: —
+Visual Territory: D
 
-Primary Button: —
+Primary Button: B01
 
-Field System: —
+Field System: F02
 
-Iconography: —
+Iconography: I01
 
-Approved At: —
+Approved At: 2026-09-01T20:26:19.118Z
 <!-- GATE_1B:END -->
