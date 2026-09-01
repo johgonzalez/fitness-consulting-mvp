@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "gateId": "GATE_2_APP_SHELL",
+  "revision": 1,
+  "status": "APPROVED",
+  "approvedAt": "2026-09-01T22:33:15.518Z",
+  "branch": "codex/product-visual-foundation-v1",
+  "sourceCommit": "8a385e270fd5a037dfb9f759ac803fe0a5e801c4",
+  "labVersion": "gate-2-app-shell.v1",
+  "labFingerprint": "e2ada5d0b0ef99b005fdd5389d2595f5e7d31b4a6f209f1b218757e360b8f773",
+  "decisions": {
+    "trainerMobileNavigation": "G2-01A",
+    "studentIdentity": "G2-02A"
+  },
+  "inheritedFoundation": {
+    "visualTerritory": "D",
+    "primaryButton": "B01",
+    "fieldSystem": "F02",
+    "iconography": "I01"
+  },
+  "fixedShellRules": {
+    "futureFeaturesHidden": true,
+    "contextualHeaders": true,
+    "studentWorkoutImmersiveMode": true,
+    "workoutBuilderMaxWorkingArea": true
+  }
+}
