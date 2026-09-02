@@ -58,4 +58,6 @@ test("auth reuses the canonical monochrome product shell identity", () => {
   assert.match(css, /var\(--pp-shell-solid\)/);
   assert.match(css, /var\(--pp-shell-on-solid\)/);
   assert.doesNotMatch(css, /--pc-contrast-(?:bg|text)/);
+  assert.match(css, /data-auth-view="login"[^}]*\.pc-auth-layout[\s\S]*?display: flex;/);
+  assert.doesNotMatch(css, /grid-template-columns: minmax\(72px, 0\.34fr\)/);
 });

@@ -484,12 +484,11 @@
 }
 
 .pc-auth-page[data-auth-view="login"] .pc-auth-layout {
-  width: min(calc(100% - 56px), 1180px);
+  width: min(calc(100% - 56px), 760px);
   min-height: calc(100dvh - 78px);
-  display: grid;
-  grid-template-columns: minmax(72px, 0.34fr) minmax(390px, 440px) minmax(0, 0.78fr);
-  gap: 0;
+  display: flex;
   align-items: center;
+  justify-content: center;
   margin: 0 auto;
 }
 
@@ -498,12 +497,11 @@
 }
 
 .pc-auth-page[data-auth-view="login"] .pc-auth-panel {
-  grid-column: 2;
+  width: min(100%, 440px);
   min-height: min(680px, calc(100dvh - 110px));
   justify-content: center;
-  padding: 64px 0 72px clamp(40px, 5vw, 72px);
+  padding: 64px 34px 72px;
   border: 0;
-  border-left: 1px solid var(--pp-divider);
   background: transparent;
 }
 
