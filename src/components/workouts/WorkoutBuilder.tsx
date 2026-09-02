@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   ArrowUp,
   Check,
+  ChevronDown,
   Clock3,
   Copy,
   Dumbbell,
@@ -82,6 +83,52 @@ function moveItem<T>(items: T[], index: number, direction: -1 | 1) {
   return next;
 }
 
+function exerciseValidationMessage(prescribed: WorkoutExercisePrescription) {
+  if (prescribed.sets.length === 0) return "Adicione ao menos uma série para concluir este exercício.";
+  for (const set of prescribed.sets) {
+    const hasTarget = set.targetReps != null
+      || (set.targetRepsMin != null && set.targetRepsMax != null)
+      || set.durationSeconds != null
+      || (set.distanceValue != null && set.distanceUnit != null);
+    if (!hasTarget) return `Defina o alvo da série ${set.setNumber} antes de concluir.`;
+    if (set.targetRepsMin != null && set.targetRepsMax != null && set.targetRepsMin > set.targetRepsMax) {
+      return `Na série ${set.setNumber}, a repetição mínima não pode superar a máxima.`;
+    }
+  }
+  return null;
+}
+
+function uniformValue<T>(values: T[]) {
+  return values.length > 0 && values.every((value) => value === values[0]) ? values[0] : null;
+}
+
+function builderScrollBehavior(): ScrollBehavior {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
+function exerciseSummary(prescribed: WorkoutExercisePrescription) {
+  const sets = prescribed.sets.toSorted((left, right) => left.setNumber - right.setNumber);
+  const lines: string[] = [];
+  if (sets.length) {
+    const targets = sets.map((set) => {
+      if (set.targetReps != null) return `${set.targetReps} repetições`;
+      if (set.targetRepsMin != null && set.targetRepsMax != null) return `${set.targetRepsMin}–${set.targetRepsMax} repetições`;
+      if (set.durationSeconds != null) return `${set.durationSeconds} s`;
+      if (set.distanceValue != null && set.distanceUnit) return `${set.distanceValue} ${set.distanceUnit}`;
+      return null;
+    });
+    const target = uniformValue(targets);
+    lines.push(`${sets.length} ${sets.length === 1 ? "série" : "séries"}${target ? ` · ${target}` : targets.some(Boolean) ? " · alvos variados" : ""}`);
+    const loads = sets.map((set) => set.targetLoad != null && set.loadUnit ? `${set.targetLoad} ${set.loadUnit}` : null);
+    const rests = sets.map((set) => set.restSeconds != null ? `${set.restSeconds} s de descanso` : null);
+    const load = uniformValue(loads);
+    const rest = uniformValue(rests);
+    if (load || rest) lines.push([load, rest].filter(Boolean).join(" · "));
+  }
+  if (prescribed.studentInstruction?.trim()) lines.push(prescribed.studentInstruction.trim());
+  return lines;
+}
+
 function ExerciseCard({
   prescribed,
   sectionType,
@@ -90,6 +137,8 @@ function ExerciseCard({
   editable,
   demoMode,
   deleteArmed,
+  expanded,
+  validationMessage,
   onMove,
   onReplace,
   onArmDelete,
@@ -99,6 +148,8 @@ function ExerciseCard({
   onDuplicateSet,
   onRemoveSet,
   onAddSet,
+  onExpand,
+  onConfirm,
 }: {
   prescribed: WorkoutExercisePrescription;
   sectionType: WorkoutSectionType;
@@ -107,6 +158,8 @@ function ExerciseCard({
   editable: boolean;
   demoMode: boolean;
   deleteArmed: boolean;
+  expanded: boolean;
+  validationMessage: string | null;
   onMove: (direction: -1 | 1) => void;
   onReplace: () => void;
   onArmDelete: () => void;
@@ -116,8 +169,19 @@ function ExerciseCard({
   onDuplicateSet: (set: WorkoutSetPrescription) => void;
   onRemoveSet: (setId: string) => void;
   onAddSet: () => void;
+  onExpand: () => void;
+  onConfirm: () => void;
 }) {
-  return <article className={`${styles.exerciseCard}${prescribed.supersetGroupKey ? ` ${styles.supersetExercise}` : ""}`}>
+  const summary = exerciseSummary(prescribed);
+  return <article className={`${styles.exerciseCard}${prescribed.supersetGroupKey ? ` ${styles.supersetExercise}` : ""}${expanded ? ` ${styles.exerciseCardExpanded}` : ` ${styles.exerciseCardCollapsed}`}`} data-exercise-id={prescribed.id}>
+    {!expanded ? <div className={styles.exerciseSummaryRow}>
+      <button type="button" className={styles.exerciseSummaryMain} onClick={onExpand} aria-expanded="false" aria-label={`Editar ${prescribed.exercise.name}`}>
+        <ExerciseMedia exercise={prescribed.exercise} demoMode={demoMode} priority={index === 0} />
+        <span className={styles.exerciseSummaryCopy}><span className={styles.exerciseSummaryTitle}><span className={styles.exercisePosition}>{index + 1}</span><strong>{prescribed.exercise.name}</strong></span>{summary.map((line, lineIndex) => <small key={`${line}-${lineIndex}`}>{line}</small>)}</span>
+        <ChevronDown aria-hidden="true" />
+      </button>
+      {editable ? <div className={styles.exerciseSummaryActions}><button type="button" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Mover exercício para cima"><ArrowUp aria-hidden="true" /></button><button type="button" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Mover exercício para baixo"><ArrowDown aria-hidden="true" /></button><button type="button" onClick={onArmDelete} aria-label="Remover exercício"><Trash2 aria-hidden="true" /></button></div> : null}
+    </div> : <>
     <div className={styles.exerciseIdentity}>
       {editable ? <span className={styles.dragHandle} title="Use os botões para mover"><GripVertical aria-hidden="true" /></span> : null}
       <ExerciseMedia exercise={prescribed.exercise} demoMode={demoMode} priority={index === 0} />
@@ -132,6 +196,9 @@ function ExerciseCard({
       {editable ? <label className={styles.trainerOnly}><span>Nota do Personal <small>privada</small></span><textarea value={prescribed.trainerNote ?? ""} maxLength={2000} placeholder="Apenas você vê esta nota." onChange={(event) => onUpdateDetails({ trainerNote: event.target.value || null })} onBlur={() => onUpdateDetails({}, true)} /></label> : null}
       <label className={styles.studentInstruction}><span>Instrução para o aluno</span><textarea value={prescribed.studentInstruction ?? ""} disabled={!editable} maxLength={2000} placeholder="Orientação que o aluno receberá." onChange={(event) => onUpdateDetails({ studentInstruction: event.target.value || null })} onBlur={() => onUpdateDetails({}, true)} /></label>
     </div>
+    {editable ? <footer className={styles.exerciseEditorFooter}>{validationMessage ? <p id={`exercise-error-${prescribed.id}`} role="alert">{validationMessage}</p> : <span>Conclua para recolher e continuar o treino.</span>}<button type="button" className="pp-button pp-button--primary" onClick={onConfirm} aria-describedby={validationMessage ? `exercise-error-${prescribed.id}` : undefined}><Check aria-hidden="true" />Concluir</button></footer> : null}
+    </>}
+    {deleteArmed && !expanded ? <div className={styles.inlineConfirm} role="alert"><span>Remover este exercício e suas séries?</span><button type="button" onClick={onArmDelete}>Cancelar</button><button type="button" onClick={onRemove}>Remover</button></div> : null}
   </article>;
 }
 
@@ -151,12 +218,18 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
   const [failedMutation, setFailedMutation] = useState<WorkoutMutation | null>(null);
   const [publishConfirm, setPublishConfirm] = useState(false);
   const [discardConfirm, setDiscardConfirm] = useState(false);
+  const [expandedExerciseId, setExpandedExerciseId] = useState<string | null>(() => record.projection.sessions[0]?.sections[0]?.exercises[0]?.id ?? null);
+  const [exerciseErrors, setExerciseErrors] = useState<Record<string, string>>({});
   const [pending, startTransition] = useTransition();
   const saveSequence = useRef(0);
+  const lastEditedExerciseId = useRef<string | null>(null);
   const selectedSession = projection.sessions.find((session) => session.id === selectedSessionId) ?? projection.sessions[0] ?? null;
   const editable = projection.version.status === "DRAFT" && !reviewMode;
 
   useEffect(() => { projectionRef.current = projection; }, [projection]);
+  useEffect(() => {
+    if (saveState === "error" && lastEditedExerciseId.current) setExpandedExerciseId(lastEditedExerciseId.current);
+  }, [saveState]);
 
   function applyLocal(mutator: (draft: WorkoutVersionProjection) => void) {
     const next = structuredClone(projectionRef.current);
@@ -281,6 +354,8 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
       const created: WorkoutExercisePrescription = { id: resultId, sortOrder: 0, supersetGroupKey: null, trainerNote: null, studentInstruction: null, tempo: null, exercise, sets: [] };
       applyLocal((draft) => { for (const session of draft.sessions) { const section = session.sections.find((item) => item.id === sectionId); if (section) { created.sortOrder = section.exercises.length; section.exercises.push(created); } } });
       setLibraryTarget(null);
+      setExpandedExerciseId(resultId);
+      setExerciseErrors((errors) => { const next = { ...errors }; delete next[resultId]; return next; });
       addSet(resultId);
     });
   }
@@ -290,6 +365,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
   }
 
   function updateExercise(id: string, patch: Partial<Pick<WorkoutExercisePrescription, "supersetGroupKey" | "trainerNote" | "studentInstruction" | "tempo">>, persist = false) {
+    lastEditedExerciseId.current = id;
     applyLocal((draft) => { for (const session of draft.sessions) for (const section of session.sections) { const exercise = section.exercises.find((item) => item.id === id); if (exercise) Object.assign(exercise, patch); } });
     if (persist) {
       const current = findPrescribed(id)!;
@@ -323,6 +399,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
   }
 
   function updateSet(workoutExerciseId: string, setId: string, patch: Partial<WorkoutSetInput>, persist = false) {
+    lastEditedExerciseId.current = workoutExerciseId;
     applyLocal((draft) => { for (const session of draft.sessions) for (const section of session.sections) { const exercise = section.exercises.find((item) => item.id === workoutExerciseId); const set = exercise?.sets.find((item) => item.id === setId); if (set) Object.assign(set, patch); } });
     if (persist) {
       const set = findPrescribed(workoutExerciseId)?.sets.find((item) => item.id === setId);
@@ -333,6 +410,30 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
   function removeSet(setId: string) {
     runMutation({ type: "REMOVE_SET", workoutSetId: setId }, () => {
       applyLocal((draft) => { for (const session of draft.sessions) for (const section of session.sections) for (const exercise of section.exercises) exercise.sets = exercise.sets.filter((set) => set.id !== setId).map((set, index) => ({ ...set, setNumber: index + 1 })); });
+    });
+  }
+
+  function confirmExercise(id: string, sectionId: string, index: number) {
+    const prescribed = findPrescribed(id);
+    if (!prescribed) return;
+    const error = exerciseValidationMessage(prescribed);
+    if (error) {
+      setExerciseErrors((errors) => ({ ...errors, [id]: error }));
+      setExpandedExerciseId(id);
+      return;
+    }
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    setExerciseErrors((errors) => { const next = { ...errors }; delete next[id]; return next; });
+    setExpandedExerciseId(null);
+    requestAnimationFrame(() => {
+      const section = projectionRef.current.sessions.flatMap((session) => session.sections).find((item) => item.id === sectionId);
+      const nextIncomplete = section?.exercises.slice(index + 1).find((item) => exerciseValidationMessage(item) !== null);
+      if (nextIncomplete) {
+        setExpandedExerciseId(nextIncomplete.id);
+        requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-exercise-id="${nextIncomplete.id}"]`)?.scrollIntoView({ behavior: builderScrollBehavior(), block: "center" }));
+        return;
+      }
+      document.querySelector<HTMLElement>(`[data-add-exercise-for="${sectionId}"]`)?.scrollIntoView({ behavior: builderScrollBehavior(), block: "center" });
     });
   }
 
@@ -368,7 +469,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
       <div className={styles.builderTitle}><span><strong>{projection.plan.name}</strong><small>{record.studentContext?.student.name ?? "Aluno"} · v{projection.version.versionNumber}</small></span></div>
       <div className={styles.saveState} data-state={saveState}>{saveState === "saving" ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : saveState === "error" ? <X aria-hidden="true" /> : <Check aria-hidden="true" />}<span>{saveState === "saving" ? "Salvando" : saveState === "error" ? "Falha ao salvar" : "Salvo"}</span>{saveState === "error" ? <button type="button" onClick={retryFailed}>Tentar de novo</button> : null}</div>
       <WorkoutStatusBadge status={projection.version.status} />
-      <button type="button" className={styles.historyButton} onClick={() => setHistoryOpen(true)}><History aria-hidden="true" /><span>Versões</span></button>
+      <button type="button" className={styles.historyButton} onClick={() => setHistoryOpen(true)} aria-label="Abrir histórico de versões"><History aria-hidden="true" /><span>Versões</span></button>
       <div className={styles.lifecycleActions}>
         {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className={styles.discardDraftButton} onClick={() => setDiscardConfirm(true)} disabled={pending}><Trash2 aria-hidden="true" />Excluir rascunho</button> : null}
         {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className="pp-button pp-button--primary" onClick={() => setReviewMode(true)}><Eye aria-hidden="true" />Revisar treino</button> : null}
@@ -403,7 +504,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
               {editable ? <div className={styles.sectionActions}><button type="button" onClick={() => reorderSections(sectionIndex, -1)} disabled={sectionIndex === 0} aria-label="Mover bloco para cima"><ArrowUp aria-hidden="true" /></button><button type="button" onClick={() => reorderSections(sectionIndex, 1)} disabled={sectionIndex === selectedSession.sections.length - 1} aria-label="Mover bloco para baixo"><ArrowDown aria-hidden="true" /></button><button type="button" onClick={() => setDeleteTarget(deleteTarget === section.id ? null : section.id)} aria-label="Remover bloco"><Trash2 aria-hidden="true" /></button></div> : null}
             </header>
             {deleteTarget === section.id ? <div className={styles.inlineConfirm}><span>Remover este bloco e todo o conteúdo?</span><button type="button" onClick={() => setDeleteTarget(null)}>Cancelar</button><button type="button" onClick={() => removeSection(section.id)}>Remover</button></div> : null}
-            <div className={styles.exerciseStack}>{section.exercises.map((exercise, exerciseIndex) => <ExerciseCard
+            {section.exercises.length ? <div className={styles.exerciseStack}>{section.exercises.map((exercise, exerciseIndex) => <ExerciseCard
               key={exercise.id}
               prescribed={exercise}
               sectionType={section.sectionType}
@@ -412,6 +513,8 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
               editable={editable}
               demoMode={record.demoMode}
               deleteArmed={deleteTarget === exercise.id}
+              expanded={!editable || expandedExerciseId === exercise.id}
+              validationMessage={exerciseErrors[exercise.id] ?? null}
               onMove={(direction) => reorderExercises(section.id, exerciseIndex, direction)}
               onReplace={() => setLibraryTarget({ sectionId: section.id, workoutExerciseId: exercise.id })}
               onArmDelete={() => setDeleteTarget(deleteTarget === exercise.id ? null : exercise.id)}
@@ -424,8 +527,10 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
               }}
               onRemoveSet={removeSet}
               onAddSet={() => addSet(exercise.id)}
-            />)}</div>
-            {editable ? <button type="button" className={styles.addExerciseButton} onClick={() => setLibraryTarget({ sectionId: section.id })}><Plus aria-hidden="true" />Adicionar exercício</button> : null}
+              onExpand={() => { setExpandedExerciseId(exercise.id); setExerciseErrors((errors) => { const next = { ...errors }; delete next[exercise.id]; return next; }); }}
+              onConfirm={() => confirmExercise(exercise.id, section.id, exerciseIndex)}
+            />)}</div> : <div className={styles.exerciseEmpty}><Dumbbell aria-hidden="true" /><strong>Adicione o primeiro exercício</strong><p>Busque na biblioteca e configure a prescrição sem sair deste fluxo.</p>{editable ? <button type="button" className="pp-button pp-button--primary" data-add-exercise-for={section.id} onClick={() => setLibraryTarget({ sectionId: section.id })}><Plus aria-hidden="true" />Adicionar primeiro exercício</button> : null}</div>}
+            {editable && section.exercises.length ? <button type="button" className={styles.addExerciseButton} data-add-exercise-for={section.id} onClick={() => setLibraryTarget({ sectionId: section.id })}><Plus aria-hidden="true" />Adicionar exercício</button> : null}
           </section>)}</div> : <div className={styles.builderEmpty}><Layers3 aria-hidden="true" /><strong>Comece pelo primeiro bloco</strong><p>Organize aquecimento, trabalho principal e finalização sem transformar o treino em uma planilha.</p>{editable ? <button type="button" className="pp-button pp-button--primary" onClick={() => setSectionPicker(true)}><Plus aria-hidden="true" />Adicionar bloco</button> : null}</div>}
 
           {editable ? <div className={styles.addSectionArea}>{sectionPicker ? <div className={styles.sectionTypePicker}><header><strong>Escolha o tipo de bloco</strong><button type="button" onClick={() => setSectionPicker(false)} aria-label="Fechar"><X aria-hidden="true" /></button></header><div>{sectionTypes.map((type) => <button type="button" key={type} onClick={() => addSection(type)}><span><Layers3 aria-hidden="true" /></span><strong>{workoutSectionLabels[type]}</strong><small>{type}</small></button>)}</div></div> : <button type="button" onClick={() => setSectionPicker(true)}><Plus aria-hidden="true" />Adicionar bloco</button>}</div> : null}

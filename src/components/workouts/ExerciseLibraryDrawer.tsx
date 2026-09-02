@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState, useTransition } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { Check, ChevronLeft, Dumbbell, Filter, Plus, Search, X } from "lucide-react";
 import { createCustomExerciseAction, searchExerciseLibraryAction } from "@/app/actions/workouts";
 import { ExerciseMedia } from "@/components/workouts/ExerciseMedia";
@@ -26,6 +26,7 @@ export function ExerciseLibraryDrawer({
   onCustomCreated: (exercise: Exercise) => void;
 }) {
   const [query, setQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
   const deferredQuery = useDeferredValue(query);
   const [muscle, setMuscle] = useState("all");
   const [equipment, setEquipment] = useState("all");
@@ -63,6 +64,14 @@ export function ExerciseLibraryDrawer({
     });
     return () => { ignore = true; };
   }, [equipment, muscle, normalizedQuery, remoteSearch, searchSignature, source]);
+
+  useEffect(() => {
+    if (!open) return;
+    searchRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose, open]);
 
   const filtered = useMemo(() => {
     const normalized = normalizedQuery.toLocaleLowerCase("pt-BR");
@@ -109,17 +118,20 @@ export function ExerciseLibraryDrawer({
   return <div className={styles.libraryBackdrop} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <aside className={styles.libraryDrawer} role="dialog" aria-modal="true" aria-labelledby="exercise-library-title">
       <header className={styles.libraryHeader}><div><span><Dumbbell aria-hidden="true" /></span><div><h2 id="exercise-library-title">Biblioteca de exercícios</h2><p>{mode === "ADD" ? "Escolha o próximo exercício" : "Substitua sem perder a prescrição"}</p></div></div><button type="button" className="pp-icon-button" onClick={onClose} aria-label="Fechar biblioteca"><X aria-hidden="true" /></button></header>
-      <div className={styles.librarySearch}><Search aria-hidden="true" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar exercício" aria-label="Buscar exercício" /></div>
+      <div className={styles.librarySearch}><Search aria-hidden="true" /><input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar exercício" aria-label="Buscar exercício" />{query ? <button type="button" onClick={() => setQuery("")} aria-label="Limpar busca"><X aria-hidden="true" /></button> : null}</div>
       <div className={styles.libraryFilters}><Filter aria-hidden="true" /><select value={muscle} onChange={(event) => setMuscle(event.target.value)} aria-label="Filtrar por grupo muscular"><option value="all">Todos os músculos</option>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={equipment} onChange={(event) => setEquipment(event.target.value)} aria-label="Filtrar por equipamento"><option value="all">Todos os equipamentos</option>{exerciseEquipmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={source} onChange={(event) => setSource(event.target.value)} aria-label="Filtrar por origem"><option value="all">Sistema + meus</option><option value="PPERFIL_LIBRARY">PPerfil</option><option value="TRAINER_CUSTOM">Meus exercícios</option></select></div>
       <p className={styles.librarySearchStatus} role="status" aria-live="polite">{searchPending ? "Consultando catálogo…" : remoteSearch ? searchResult.signature === searchSignature ? searchResult.message : "Consultando catálogo…" : `${exercises.length} exercícios carregados. Use a busca para consultar todo o catálogo.`}</p>
 
       <div className={styles.libraryContent}>
         <div className={styles.libraryList}>
-          {filtered.length ? filtered.map((exercise) => <button type="button" className={`${styles.libraryCard}${selected?.id === exercise.id ? ` ${styles.libraryCardSelected}` : ""}`} key={exercise.id} onClick={() => setSelectedId(exercise.id)}>
-            <ExerciseMedia exercise={exercise} demoMode={demoMode} />
-            <span><strong>{exercise.name}</strong><small>{exercise.primaryMuscleGroup}</small><em>{exercise.equipment.join(" · ") || "Sem equipamento"}</em></span>
-            {selected?.id === exercise.id ? <Check aria-hidden="true" /> : null}
-          </button>) : <div className={styles.libraryEmpty}><Dumbbell aria-hidden="true" /><strong>{searchPending ? "Consultando exercícios" : "Nenhum exercício encontrado"}</strong><p>{searchPending ? "Aguarde um instante." : "Limpe um filtro ou crie um exercício personalizado."}</p></div>}
+          {filtered.length ? filtered.map((exercise) => <div className={`${styles.libraryCard}${selected?.id === exercise.id ? ` ${styles.libraryCardSelected}` : ""}`} key={exercise.id}>
+            <button type="button" className={styles.libraryCardSelect} onClick={() => setSelectedId(exercise.id)} aria-label={`Ver detalhes de ${exercise.name}`}>
+              <ExerciseMedia exercise={exercise} demoMode={demoMode} />
+              <span><strong>{exercise.name}</strong><small>{exercise.primaryMuscleGroup} · {exercise.equipment.join(" · ") || "Sem equipamento"}</small></span>
+              {selected?.id === exercise.id ? <Check aria-hidden="true" /> : null}
+            </button>
+            <button type="button" className={styles.libraryCardAdd} onClick={() => onChoose(exercise)} aria-label={`${mode === "ADD" ? "Adicionar" : "Usar"} ${exercise.name}`}>{mode === "ADD" ? "Adicionar" : "Usar"}</button>
+          </div>) : <div className={styles.libraryEmpty}><Dumbbell aria-hidden="true" /><strong>{searchPending ? "Consultando exercícios" : "Nenhum exercício encontrado"}</strong><p>{searchPending ? "Aguarde um instante." : "Limpe um filtro ou crie um exercício personalizado."}</p></div>}
           <button type="button" className={styles.createExerciseButton} onClick={() => setCreating(true)}><Plus aria-hidden="true" />Criar exercício personalizado</button>
         </div>
         <div className={styles.exercisePreview}>
