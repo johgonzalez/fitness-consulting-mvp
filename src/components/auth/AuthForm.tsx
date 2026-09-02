@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useMemo, useSyncExternalStore } from "react";
+import { useActionState, useMemo, useState, useSyncExternalStore } from "react";
 import type { AuthContext, AuthFormState } from "@/lib/validation/auth";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import { PasswordField } from "./PasswordField";
@@ -30,6 +30,7 @@ function readPendingOtp(serialized: string | null): AuthFormState | null {
 
 export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true }: { mode: "login" | "signup"; action: AuthAction; nextPath?: string; context?: AuthContext; oauthEnabled?: boolean }) {
   const [state, formAction, pending] = useActionState(action, {});
+  const [providerNotice, setProviderNotice] = useState<string | null>(null);
   const signupMode = mode === "signup";
   const storageKey = otpStorageKey(nextPath, context);
   const serializedOtp = useSyncExternalStore(
@@ -59,15 +60,22 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
     {state.message ? <p className={`pc-auth-feedback pc-auth-feedback--${state.tone ?? "danger"}`} role={state.tone === "success" ? "status" : "alert"}>{state.message}</p> : null}
     {!signupMode ? <Link className="pc-auth-forgot" href={recoveryHref}>Esqueci minha senha</Link> : null}
     <button className="pp-button pp-button--primary" type="submit" disabled={pending}><span>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</span></button>
-  </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>{signupMode ? "ou" : "ou continue com"}</span></div><form action={startGoogleOAuth} className="pc-auth-oauth">
-    {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
-    {context ? <input type="hidden" name="context" value={context} /> : null}
-    <button className="pc-auth-provider" type="submit" aria-label="Continuar com Google" title="Continuar com Google">
-      {/* Official Google identity mark from the provider's current branding assets. */}
+  </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>{signupMode ? "ou" : "ou continue com"}</span></div><div className="pc-auth-providers">
+    <form action={startGoogleOAuth} className="pc-auth-oauth">
+      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+      {context ? <input type="hidden" name="context" value={context} /> : null}
+      <button className="pc-auth-provider" type="submit" aria-label="Continuar com Google" title="Continuar com Google">
+        {/* Official Google identity mark from the provider's current branding assets. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="https://developers.google.com/static/identity/images/g-logo.png" alt="" width="22" height="22" aria-hidden="true" />
+      </button>
+    </form>
+    <button className="pc-auth-provider pc-auth-provider--apple" type="button" aria-label="Entrar com Apple — em breve" title="Entrar com Apple — em breve" aria-describedby={providerNotice ? "apple-provider-notice" : undefined} onClick={() => setProviderNotice("Entrar com Apple — em breve") }>
+      {/* Apple-hosted logo-only Sign in with Apple artwork; this preview never starts OAuth. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="https://developers.google.com/static/identity/images/g-logo.png" alt="" width="22" height="22" aria-hidden="true" />
+      <img src="https://appleid.cdn-apple.com/appleid/button/logo?size=52&color=white&border=true&border_radius=8&scale=1" alt="" width="52" height="52" aria-hidden="true" />
     </button>
-  </form></> : null}<p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : context === "student" ? "Criar acesso para aguardar convite" : "Criar acesso"}</Link></p>
+  </div>{providerNotice ? <p id="apple-provider-notice" className="pc-auth-provider-feedback" role="status" aria-live="polite">{providerNotice}</p> : null}</> : null}<p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : context === "student" ? "Criar acesso para aguardar convite" : "Criar acesso"}</Link></p>
     {backHref ? <Link className="pc-auth-back" href={backHref}>Voltar</Link> : null}
   </div>;
 }

@@ -83,7 +83,12 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
         <span className={styles.planDate}><CalendarDays aria-hidden="true" />{formatWorkoutDate(item.currentVersion.publishedAt ?? item.plan.updatedAt)}</span>
         <span className={styles.planOpen} aria-hidden="true">Abrir</span>
         </Link>
-        {item.currentVersion.status === "DRAFT" ? <WorkoutDraftDiscardButton versionId={item.currentVersion.id} planName={item.plan.name} /> : null}
+        {item.currentVersion.status === "DRAFT" || item.currentVersion.status === "PUBLISHED" ? <WorkoutDraftDiscardButton
+          versionId={item.currentVersion.id}
+          planName={item.plan.name}
+          status={item.currentVersion.status}
+          editHref={item.currentVersion.status === "DRAFT" ? `/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}` : undefined}
+        /> : null}
       </article>)}
     </section> : <section className="pp-panel">
       <EmptyState icon={Dumbbell} title={filter === "all" ? "Crie o primeiro treino" : "Nenhum treino neste filtro"} description={filter === "all" ? "Comece manualmente ou use um Draft com IA para acelerar a primeira estrutura." : "Os treinos aparecerão aqui conforme avançam no ciclo."} action={filter === "all" ? <div className={styles.emptyActions}><Link href="/dashboard/workouts/new?mode=manual" className="pp-button pp-button--primary">Criar manualmente</Link><Link href="/dashboard/workouts/new?mode=ai" className="pp-button pp-button--secondary">Criar com IA</Link></div> : null} />

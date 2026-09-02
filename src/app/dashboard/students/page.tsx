@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Clock3, Mail, UserRoundPlus, UsersRound } from "lucide-react";
+import { CalendarDays, Clock3, Mail, Search, UserRoundPlus, UsersRound } from "lucide-react";
 import { InviteStudentForm } from "@/components/students/InviteStudentForm";
 import { RevokeInvitationAction } from "@/components/students/RevokeInvitationAction";
 import { InvitationManagementActions } from "@/components/students/InvitationManagementActions";
@@ -10,18 +10,21 @@ import { getStudentsWorkspace } from "@/lib/supabase/students";
 
 const statusLabels: Record<RelationshipState, string> = { active: "Ativo", inactive: "Inativo", ended: "Encerrado" };
 
-export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ status?: string; add?: string }> }) {
+export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ status?: string; add?: string; q?: string }> }) {
   const [query, workspace] = await Promise.all([searchParams, getStudentsWorkspace()]);
   const { students, invitations } = workspace;
   const filter = query.status === "active" || query.status === "inactive" ? query.status : "all";
-  const visible = filter === "all" ? students : filter === "active" ? students.filter((student) => student.status === "active") : students.filter((student) => student.status !== "active");
+  const search = query.q?.trim().slice(0, 120) ?? "";
+  const normalizedSearch = search.toLocaleLowerCase("pt-BR");
+  const filteredByStatus = filter === "all" ? students : filter === "active" ? students.filter((student) => student.status === "active") : students.filter((student) => student.status !== "active");
+  const visible = normalizedSearch ? filteredByStatus.filter((student) => `${student.name} ${student.email ?? ""}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) : filteredByStatus;
 
   return <main className="dashboard-main pp-workspace pp-students-workspace">
     <header className="pp-page-header">
       <div>
         <p className="pp-page-context">Relacionamentos</p>
         <h1>Alunos</h1>
-        <p>Gerencie pessoas, convites e vínculos ativos em um único workspace.</p>
+        <p>Encontre cada aluno, entenda o vínculo e siga para a próxima ação.</p>
       </div>
     </header>
 
@@ -34,6 +37,14 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       note={invitations.length ? <><Mail aria-hidden="true" />{invitations.length} convite(s) pendente(s)</> : null}
       action={<Link href="/dashboard/students?add=1" className="pp-button pp-button--primary"><UserRoundPlus aria-hidden="true" />Adicionar aluno</Link>}
     />
+
+    <form className="pp-student-search" action="/dashboard/students" method="get" role="search">
+      {filter !== "all" ? <input type="hidden" name="status" value={filter} /> : null}
+      <Search aria-hidden="true" />
+      <label htmlFor="student-search">Buscar aluno</label>
+      <input id="student-search" name="q" type="search" defaultValue={search} placeholder="Nome ou e-mail" autoComplete="off" />
+      <button type="submit">Buscar</button>
+    </form>
 
     {query.add === "1" ? <div id="add-student"><ContextPanel title="Adicionar aluno" description="Crie um convite por e-mail. Nenhum lead artificial será criado." className="pp-inline-create">
       <InviteStudentForm />
@@ -51,7 +62,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       </article>)}</div>
     </section> : null}
 
-    {visible.length ? <DataList label="Alunos" columns={["Aluno", "Relacionamento", "Origem", "Desde", "Status", ""]} className="pp-student-list">
+    {visible.length ? <DataList label="Alunos" columns={["Aluno", "Acompanhamento", "Origem", "Desde", "Status", ""]} className="pp-student-list pp-student-list--v1d">
       {visible.map((student) => <DataListRow href={`/dashboard/students/${student.id}`} key={student.id}>
         <IdentityCell name={student.name} detail={student.email ?? "E-mail não informado"} />
         <span className="pp-data-cell pp-data-cell--stacked" role="cell"><strong>{student.status === "active" ? "Acompanhamento ativo" : student.status === "inactive" ? "Relacionamento inativo" : "Relacionamento encerrado"}</strong><small>{statusLabels[student.status]}</small></span>
@@ -59,8 +70,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         <span className="pp-data-cell pp-data-cell--date" role="cell"><CalendarDays aria-hidden="true" />{new Date(student.startedAt).toLocaleDateString("pt-BR")}</span>
         <span className="pp-data-cell pp-data-cell--status" role="cell"><Status tone={student.status === "active" ? "success" : "neutral"}>{statusLabels[student.status]}</Status></span>
       </DataListRow>)}
-    </DataList> : <section className="pp-panel">
-      <EmptyState icon={UsersRound} title="Nenhum aluno neste filtro" description="Adicione uma pessoa por e-mail para iniciar um relacionamento." action={<Link href="/dashboard/students?add=1" className="pp-button pp-button--secondary">Adicionar aluno</Link>} />
+    </DataList> : <section className="pp-panel pp-student-empty">
+      <EmptyState icon={UsersRound} title={search ? "Nenhum aluno encontrado" : "Nenhum aluno neste filtro"} description={search ? "Revise o nome ou e-mail e tente novamente." : "Adicione uma pessoa por e-mail para iniciar um relacionamento."} action={search ? <Link href={filter === "all" ? "/dashboard/students" : `/dashboard/students?status=${filter}`} className="pp-button pp-button--secondary">Limpar busca</Link> : <Link href="/dashboard/students?add=1" className="pp-button pp-button--secondary">Adicionar aluno</Link>} />
     </section>}
   </main>;
 }

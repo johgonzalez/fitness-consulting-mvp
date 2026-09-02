@@ -1,13 +1,14 @@
 .workspace,.newWorkspace,.builderPage{max-width:1440px!important}
-.planList{overflow:hidden;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);background:var(--pp-surface);box-shadow:var(--pp-shadow)}
+.planList{overflow:visible;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);background:var(--pp-surface);box-shadow:var(--pp-shadow)}
 .planListHeader,.planRowLink{display:grid;grid-template-columns:minmax(280px,1.8fr) minmax(150px,.8fr) 90px 110px 120px 60px;gap:18px;align-items:center}
 .planListHeader{min-height:42px;padding:0 20px;border-bottom:1px solid var(--pp-divider);color:var(--pp-text-muted);font-size:.65rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .planRow{position:relative;min-height:104px;border-bottom:1px solid var(--pp-divider);transition:background var(--pp-motion-fast) var(--pp-ease)}
 .planRowLink{min-height:104px;padding:16px 20px;color:var(--pp-text-primary)}
 .planRow:last-child{border:0}.planRow:hover{background:var(--pp-surface-hover)}
-.planRow:has(.planDiscard) .planOpen{visibility:hidden}
-.planDiscard{position:absolute;z-index:2;top:50%;right:18px;display:grid;transform:translateY(-50%)}.planDiscard[data-removed="true"]{display:none}.planRow:has(.planDiscard[data-removed="true"]){display:none}.planDiscard>button{width:44px;height:44px;display:grid;place-items:center;border:1px solid transparent;border-radius:var(--pp-radius-sm);background:transparent;color:var(--pp-text-muted);cursor:pointer}.planDiscard>button:hover,.planDiscard>button:focus-visible{border-color:color-mix(in srgb,var(--pp-danger) 30%,var(--pp-border));background:var(--pp-danger-soft);color:var(--pp-danger)}.planDiscard>button svg{width:17px;height:17px}
-.discardDialog{width:min(430px,calc(100% - 32px));padding:28px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);background:var(--pp-surface);box-shadow:var(--pp-shadow-raised);color:var(--pp-text-primary);text-align:center}.discardDialog::backdrop{background:rgba(15,20,25,.42);backdrop-filter:blur(3px)}.discardDialog>span{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 14px;border-radius:50%;background:var(--pp-danger-soft);color:var(--pp-danger)}.discardDialog>span svg{width:21px}.discardDialog h2{margin:0;font:750 1.05rem var(--pp-font-display)}.discardDialog p{margin:10px 0 22px;color:var(--pp-text-secondary);font-size:.68rem;line-height:1.55}.discardDialog>div{display:flex;justify-content:center;gap:8px}.discardDialog :global(.pp-button--danger){border-color:var(--pp-danger);background:var(--pp-danger);color:#fff}.discardError{color:var(--pp-danger)!important}
+.planRow:has(.planDiscard) .planOpen{visibility:hidden}.planRow:has(.planActionMenu){z-index:8}
+.planDiscard{position:absolute;z-index:2;top:50%;right:18px;display:grid;transform:translateY(-50%)}.planDiscard[data-removed="true"]{display:none}.planRow:has(.planDiscard[data-removed="true"]){display:none}.planDiscard>button{width:44px;height:44px;display:grid;place-items:center;border:1px solid transparent;border-radius:var(--pp-radius-sm);background:transparent;color:var(--pp-text-muted);cursor:pointer}.planDiscard>button:hover,.planDiscard>button:focus-visible{border-color:var(--pp-border-strong);background:var(--pp-surface-subtle);color:var(--pp-text-primary)}.planDiscard>button svg{width:17px;height:17px}
+.planActionMenu{position:absolute;z-index:12;top:calc(100% + 5px);right:0;width:190px;display:grid;padding:6px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-sm);background:var(--pp-surface);box-shadow:var(--pp-shadow-raised)}.planActionMenu>a,.planActionMenu>button{min-height:44px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:7px;background:transparent;color:var(--pp-text-secondary);font:650 .65rem/1 var(--pp-font-ui);text-align:left;cursor:pointer}.planActionMenu>a:hover,.planActionMenu>button:hover,.planActionMenu>a:focus-visible,.planActionMenu>button:focus-visible{background:var(--pp-surface-subtle);color:var(--pp-text-primary)}.planActionMenu svg{width:16px;height:16px;stroke-width:1.8}.planActionMenu>.destructiveMenuItem{border-top:1px solid var(--pp-divider);border-radius:0 0 7px 7px;color:var(--pp-danger)}
+.discardDialog{width:min(430px,calc(100% - 32px));padding:28px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);background:var(--pp-surface);box-shadow:var(--pp-shadow-raised);color:var(--pp-text-primary);text-align:center}.discardDialog::backdrop{background:rgba(15,20,25,.42);backdrop-filter:blur(3px)}.discardDialog>span{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 14px;border-radius:50%;background:var(--pp-danger-soft);color:var(--pp-danger)}.planDiscard[data-status="published"] .discardDialog>span{background:var(--pp-surface-subtle);color:var(--pp-text-primary)}.discardDialog>span svg{width:21px}.discardDialog h2{margin:0;font:750 1.05rem var(--pp-font-display)}.discardDialog p{margin:10px 0 22px;color:var(--pp-text-secondary);font-size:.68rem;line-height:1.55}.discardDialog>div{display:flex;justify-content:center;gap:8px}.discardDialog :global(.pp-button--danger){border-color:var(--pp-danger);background:var(--pp-danger);color:#fff}.discardError{color:var(--pp-danger)!important}
 .planIdentity{min-width:0;display:flex;align-items:center;gap:14px}.planIdentity>span:last-child{min-width:0;display:grid;gap:3px}.planIdentity strong{overflow:hidden;font-family:var(--pp-font-display);font-size:.9rem;text-overflow:ellipsis;white-space:nowrap}.planIdentity small,.planIdentity em{display:flex;align-items:center;gap:5px;overflow:hidden;color:var(--pp-text-secondary);font-size:.68rem;font-style:normal;text-overflow:ellipsis;white-space:nowrap}.planIdentity em{color:var(--pp-text-muted)}
 .planIdentity svg,.planStructure svg,.planDate svg{width:14px;height:14px}.planStructure{display:grid;gap:6px}.planStructure strong,.planStructure small{display:flex;align-items:center;gap:6px}.planStructure strong{font-size:.72rem}.planStructure small{color:var(--pp-text-muted);font-size:.65rem}
 .planVersion{display:grid;gap:3px;font-family:var(--pp-font-display);font-size:.82rem;font-weight:750}.planVersion small{color:var(--pp-text-muted);font-family:var(--pp-font-ui);font-size:.6rem;font-weight:600}.planDate{display:flex;align-items:center;gap:6px;color:var(--pp-text-secondary);font-size:.68rem}.planOpen{color:var(--pp-accent);font-size:.68rem;font-weight:750}.emptyActions{display:flex;gap:10px;justify-content:center}
@@ -655,5 +656,14 @@
   .libraryCard {
     scroll-behavior: auto;
     transition: none;
+  }
+}
+
+@media(max-width:900px) {
+  .planActionMenu {
+    top:auto;
+    right:0;
+    bottom:50px;
+    width:min(230px,calc(100vw - 48px));
   }
 }

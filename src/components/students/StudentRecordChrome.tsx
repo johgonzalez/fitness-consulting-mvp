@@ -20,7 +20,6 @@ export function StudentRecordChrome({ student, active }: { student: ManagedStude
       <Link href={{ pathname: "/dashboard/workouts", query: { student: student.id } }} aria-current={active === "workouts" ? "page" : undefined}>Treinos</Link>
       <Link href={{ pathname: "/dashboard/assessments", query: { student: student.id } }} aria-current={active === "assessments" ? "page" : undefined}>Avaliações</Link>
       <Link href={`/dashboard/students/${student.id}/progress`} aria-current={active === "progress" ? "page" : undefined}>Progresso</Link>
-      {["Financeiro", "Histórico"].map((tab) => <button type="button" disabled key={tab} title="Módulo futuro">{tab}<small>Em breve</small></button>)}
     </nav>
   </>;
 }

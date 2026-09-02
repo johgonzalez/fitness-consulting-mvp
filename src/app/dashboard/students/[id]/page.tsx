@@ -36,9 +36,15 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
     .filter((item) => item.assessment.trainerStudentRelationshipId === student.id)
     .toSorted((left, right) => Date.parse(right.assessment.updatedAt) - Date.parse(left.assessment.updatedAt));
   const latestTraining = progress.workouts[0] ?? null;
+  const attentionAssessment = assessments.find(({ assessment }) => assessment.status === "ANSWERED" || assessment.status === "IN_REVIEW") ?? null;
 
   return <main className="dashboard-main pp-record-page pp-student-record">
     <StudentRecordChrome student={student} active="overview" />
+    <section className="pp-student-pulse" aria-label="Resumo factual do aluno">
+      <div><span>Vínculo</span><strong>{student.status === "active" ? "Acompanhamento ativo" : statusLabels[student.status]}</strong></div>
+      <div><span>Treino atual</span><strong>{currentWorkout?.plan.name ?? "Nenhum treino publicado"}</strong></div>
+      <div><span>Próxima atenção</span><strong>{attentionAssessment ? attentionAssessment.assessment.title : "Nenhuma revisão pendente"}</strong></div>
+    </section>
     <div className="pp-student-workspace">
       <div className="pp-student-workspace__main">
         <nav className="pp-student-quick-actions" aria-label="Ações rápidas do aluno">

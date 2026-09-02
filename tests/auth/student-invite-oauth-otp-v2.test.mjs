@@ -20,7 +20,9 @@ test("Google OAuth preserves only a validated internal next path", () => {
   assert.doesNotMatch(callback, /new URL\(url\.searchParams\.get\("next"\)/);
   assert.match(form, /aria-label="Continuar com Google"/);
   assert.match(form, /developers\.google\.com\/static\/identity\/images\/g-logo\.png/);
-  assert.doesNotMatch(form, />Continuar com Google<|aria-label="[^"]*Apple/);
+  assert.doesNotMatch(form, />Continuar com Google</);
+  assert.match(form, /aria-label="Entrar com Apple — em breve"/);
+  assert.doesNotMatch(form, /provider:\s*["']apple["']/i);
 });
 
 test("password signup uses provider OTP verification and supported resend", () => {

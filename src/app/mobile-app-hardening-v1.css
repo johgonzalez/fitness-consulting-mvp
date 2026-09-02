@@ -1,0 +1,138 @@
+/* Shared mobile web-app hardening. No zoom suppression: text-entry controls
+   remain at an iOS-safe 16 CSS px while browser/user zoom stays available. */
+.pp-app-shell-v1 {
+  min-height:100dvh;
+}
+
+.pp-app-shell-v1 :is(input,textarea,select) {
+  scroll-margin-block:88px calc(96px + env(safe-area-inset-bottom));
+}
+
+.pc-auth-providers {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+}
+
+.pc-auth-providers .pc-auth-oauth {
+  display:block;
+}
+
+.pc-auth-provider--apple {
+  overflow:hidden;
+  border-color:transparent;
+  background:transparent;
+}
+
+.pc-auth-provider--apple img {
+  width:52px;
+  height:52px;
+  max-width:none;
+}
+
+.pc-auth-provider-feedback {
+  min-height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:8px 0 -4px;
+  color:var(--pp-text-secondary);
+  font:580 .66rem/1.35 var(--pp-font-ui);
+}
+
+.pp-mobile-more__utilities {
+  display:grid;
+  padding-top:4px;
+}
+
+.pp-fullscreen-utility {
+  min-height:48px;
+  display:grid;
+  grid-template-columns:28px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:var(--pp-text-secondary);
+  font:600 .68rem/1 var(--pp-font-ui);
+  text-align:left;
+  cursor:pointer;
+}
+
+.pp-fullscreen-utility:hover {
+  color:var(--pp-text-primary);
+}
+
+.pp-fullscreen-utility svg {
+  width:17px;
+  height:17px;
+  stroke-width:1.8;
+}
+
+@media(max-width:900px) {
+  input:is([type="text"],[type="email"],[type="password"],[type="search"],[type="number"],[type="tel"],[type="url"],:not([type])),
+  textarea,
+  select {
+    font-size:16px!important;
+  }
+
+  :where(.pp-app-shell-v1,.pc-auth-page) :is(
+    a,
+    button,
+    input:not([type="hidden"]),
+    textarea,
+    select,
+    summary
+  ) {
+    touch-action:manipulation;
+  }
+
+  .dashboard-shell.pp-app-shell-v1,
+  .pp-student-app.pp-app-shell-v1,
+  .pc-auth-page {
+    min-height:100dvh;
+  }
+
+  .pp-mobile-more[open] {
+    height:100dvh;
+  }
+
+  .pp-mobile-more>section {
+    max-height:min(88dvh,720px);
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+
+  .pp-app-shell-v1 .dashboard-content,
+  .pp-app-shell-v1 .pp-student-app__main {
+    padding-bottom:max(88px,calc(72px + env(safe-area-inset-bottom)));
+  }
+
+  .pp-app-shell-v1.pp-student-app--immersive .pp-student-app__main {
+    min-height:100dvh;
+    padding-bottom:0;
+  }
+}
+
+@media(max-width:430px) {
+  .pc-auth-provider,
+  .pc-auth-provider--apple {
+    width:52px;
+    height:52px;
+  }
+}
+
+@media(max-height:620px) and (max-width:900px) {
+  .pp-mobile-more>section {
+    max-height:calc(100dvh - env(safe-area-inset-top));
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .pc-auth-provider,
+  .pp-fullscreen-utility {
+    transition:none;
+  }
+}

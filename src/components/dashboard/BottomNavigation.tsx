@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { FullscreenUtility } from "@/components/app-shell/AppFullscreenController";
 
 type Destination = {
   label: string;
@@ -98,6 +99,7 @@ export function BottomNavigation({ leadCount = 0 }: { leadCount?: number }) {
       <section>
         <header><div><span>Portal do Personal</span><strong id="pp-mobile-more-title">Mais destinos</strong></div><button type="button" aria-label="Fechar menu" onClick={closeMore}><X aria-hidden="true" /></button></header>
         <nav aria-label="Mais destinos do Personal">{moreDestinations.map((item) => <DestinationLink key={item.href} item={item} pathname={pathname} onNavigate={closeMore} />)}</nav>
+        <div className="pp-mobile-more__utilities" aria-label="Utilidades do aplicativo"><FullscreenUtility /></div>
       </section>
     </dialog>
   </div>;

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { Avatar } from "@/components/ui/PPerfilPrimitives";
 import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
+import { AppFullscreenController } from "@/components/app-shell/AppFullscreenController";
 
 const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
@@ -19,7 +20,7 @@ export function StudentAppShell({ children, demoMode, identity }: { children: Re
   const immersive = pathname.endsWith("/execute") || pathname.includes("/execute/");
   const trainerLabel = identity.trainer.name === "Seu Personal" ? "Acompanhamento" : "Seu Personal";
 
-  return <div className={`pp-student-shell pp-app-shell-v1 pp-student-app${immersive ? " pp-student-app--immersive" : ""}`}>
+  return <div className={`pp-student-shell pp-app-shell-v1 pp-student-app${immersive ? " pp-student-app--immersive" : ""}`}><AppFullscreenController />
     <header className="pp-student-app__bar">
       <Link href="/student/today" className="pp-student-coach" aria-label={`${identity.trainer.name}, ${trainerLabel}`}>
         <Avatar name={identity.trainer.name} imageUrl={identity.trainer.imageUrl} size="small" loading="eager" />
