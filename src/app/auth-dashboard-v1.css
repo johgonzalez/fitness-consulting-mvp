@@ -2,17 +2,10 @@
    Scoped to Auth and Trainer Dashboard; product behavior remains unchanged. */
 
 .pc-auth-page {
-  --pc-contrast-bg: #14171a;
-  --pc-contrast-text: #ffffff;
   min-height: 100dvh;
   background: var(--pp-background);
   color: var(--pp-text-primary);
   caret-color: var(--pp-accent);
-}
-
-[data-theme="dark"] .pc-auth-page {
-  --pc-contrast-bg: #f2f4f5;
-  --pc-contrast-text: #111417;
 }
 
 .pc-auth-page ::selection,
@@ -46,8 +39,8 @@
   position: relative;
   padding: clamp(38px, 5vw, 72px);
   border-radius: 18px 0 0 18px;
-  background: var(--pc-contrast-bg);
-  color: var(--pc-contrast-text);
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
   overflow: hidden;
 }
 
@@ -176,9 +169,9 @@
 
 .pc-auth-form > .pp-button {
   margin-top: 10px;
-  border-color: var(--pc-contrast-bg);
-  background: var(--pc-contrast-bg);
-  color: var(--pc-contrast-text);
+  border-color: var(--pp-shell-solid);
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
   box-shadow: none;
 }
 
@@ -421,23 +414,23 @@
 }
 
 .pc-auth-contexts > label[data-selected="true"] .pc-auth-contexts__indicator {
-  border: 5px solid var(--pc-contrast-bg);
-  background: var(--pc-contrast-text);
+  border: 5px solid var(--pp-shell-solid);
+  background: var(--pp-shell-on-solid);
 }
 
 .pc-auth-contexts > label[data-selected="true"] .pc-auth-contexts__icon {
-  border-color: var(--pc-contrast-bg);
-  background: var(--pc-contrast-bg);
-  color: var(--pc-contrast-text);
+  border-color: var(--pp-shell-solid);
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
 }
 
 .pc-auth-context-submit {
   width: 100%;
   min-height: 50px;
-  border-color: var(--pc-contrast-bg) !important;
+  border-color: var(--pp-shell-solid) !important;
   border-radius: 10px !important;
-  background: var(--pc-contrast-bg) !important;
-  color: var(--pc-contrast-text) !important;
+  background: var(--pp-shell-solid) !important;
+  color: var(--pp-shell-on-solid) !important;
 }
 
 .pc-auth-context-submit:disabled {
