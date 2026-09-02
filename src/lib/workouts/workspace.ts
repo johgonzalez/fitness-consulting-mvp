@@ -180,7 +180,7 @@ export async function getWorkoutIndex(): Promise<{ items: WorkoutIndexItem[]; de
   if (demoMode) {
     const students = (await studentsPromise).students;
     const items = demoPlanSummaries().map((planSummary) => {
-      const current = planSummary.versions[0];
+      const current = planSummary.versions.find((version) => version.status !== "ARCHIVED") ?? planSummary.versions[0];
       const projection = workoutDemoVersions.find((item) => item.version.id === current.id)!;
       return {
         plan: projection.plan,
@@ -196,7 +196,8 @@ export async function getWorkoutIndex(): Promise<{ items: WorkoutIndexItem[]; de
   const repository = new SupabaseWorkoutRepository();
   const [plans, students] = await Promise.all([repository.listTrainerPlans(), studentsPromise]);
   const projections = await Promise.all(plans.map(async (planSummary) => {
-    const current = planSummary.versions.toSorted((left, right) => right.versionNumber - left.versionNumber)[0];
+    const ordered = planSummary.versions.toSorted((left, right) => right.versionNumber - left.versionNumber);
+    const current = ordered.find((version) => version.status !== "ARCHIVED") ?? ordered[0];
     return current ? repository.getTrainerVersion(current.id) : null;
   }));
   return {

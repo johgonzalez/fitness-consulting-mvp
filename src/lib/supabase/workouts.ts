@@ -275,6 +275,14 @@ export class SupabaseWorkoutRepository implements WorkoutRepository, ExerciseLib
     return this.lifecycleRpc("archive_workout_version", versionId);
   }
 
+  async discardDraft(versionId: string): Promise<void> {
+    const supabase = await requireAuthenticatedClient();
+    const { error } = await supabase.rpc("discard_workout_draft", {
+      p_workout_plan_version_id: versionId,
+    });
+    requireRpcSuccess(error);
+  }
+
   async clonePublished(versionId: string): Promise<string> {
     const supabase = await requireAuthenticatedClient();
     const { data, error } = await supabase.rpc("create_new_draft_from_published_version", {

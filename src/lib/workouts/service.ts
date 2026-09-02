@@ -248,6 +248,11 @@ export class WorkoutService {
     return this.workouts.archive(versionId);
   }
 
+  discardDraft(versionId: string): Promise<void> {
+    assertWorkoutUuid(versionId, "versionId");
+    return this.workouts.discardDraft(versionId);
+  }
+
   clonePublished(versionId: string): Promise<string> {
     assertWorkoutUuid(versionId, "versionId");
     return this.workouts.clonePublished(versionId);
