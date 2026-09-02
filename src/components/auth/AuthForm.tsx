@@ -73,7 +73,7 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
     <button className="pc-auth-provider pc-auth-provider--apple" type="button" aria-label="Entrar com Apple — em breve" title="Entrar com Apple — em breve" aria-describedby={providerNotice ? "apple-provider-notice" : undefined} onClick={() => setProviderNotice("Entrar com Apple — em breve") }>
       {/* Apple-hosted logo-only Sign in with Apple artwork; this preview never starts OAuth. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="https://appleid.cdn-apple.com/appleid/button/logo?size=52&color=white&border=true&border_radius=8&scale=1" alt="" width="52" height="52" aria-hidden="true" />
+      <img src="https://appleid.cdn-apple.com/appleid/button/logo?size=50&color=white&border=false&border_radius=0&scale=1" alt="" width="50" height="50" aria-hidden="true" />
     </button>
   </div>{providerNotice ? <p id="apple-provider-notice" className="pc-auth-provider-feedback" role="status" aria-live="polite">{providerNotice}</p> : null}</> : null}<p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : context === "student" ? "Criar acesso para aguardar convite" : "Criar acesso"}</Link></p>
     {backHref ? <Link className="pc-auth-back" href={backHref}>Voltar</Link> : null}

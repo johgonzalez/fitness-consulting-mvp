@@ -13,10 +13,13 @@ test("Google remains real while Apple is an announced future preview only", asyn
   assert.match(form, /action=\{startGoogleOAuth\}/);
   assert.match(form, /developers\.google\.com\/static\/identity\/images\/g-logo\.png/);
   assert.match(form, /appleid\.cdn-apple\.com\/appleid\/button/);
+  assert.match(form, /border=false/);
   assert.match(form, /Entrar com Apple — em breve/);
   assert.match(form, /role="status"/);
   assert.match(css, /\.pc-auth-providers/);
   assert.match(css, /width:52px/);
+  assert.doesNotMatch(css, /\.pc-auth-provider--apple\s*\{[^}]*border-color:transparent/s);
+  assert.doesNotMatch(css, /\.pc-auth-provider--apple\s*\{[^}]*background:transparent/s);
   assert.doesNotMatch(form, /signInWithOAuth[\s\S]{0,300}apple|provider:\s*["']apple["']/i);
   assert.match(action, /provider: "google"/);
 });

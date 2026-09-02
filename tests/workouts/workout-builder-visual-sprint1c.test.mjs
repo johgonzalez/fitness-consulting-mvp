@@ -35,6 +35,9 @@ test("mobile flow keeps one editor expanded and exposes accessible reorder contr
   assert.match(builder, /prefers-reduced-motion: reduce/);
   assert.match(styles, /\.exerciseEditorFooter/);
   assert.match(styles, /@media\(max-width:560px\)/);
+  assert.doesNotMatch(styles, /\.exerciseEditorFooter\s*\{\s*position:\s*sticky/s);
+  assert.match(styles, /width:\s*min\(100%,\s*176px\)/);
+  assert.match(styles, /min-height:\s*44px/);
 });
 
 test("exercise library provides quiet search, clearing and direct row addition", async () => {

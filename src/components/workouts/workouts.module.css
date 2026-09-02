@@ -422,11 +422,6 @@
     height: 44px;
   }
 
-  .exerciseEditorFooter {
-    position: sticky;
-    z-index: 2;
-    bottom: 0;
-  }
 }
 
 @media(max-width:560px) {
@@ -461,8 +456,9 @@
   }
 
   .exerciseEditorFooter :global(.pp-button) {
-    width: 100%;
-    min-height: 48px;
+    width: min(100%, 176px);
+    min-height: 44px;
+    align-self: flex-end;
   }
 
   .setRow {
