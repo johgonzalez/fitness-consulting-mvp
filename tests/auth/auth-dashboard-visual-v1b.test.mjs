@@ -14,13 +14,16 @@ const dashboard = read("../../src/app/dashboard/page.tsx");
 const css = read("../../src/app/auth-dashboard-v1.css");
 const premiumCss = read("../../src/app/premium-consumer-v1a.css");
 const authShell = read("../../src/components/auth/AuthShell.tsx");
+const authEntryCss = read("../../src/app/cheipi-auth-entry-v1.css");
 
 test("returning users and invited students bypass unnecessary role selection", () => {
   assert.match(login, /if \(choose === "1"\)/);
   assert.doesNotMatch(login, /if \(!context\).*AuthContextPicker/);
   assert.match(login, /invited \? "student" : normalizeAuthContext/);
   assert.match(login, /resolveAuthenticatedHome\(supabase, \{ context, nextPath: next \}\)/);
-  assert.match(signup, /if \(!context\).*AuthContextPicker/);
+  assert.doesNotMatch(signup, /AuthContextPicker/);
+  assert.match(signup, /invited \? "student" : normalizeAuthContext/);
+  assert.match(signup, /resolveAuthenticatedHome\(supabase, \{ context, nextPath: next \}\)/);
 });
 
 test("role selection is semantic, explicit and never grants authorization", () => {
@@ -55,7 +58,9 @@ test("dashboard remains factual, attention-first and open-layout", () => {
 
 test("auth reuses the canonical monochrome product shell identity", () => {
   assert.match(authShell, /className="pc-auth-page pp-app-shell-v1"/);
-  assert.match(authShell, /<BrandLogo href="\/" monochrome \/>/);
+  assert.match(authShell, /<CheipiBrand href="\/" \/>/);
+  assert.match(authEntryCss, /var\(--pp-shell-solid\)/);
+  assert.match(authEntryCss, /var\(--pp-shell-on-solid\)/);
   assert.match(css, /var\(--pp-shell-solid\)/);
   assert.match(css, /var\(--pp-shell-on-solid\)/);
   assert.doesNotMatch(css, /--pc-contrast-(?:bg|text)/);

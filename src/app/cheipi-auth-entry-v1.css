@@ -1,0 +1,408 @@
+/* Sprint Auth 2A — Cheipi presentation over the canonical Monochrome Product tokens. */
+
+.cheipi-brand {
+  --cheipi-mark-tile: var(--pp-shell-solid);
+  --cheipi-mark-glyph: var(--pp-shell-on-solid);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--pp-text-primary);
+  text-decoration: none;
+}
+
+.cheipi-brand__mark {
+  width: 25px;
+  height: 32px;
+  display: block;
+}
+
+.cheipi-brand__mark .brand-logo__tile { fill: var(--cheipi-mark-tile); }
+.cheipi-brand__mark .brand-logo__glyph { fill: var(--cheipi-mark-glyph); }
+
+.cheipi-brand strong {
+  font: 720 1.05rem/1 var(--pp-font-display);
+  letter-spacing: -.03em;
+}
+
+.cheipi-brand--symbol {
+  min-width: 44px;
+  justify-content: center;
+  gap: 0;
+}
+
+.cheipi-splash {
+  width: 100%;
+  min-height: 100svh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: hidden;
+  background: #0e0e0e;
+  color: #f5f5f3;
+  isolation: isolate;
+}
+
+.cheipi-splash__halo {
+  width: 116px;
+  height: 116px;
+  position: absolute;
+  border: 1px solid rgb(245 245 243 / 10%);
+  border-radius: 50%;
+  box-shadow: 0 28px 70px rgb(0 0 0 / 36%);
+  animation: cheipi-splash-halo 720ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.cheipi-splash__brand {
+  --cheipi-mark-tile: #f5f5f3;
+  --cheipi-mark-glyph: #0e0e0e;
+  position: relative;
+  z-index: 1;
+  transform: scale(.96);
+  animation: cheipi-splash-mark 720ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.cheipi-splash__brand .cheipi-brand__mark {
+  width: 36px;
+  height: 45px;
+}
+
+.cheipi-welcome {
+  width: 100%;
+  min-height: 100svh;
+  height: 100dvh;
+  position: relative;
+  overflow: hidden;
+  background: #0e0e0e;
+  color: #f5f5f3;
+  color-scheme: dark;
+  isolation: isolate;
+  animation: cheipi-welcome-in 420ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.cheipi-welcome ::selection {
+  background: #f5f5f3;
+  color: #0e0e0e;
+}
+
+.cheipi-welcome__mosaic,
+.cheipi-welcome__shade {
+  position: absolute;
+  inset: 0;
+}
+
+.cheipi-welcome__mosaic {
+  z-index: -3;
+  background: #0e0e0e;
+}
+
+.cheipi-welcome__tile {
+  position: absolute;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #171717;
+  box-shadow: 0 24px 60px rgb(0 0 0 / 34%);
+  animation: cheipi-tile-drift 16s ease-in-out infinite alternate;
+}
+
+.cheipi-welcome__tile img {
+  object-fit: cover;
+  filter: saturate(.84) contrast(1.04);
+  transform: scale(1.035);
+}
+
+.cheipi-welcome__tile--strength img { object-position: 72% 28%; filter: saturate(.82) contrast(1.02) brightness(1.48); }
+.cheipi-welcome__tile--movement img { object-position: 58% 42%; filter: saturate(.78) contrast(1.02) brightness(1.08); }
+.cheipi-welcome__tile--conditioning img { object-position: 68% 30%; filter: saturate(.82) contrast(1.02) brightness(1.5); }
+.cheipi-welcome__tile--focus img { object-position: 62% 38%; filter: saturate(.82) contrast(1.02) brightness(1.32); }
+
+.cheipi-welcome__tile--coaching { inset: 5% auto auto 3.5%; width: 31%; height: 48%; }
+.cheipi-welcome__tile--strength { inset: 2.5% 3.5% auto auto; width: 27%; height: 39%; animation-delay: -4s; }
+.cheipi-welcome__tile--movement { inset: auto auto 4.5% 6%; width: 29%; height: 36%; animation-delay: -8s; }
+.cheipi-welcome__tile--conditioning { inset: auto 5% 3.5% auto; width: 31%; height: 48%; animation-delay: -11s; }
+.cheipi-welcome__tile--focus { inset: 8% auto auto 38%; width: 24%; height: 30%; animation-delay: -6s; }
+
+.cheipi-welcome__shade {
+  z-index: -2;
+  background:
+    radial-gradient(circle at 50% 45%, rgb(14 14 14 / 2%) 0 16%, rgb(14 14 14 / 28%) 38%, rgb(14 14 14 / 76%) 90%),
+    linear-gradient(180deg, rgb(14 14 14 / 10%), rgb(14 14 14 / 28%) 58%, rgb(14 14 14 / 82%));
+  pointer-events: none;
+}
+
+.cheipi-welcome__wordmark {
+  --cheipi-mark-tile: #f5f5f3;
+  --cheipi-mark-glyph: #0e0e0e;
+  position: absolute;
+  z-index: 4;
+  right: max(24px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  color: #f5f5f3;
+  opacity: .78;
+}
+
+.cheipi-welcome__wordmark .cheipi-brand__mark { width: 21px; height: 27px; }
+.cheipi-welcome__wordmark strong { font-size: .8rem; }
+
+.cheipi-welcome__orb {
+  width: clamp(214px, 24vw, 298px);
+  aspect-ratio: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  position: absolute;
+  z-index: 2;
+  top: 46%;
+  left: 50%;
+  padding: 30px;
+  border: 1px solid rgb(245 245 243 / 16%);
+  border-radius: 50%;
+  background: rgb(14 14 14 / 78%);
+  box-shadow: 0 32px 80px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(255 255 255 / 11%);
+  backdrop-filter: blur(13px);
+  transform: translate(-50%, -50%);
+}
+
+.cheipi-welcome__orb h1 {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  color: #f5f5f3;
+  font: 590 clamp(.82rem, 1.25vw, 1rem)/1.14 var(--pp-font-display);
+  letter-spacing: .105em;
+  text-align: center;
+}
+
+.cheipi-welcome__orb h1 span,
+.cheipi-welcome__orb h1 strong { display: block; }
+.cheipi-welcome__orb h1 strong { font-weight: 780; }
+
+.cheipi-welcome__orb-brand {
+  --cheipi-mark-tile: #f5f5f3;
+  --cheipi-mark-glyph: #0e0e0e;
+  color: #f5f5f3;
+}
+
+.cheipi-welcome__orb-brand .cheipi-brand__mark { width: 25px; height: 32px; }
+
+.cheipi-welcome__actions {
+  width: min(100% - 40px, 250px);
+  display: grid;
+  justify-items: center;
+  gap: 13px;
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: max(28px, calc(18px + env(safe-area-inset-bottom)));
+  transform: translateX(-50%);
+}
+
+.cheipi-provider-area {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+}
+
+.cheipi-provider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cheipi-provider-controls form { display: contents; }
+
+.cheipi-provider-control {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #f5f5f3;
+  box-shadow: 0 13px 30px rgb(0 0 0 / 24%);
+  cursor: pointer;
+  transition: border-color var(--pp-motion-fast) var(--pp-ease), background-color var(--pp-motion-fast) var(--pp-ease), transform var(--pp-motion-fast) var(--pp-ease);
+}
+
+.cheipi-provider-control img { width: 52px; height: 52px; display: block; border-radius: 10px; object-fit: contain; }
+.cheipi-provider-control:hover:not(:disabled) { background: transparent; transform: translateY(-1px); filter: brightness(1.12); }
+.cheipi-provider-control:active:not(:disabled) { transform: translateY(0) scale(.97); }
+.cheipi-provider-control:focus-visible { outline: 2px solid #f5f5f3; outline-offset: 3px; }
+.cheipi-provider-control:disabled { cursor: not-allowed; opacity: .48; }
+
+.cheipi-provider-notice {
+  margin: 0;
+  color: #d2d2cf;
+  font: 540 .66rem/1.4 var(--pp-font-ui);
+}
+
+.cheipi-welcome__email {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 12px;
+  color: #f5f5f3;
+  font: 650 .72rem/1 var(--pp-font-ui);
+  text-decoration: underline;
+  text-decoration-color: rgb(245 245 243 / 42%);
+  text-underline-offset: 5px;
+}
+
+.cheipi-welcome__email:hover { text-decoration-color: currentColor; }
+.cheipi-welcome__email:focus-visible { outline: 2px solid #f5f5f3; outline-offset: 3px; border-radius: 8px; }
+
+/* Secondary Auth surfaces stay quiet and share the production shell tokens. */
+.pc-auth-page .pc-auth-header .cheipi-brand { flex: none; }
+
+.pc-auth-page .pc-auth-layout,
+.pc-auth-page[data-auth-view="login"] .pc-auth-layout,
+.pc-auth-page[data-auth-view="selection"] .pc-auth-layout {
+  width: min(calc(100% - 40px), 720px);
+  min-height: calc(100dvh - 82px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  position: relative;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.pc-auth-watermark {
+  position: absolute;
+  right: -74px;
+  bottom: -100px;
+  color: var(--pp-text-primary);
+  opacity: .035;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.pc-auth-watermark .cheipi-brand__mark { width: 350px; height: 440px; }
+
+.pc-auth-page .pc-auth-panel,
+.pc-auth-page[data-auth-view="login"] .pc-auth-panel,
+.pc-auth-page[data-auth-view="selection"] .pc-auth-panel {
+  width: min(100%, 460px);
+  min-height: 0;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+  padding: 56px 34px 76px;
+  border: 0;
+  background: transparent;
+}
+
+.pc-auth-page .pc-auth-content,
+.pc-auth-page[data-auth-view="login"] .pc-auth-content,
+.pc-auth-page[data-auth-view="selection"] .pc-auth-content {
+  width: min(100%, 390px);
+  margin: 0 auto;
+}
+
+.pc-auth-page .pc-auth-content > h1,
+.pc-auth-page[data-auth-view="login"] .pc-auth-content > h1 {
+  font: 690 clamp(1.95rem, 4vw, 2.45rem)/1.04 var(--pp-font-display);
+  letter-spacing: -.035em;
+}
+
+.pc-auth-page[data-auth-view="selection"] .pc-auth-panel { width: min(100%, 520px); }
+.pc-auth-page[data-auth-view="selection"] .pc-auth-content { width: min(100%, 440px); }
+
+.pc-auth-page .pc-auth-panel > footer { display: none; }
+.pc-auth-page .pc-auth-form > .pp-button { margin-top: 14px; }
+.pc-auth-page .pc-auth-switch { margin-top: 24px; }
+
+.pc-invite-entry {
+  display: grid;
+  justify-items: stretch;
+  gap: 4px;
+}
+
+.pc-invite-entry .cheipi-provider-control {
+  background: transparent;
+}
+
+.pc-invite-entry .cheipi-provider-control:hover { background: transparent; }
+.pc-invite-entry .cheipi-provider-notice { color: var(--pp-text-secondary); }
+
+@keyframes cheipi-splash-mark {
+  0% { opacity: .2; transform: scale(.96); filter: blur(4px); }
+  56% { opacity: 1; transform: scale(1); filter: blur(0); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+@keyframes cheipi-splash-halo {
+  0% { opacity: 0; transform: scale(.84); }
+  62% { opacity: 1; transform: scale(1); }
+  100% { opacity: .72; transform: scale(1.04); }
+}
+
+@keyframes cheipi-welcome-in {
+  from { opacity: .65; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes cheipi-tile-drift {
+  from { transform: translate3d(0, -4px, 0); }
+  to { transform: translate3d(0, 7px, 0); }
+}
+
+@media (max-width: 760px) {
+  .cheipi-welcome__tile { border-radius: 15px; }
+  .cheipi-welcome__tile--coaching { inset: 2% auto auto -8%; width: 61%; height: 34%; }
+  .cheipi-welcome__tile--strength { inset: 2% -5% auto auto; width: 48%; height: 27%; }
+  .cheipi-welcome__tile--movement { inset: 31% auto auto -11%; width: 47%; height: 31%; }
+  .cheipi-welcome__tile--conditioning { inset: 27% -12% auto auto; width: 47%; height: 35%; }
+  .cheipi-welcome__tile--focus { inset: auto auto 7% 9%; width: 42%; height: 25%; }
+  .cheipi-welcome__shade { background: radial-gradient(circle at 50% 43%, rgb(14 14 14 / 3%) 0 18%, rgb(14 14 14 / 30%) 42%, rgb(14 14 14 / 62%) 90%), linear-gradient(180deg, rgb(14 14 14 / 4%), rgb(14 14 14 / 16%) 52%, rgb(14 14 14 / 88%)); }
+  .cheipi-welcome__orb { width: clamp(188px, 54vw, 218px); top: 43%; padding: 24px; }
+  .cheipi-welcome__orb h1 { font-size: .78rem; }
+  .cheipi-welcome__actions { bottom: max(24px, calc(14px + env(safe-area-inset-bottom))); }
+  .cheipi-welcome__wordmark { top: max(14px, env(safe-area-inset-top)); right: 16px; bottom: auto; }
+  .cheipi-welcome__wordmark strong { font-size: .72rem; }
+  .pc-auth-page .pc-auth-header { width: calc(100% - 32px); }
+  .pc-auth-page .pc-auth-layout,
+  .pc-auth-page[data-auth-view="login"] .pc-auth-layout,
+  .pc-auth-page[data-auth-view="selection"] .pc-auth-layout { width: 100%; min-height: calc(100dvh - 68px - env(safe-area-inset-top)); overflow: hidden; }
+  .pc-auth-page .pc-auth-panel,
+  .pc-auth-page[data-auth-view="login"] .pc-auth-panel,
+  .pc-auth-page[data-auth-view="selection"] .pc-auth-panel { width: 100%; min-height: 100%; padding: 34px 20px max(38px, calc(24px + env(safe-area-inset-bottom))); }
+  .pc-auth-watermark { right: -112px; bottom: -138px; }
+  .pc-auth-watermark .cheipi-brand__mark { width: 310px; height: 390px; }
+}
+
+@media (max-width: 360px) {
+  .cheipi-welcome__orb { width: 184px; }
+  .cheipi-welcome__actions { width: min(100% - 28px, 230px); }
+  .pc-auth-page .pc-auth-header .cheipi-brand strong { display: block; }
+  .pc-auth-page .pc-auth-header .cheipi-brand { width: auto; }
+  .pc-auth-page .pc-auth-panel,
+  .pc-auth-page[data-auth-view="login"] .pc-auth-panel,
+  .pc-auth-page[data-auth-view="selection"] .pc-auth-panel { padding-inline: 16px; }
+}
+
+@media (max-height: 620px) and (pointer: coarse) {
+  .cheipi-welcome__orb { width: 166px; top: 38%; gap: 10px; padding: 18px; }
+  .cheipi-welcome__actions { bottom: max(10px, env(safe-area-inset-bottom)); gap: 5px; }
+  .cheipi-provider-control { width: 48px; height: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cheipi-splash__halo,
+  .cheipi-splash__brand,
+  .cheipi-welcome,
+  .cheipi-welcome__tile { animation: none; }
+  .cheipi-splash__brand { opacity: 1; transform: none; filter: none; }
+  .cheipi-provider-control { transition: none; }
+}

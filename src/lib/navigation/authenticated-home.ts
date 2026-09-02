@@ -67,7 +67,8 @@ export async function resolveAuthenticatedHome(
   if (options.context === "student") return resolveStudentHome(supabase, roles, options.nextPath);
   if (options.context === "trainer") return resolveTrainerHome(supabase, roles, options.nextPath);
 
-  if (identityError || typeof safeIdentity?.id !== "string") return defaultAuthenticatedHome();
+  if (identityError) return defaultAuthenticatedHome(roles);
+  if (typeof safeIdentity?.id !== "string" || roles.length === 0) return "/login?choose=1";
   if (roles.includes("trainer")) return resolveTrainerHome(supabase, roles, options.nextPath);
   if (roles.includes("student")) return resolveStudentHome(supabase, roles, options.nextPath);
   return defaultAuthenticatedHome(roles);

@@ -6,6 +6,7 @@ const read = path => readFileSync(new URL(path, import.meta.url), "utf8");
 const auth = read("../../src/app/actions/auth.ts");
 const callback = read("../../src/app/auth/callback/route.ts");
 const form = read("../../src/components/auth/AuthForm.tsx");
+const providers = read("../../src/components/auth/AuthProviderControls.tsx");
 const otp = read("../../src/components/auth/OtpVerificationForm.tsx");
 const studentActions = read("../../src/app/actions/students.ts");
 const studentsRepo = read("../../src/lib/supabase/students.ts");
@@ -18,11 +19,12 @@ test("Google OAuth preserves only a validated internal next path", () => {
   assert.match(callback, /exchangeCodeForSession/);
   assert.match(callback, /accept_student_invitation/);
   assert.doesNotMatch(callback, /new URL\(url\.searchParams\.get\("next"\)/);
-  assert.match(form, /aria-label="Continuar com Google"/);
-  assert.match(form, /developers\.google\.com\/static\/identity\/images\/g-logo\.png/);
-  assert.doesNotMatch(form, />Continuar com Google</);
-  assert.match(form, /aria-label="Entrar com Apple — em breve"/);
-  assert.doesNotMatch(form, /provider:\s*["']apple["']/i);
+  assert.match(providers, /Continuar com Google/);
+  assert.match(providers, /\/auth\/providers\/google-dark-square@2x\.png/);
+  assert.doesNotMatch(providers, />Continuar com Google</);
+  assert.match(providers, /aria-label="Entrar com Apple — em breve"/);
+  assert.doesNotMatch(providers, /provider:\s*["']apple["']/i);
+  assert.doesNotMatch(form, /Continuar com Google|Entrar com Apple/);
 });
 
 test("password signup uses provider OTP verification and supported resend", () => {

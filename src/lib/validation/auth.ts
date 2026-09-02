@@ -1,7 +1,7 @@
 export type AuthFormState = {
   message?: string;
   tone?: "success" | "danger";
-  errors?: { email?: string; password?: string };
+  errors?: { email?: string; password?: string; passwordConfirmation?: string };
   verificationRequired?: boolean;
   email?: string;
   nextPath?: string;
@@ -17,12 +17,14 @@ export function normalizeAuthContext(value: FormDataEntryValue | null): AuthCont
   return value === "trainer" || value === "student" ? value : undefined;
 }
 
-export function validateAuthInput(formData: FormData) {
+export function validateAuthInput(formData: FormData, options: { requireConfirmation?: boolean } = {}) {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+  const passwordConfirmation = String(formData.get("password_confirmation") ?? "");
   const errors: NonNullable<AuthFormState["errors"]> = {};
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) errors.email = "Informe um e-mail válido.";
   if (password.length < 8 || password.length > 128) errors.password = "A senha deve ter entre 8 e 128 caracteres.";
+  if (options.requireConfirmation && password !== passwordConfirmation) errors.passwordConfirmation = "As senhas precisam ser iguais.";
   return { success: Object.keys(errors).length === 0, data: { email, password }, errors };
 }
 

@@ -21,12 +21,12 @@ async function finishInvitationIfPresent(nextPath: string) {
 }
 
 export async function signup(_state: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const validation = validateAuthInput(formData);
+  const validation = validateAuthInput(formData, { requireConfirmation: true });
   if (!validation.success) return { errors: validation.errors };
   if (!getSupabaseConfig().configured) return { message: "O acesso não está disponível neste ambiente.", tone: "danger" };
 
   const context = normalizeAuthContext(formData.get("context"));
-  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : "/onboarding");
+  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : context === "trainer" ? "/onboarding" : "/login?choose=1");
   const supabase = await createClient();
   const siteUrl = authSiteUrl();
   if (!siteUrl) return { message: "O acesso não está disponível neste ambiente.", tone: "danger" };
@@ -63,7 +63,7 @@ export async function verifySignupOtp(_state: AuthFormState, formData: FormData)
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const token = String(formData.get("token") ?? "").replace(/\s/g, "");
   const context = normalizeAuthContext(formData.get("context"));
-  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : "/onboarding");
+  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : context === "trainer" ? "/onboarding" : "/login?choose=1");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^[0-9]{6,10}$/.test(token)) {
     return { message: "Código inválido. Revise os números e tente novamente.", tone: "danger", verificationRequired: true, email, nextPath, context };
   }
@@ -81,7 +81,7 @@ export async function verifySignupOtp(_state: AuthFormState, formData: FormData)
 export async function resendSignupOtp(_state: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const context = normalizeAuthContext(formData.get("context"));
-  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : "/onboarding");
+  const nextPath = safeInternalPath(formData.get("next"), context === "student" ? "/access/student" : context === "trainer" ? "/onboarding" : "/login?choose=1");
   const siteUrl = authSiteUrl();
   if (!siteUrl || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { message: "Não conseguimos reenviar o código agora.", tone: "danger", verificationRequired: true, email, nextPath, context, resendAttempted: true };

@@ -4,8 +4,10 @@ import test from "node:test";
 
 const rootPage = await readFile(new URL("../../src/app/page.tsx", import.meta.url), "utf8");
 
-test("root enters the application through login without a demo Trainer dependency", () => {
+test("root resolves a valid session and otherwise renders the Cheipi entry", () => {
   assert.match(rootPage, /import \{ redirect \} from "next\/navigation"/);
-  assert.match(rootPage, /redirect\("\/login"\)/);
+  assert.match(rootPage, /supabase\.auth\.getUser\(\)/);
+  assert.match(rootPage, /resolveAuthenticatedHome\(supabase, \{ nextPath \}\)/);
+  assert.match(rootPage, /<CheipiEntry googleEnabled=\{configured\} nextPath=\{nextPath\} \/>/);
   assert.doesNotMatch(rootPage, /findPublishedBySlug|rafael-martins|return null/);
 });
