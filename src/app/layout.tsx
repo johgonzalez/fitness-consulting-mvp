@@ -16,6 +16,7 @@ import "./assessments.css";
 import "./student-workouts.css";
 import "./premium-consumer-v1a.css";
 import "./app-shell-v1.css";
+import "./auth-dashboard-v1.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });

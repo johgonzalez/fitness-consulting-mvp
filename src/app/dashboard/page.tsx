@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const reviewAssessments = (assessmentData?.items ?? []).filter(({ assessment }) => assessment.status === "ANSWERED" || assessment.status === "IN_REVIEW");
   const draftWorkouts = (workoutData?.items ?? []).filter(({ currentVersion }) => currentVersion.status === "DRAFT");
   const siteHref = `/p/${profile.slug}`;
-  const siteUrl = `pperfil.com/p/${profile.slug}`;
+  const siteUrl = `/p/${profile.slug}`;
   const priorities = [
     ...workoutNotifications.map((notification) => ({
       label: `${notification.studentName} concluiu ${notification.sessionName}`,
@@ -45,8 +45,10 @@ export default async function DashboardPage() {
     invitations.length ? { label: countLabel(invitations.length, "convite pendente", "convites pendentes"), href: "/dashboard/students", action: "Acompanhar", icon: Send, tone: "neutral" } : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 
-  return <main className="pc-dashboard">
-    <header className="pc-dashboard__header"><div><h1>Bom dia, {profile.display_name.split(" ")[0]}</h1><p>{dayFormatter.format(new Date())}</p></div><Link className="pc-primary-action" href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link></header>
+  const hasWorkspaceContent = priorities.length > 0 || activeStudents.length > 0 || attentionLeads.length > 0 || profile.published;
+
+  return <main className="pc-dashboard pc-dashboard--v1b">
+    <header className="pc-dashboard__header"><div><p>{dayFormatter.format(new Date())}</p><h1>Bom dia, {profile.display_name.split(" ")[0]}</h1><span>Veja o que precisa da sua atenção agora.</span></div><Link className="pc-primary-action" href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link></header>
 
     <section className="pc-pulse" aria-label="Resumo do negócio">
       <div><strong>{activeStudents.length}</strong><span>alunos ativos</span></div><div><strong>{draftWorkouts.length}</strong><span>treinos em rascunho</span></div><div><strong>{reviewAssessments.length}</strong><span>avaliações pendentes</span></div><div><strong>{attentionLeads.length}</strong><span>novos leads</span></div><div><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Site publicado" : "Site em rascunho"}</Status></div>
@@ -55,7 +57,9 @@ export default async function DashboardPage() {
     <div className="pc-dashboard__workspace">
       <section className="pc-dashboard__today" aria-labelledby="today-title">
         <header><h2 id="today-title">Hoje</h2><span>{countLabel(priorities.length, "prioridade", "prioridades")}</span></header>
-        <div className="pc-priority-list">{priorities.length ? priorities.map(({ label, href, action, icon: Icon, tone }) => <Link href={href} key={label} className="pc-priority-row"><span className={`pc-priority-row__icon pc-tone--${tone}`}><Icon aria-hidden="true" /></span><strong>{label}</strong><span>{action}</span><ArrowRight aria-hidden="true" /></Link>) : <div className="pc-quiet-state"><strong>Nenhuma pendência nos módulos disponíveis.</strong><span>Seu dia começa organizado.</span></div>}</div>
+        <div className="pc-priority-list">{priorities.length ? priorities.map(({ label, href, action, icon: Icon, tone }) => <Link href={href} key={label} className="pc-priority-row"><span className={`pc-priority-row__icon pc-tone--${tone}`}><Icon aria-hidden="true" /></span><strong>{label}</strong><span>{action}</span><ArrowRight aria-hidden="true" /></Link>) : <div className="pc-quiet-state"><strong>Nada pendente agora.</strong><span>Seus módulos disponíveis estão em dia.</span></div>}</div>
+
+        {!hasWorkspaceContent ? <div className="pc-dashboard-zero"><div><strong>Comece pelo primeiro aluno.</strong><p>Convide alguém para liberar a rotina de treinos e acompanhamento.</p></div><Link href="/dashboard/students?add=1#add-student">Adicionar aluno<ArrowRight aria-hidden="true" /></Link></div> : null}
 
         <div className="pc-section-heading"><h2>Alunos</h2><Link href="/dashboard/students">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
         <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} size="small" /><span><strong>{student.name}</strong><small>{student.email ?? "Contato não informado"}</small></span><Status tone="success">Ativo</Status><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <div className="pc-quiet-state"><strong>Nenhum aluno ativo.</strong><Link href="/dashboard/students?add=1#add-student">Adicionar aluno</Link></div> : null}</div>
@@ -64,7 +68,6 @@ export default async function DashboardPage() {
       <aside className="pc-dashboard__rail">
         <section className="pc-site-panel"><header><Globe2 aria-hidden="true" /><div><strong>Meu Site</strong><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Publicado" : "Rascunho"}</Status></div></header><a href={siteHref} target="_blank" rel="noreferrer">{siteUrl}<ExternalLink aria-hidden="true" /></a>{profile.published ? <p>{metrics.profile_views.toLocaleString("pt-BR")} visitas · {metrics.leads.toLocaleString("pt-BR")} leads</p> : <p>Finalize a revisão antes de publicar.</p>}<div><Link href={siteHref} target="_blank">Abrir</Link><Link href="/dashboard/site">Editar</Link><Link href="/dashboard/site"><Share2 aria-hidden="true" />Compartilhar</Link></div></section>
         <section className="pc-quick-actions" aria-labelledby="quick-actions-title"><h2 id="quick-actions-title">Ações rápidas</h2><div><Link href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" />Adicionar aluno</Link><Link href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link><Link href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" />Nova avaliação</Link><Link href="/dashboard/site"><Globe2 aria-hidden="true" />Meu Site</Link></div></section>
-        <p className="pc-data-note">Mensagens e check-ins aparecerão quando esses módulos disponibilizarem dados confiáveis.</p>
       </aside>
     </div>
   </main>;
