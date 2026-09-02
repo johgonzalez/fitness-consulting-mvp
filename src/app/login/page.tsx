@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { login } from "@/app/actions/auth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthContextPicker } from "@/components/auth/AuthContextPicker";
+import { AuthProviderControls } from "@/components/auth/AuthProviderControls";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { getSupabaseConfig } from "@/lib/supabase/config";
@@ -34,5 +35,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const title = invited ? "Acesse seu convite" : "Entre na sua conta";
   const subtitle = invited ? "Use a mesma conta que recebeu o convite." : "";
   const authError = error === "configuration" ? "O acesso não está disponível neste ambiente." : oauth === "failed" ? "Não foi possível concluir o acesso com Google. Tente novamente." : oauth === "unavailable" ? "O acesso com Google está indisponível agora. Use seu e-mail e senha." : null;
-  return <AuthShell view="login" title={title} subtitle={subtitle}>{authError ? <p className="pc-auth-feedback pc-auth-feedback--danger" role="alert">{authError}</p> : null}<AuthForm mode="login" action={login} nextPath={next} context={context} /></AuthShell>;
+  const socialOptions = <div className="pc-auth-login-social">
+    <div className="pc-auth-divider"><span>ou continue com</span></div>
+    <AuthProviderControls googleEnabled={configured} googleFirst nextPath={next} context={context} />
+  </div>;
+  return <AuthShell view="login" title={title} subtitle={subtitle}>{authError ? <p className="pc-auth-feedback pc-auth-feedback--danger" role="alert">{authError}</p> : null}<AuthForm mode="login" action={login} nextPath={next} context={context} socialOptions={socialOptions} /></AuthShell>;
 }

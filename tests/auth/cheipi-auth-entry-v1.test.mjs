@@ -35,11 +35,14 @@ test("Welcome keeps the approved sparse fitness composition", () => {
   assert.match(css, /\.cheipi-welcome__tile \{[\s\S]*animation: cheipi-tile-drift 16s/);
 });
 
-test("social providers appear only before the email choice", () => {
+test("social providers remain available at Welcome and the email login", () => {
   assert.match(providers, /startGoogleOAuth/);
   assert.match(providers, /Entrar com Apple — em breve/);
   assert.doesNotMatch(providers, /provider:\s*["']apple["']/i);
-  assert.doesNotMatch(form, /startGoogleOAuth|Entrar com Apple|Continuar com Google/);
+  assert.match(form, /socialOptions\?: ReactNode/);
+  assert.match(form, /!signupMode \? socialOptions : null/);
+  assert.match(login, /<AuthProviderControls googleEnabled=\{configured\} googleFirst nextPath=\{next\} context=\{context\} \/>/);
+  assert.match(login, /ou continue com/);
 });
 
 test("new account confirms its password and resolves role after verified identity", () => {

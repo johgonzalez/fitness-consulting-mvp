@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useMemo, useSyncExternalStore } from "react";
+import { useActionState, useMemo, useSyncExternalStore, type ReactNode } from "react";
 import type { AuthContext, AuthFormState } from "@/lib/validation/auth";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import { PasswordField } from "./PasswordField";
@@ -27,7 +27,7 @@ function readPendingOtp(serialized: string | null): AuthFormState | null {
   }
 }
 
-export function AuthForm({ mode, action, nextPath, context }: { mode: "login" | "signup"; action: AuthAction; nextPath?: string; context?: AuthContext }) {
+export function AuthForm({ mode, action, nextPath, context, socialOptions }: { mode: "login" | "signup"; action: AuthAction; nextPath?: string; context?: AuthContext; socialOptions?: ReactNode }) {
   const [state, formAction, pending] = useActionState(action, {});
   const signupMode = mode === "signup";
   const storageKey = otpStorageKey(nextPath, context);
@@ -62,7 +62,7 @@ export function AuthForm({ mode, action, nextPath, context }: { mode: "login" | 
     {state.message ? <p className={`pc-auth-feedback pc-auth-feedback--${state.tone ?? "danger"}`} role={state.tone === "success" ? "status" : "alert"}>{state.message}</p> : null}
     {!signupMode ? <Link className="pc-auth-forgot" href={recoveryHref}>Esqueci minha senha</Link> : null}
     <button className="pp-button pp-button--primary" type="submit" disabled={pending}><span>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</span></button>
-  </form><p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem conta?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar acesso"}</Link></p>
+  </form>{!signupMode ? socialOptions : null}<p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem conta?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : "Criar acesso"}</Link></p>
     {backHref ? <Link className="pc-auth-back" href={backHref}>Voltar</Link> : null}
   </div>;
 }
