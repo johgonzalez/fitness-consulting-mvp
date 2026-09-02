@@ -8,12 +8,12 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string }> }) {
-  const { next: rawNext, context: rawContext, choose } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; oauth?: string; error?: string }> }) {
+  const { next: rawNext, context: rawContext, choose, oauth, error } = await searchParams;
   const next = safeInternalPath(rawNext ?? null, "") || undefined;
   const invited = /^\/invite\/[a-f0-9]{64}$/.test(next ?? "");
   const context = invited ? "student" : normalizeAuthContext(rawContext ?? null);
-  if (choose === "1") return <AuthShell title="Como você usa o PPerfil?" subtitle="Escolha seu contexto para continuar."><AuthContextPicker route="/login" nextPath={next} /></AuthShell>;
+  if (choose === "1") return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} /></AuthShell>;
   const configured = getSupabaseConfig().configured;
   if (configured) {
     const supabase = await createClient();
@@ -22,5 +22,6 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   }
   const title = invited ? "Acesse seu convite" : "Entre na sua conta";
   const subtitle = invited ? "Use a mesma conta que recebeu o convite." : "Continue de onde parou no PPerfil.";
-  return <AuthShell title={title} subtitle={subtitle}><AuthForm mode="login" action={login} nextPath={next} context={context} oauthEnabled={configured} /></AuthShell>;
+  const authError = error === "configuration" ? "O acesso não está disponível neste ambiente." : oauth === "failed" ? "Não foi possível concluir o acesso com Google. Tente novamente." : oauth === "unavailable" ? "O acesso com Google está indisponível agora. Use seu e-mail e senha." : null;
+  return <AuthShell title={title} subtitle={subtitle}>{authError ? <p className="pc-auth-feedback pc-auth-feedback--danger" role="alert">{authError}</p> : null}<AuthForm mode="login" action={login} nextPath={next} context={context} oauthEnabled={configured} /></AuthShell>;
 }

@@ -40,6 +40,10 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
   const restoredOtp = useMemo(() => signupMode ? readPendingOtp(serializedOtp) : null, [serializedOtp, signupMode]);
   const alternateAuthHref = authRouteWithNext(signupMode ? "/login" : "/signup", nextPath, context);
   const backHref = nextPath?.startsWith("/invite/") ? nextPath : context ? "/login?choose=1" : undefined;
+  const recoveryParams = new URLSearchParams();
+  if (nextPath) recoveryParams.set("next", nextPath);
+  if (context) recoveryParams.set("context", context);
+  const recoveryHref = `/forgot-password${recoveryParams.size ? `?${recoveryParams}` : ""}`;
   const passwordErrorId = state.errors?.password ? `${mode}-password-error` : undefined;
   const otpState = state.verificationRequired ? state : restoredOtp;
   if (signupMode && otpState) return <OtpVerificationForm initialState={otpState} storageKey={storageKey} />;
@@ -53,7 +57,7 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
     <PasswordField id={`${mode}-password`} autoComplete={signupMode ? "new-password" : "current-password"} describedBy={passwordErrorId} />
     {state.errors?.password ? <p id={`${mode}-password-error`} className="field-error">{state.errors.password}</p> : null}
     {state.message ? <p className={`pc-auth-feedback pc-auth-feedback--${state.tone ?? "danger"}`} role={state.tone === "success" ? "status" : "alert"}>{state.message}</p> : null}
-    {!signupMode ? <span className="pc-auth-forgot" aria-disabled="true" title="Recuperação de senha será disponibilizada futuramente">Esqueci minha senha</span> : null}
+    {!signupMode ? <Link className="pc-auth-forgot" href={recoveryHref}>Esqueci minha senha</Link> : null}
     <button className="pp-button pp-button--primary" type="submit" disabled={pending}><span>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</span></button>
   </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>ou</span></div><form action={startGoogleOAuth} className="pc-auth-oauth">
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}

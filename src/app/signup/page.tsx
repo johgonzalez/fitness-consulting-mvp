@@ -13,7 +13,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
   const next = safeInternalPath(rawNext ?? null, "") || undefined;
   const invited = /^\/invite\/[a-f0-9]{64}$/.test(next ?? "");
   const context = invited ? "student" : normalizeAuthContext(rawContext ?? null);
-  if (!context) return <AuthShell title="Como você usa o PPerfil?" subtitle="Escolha seu contexto para criar o acesso correto."><AuthContextPicker route="/signup" nextPath={next} /></AuthShell>;
+  if (!context) return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/signup" nextPath={next} /></AuthShell>;
   const configured = getSupabaseConfig().configured;
   if (configured) {
     const supabase = await createClient();

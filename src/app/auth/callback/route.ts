@@ -16,6 +16,10 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
   if (error) return NextResponse.redirect(new URL("/login?oauth=failed", url));
 
+  if (nextPath === "/reset-password" || nextPath.startsWith("/reset-password?")) {
+    return NextResponse.redirect(new URL(nextPath, url));
+  }
+
   const invite = invitePattern.exec(nextPath);
   if (invite) {
     const { error: invitationError } = await supabase.rpc("accept_student_invitation", {
