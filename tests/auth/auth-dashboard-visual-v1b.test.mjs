@@ -12,6 +12,7 @@ const forgot = read("../../src/app/forgot-password/page.tsx");
 const reset = read("../../src/app/reset-password/page.tsx");
 const dashboard = read("../../src/app/dashboard/page.tsx");
 const css = read("../../src/app/auth-dashboard-v1.css");
+const premiumCss = read("../../src/app/premium-consumer-v1a.css");
 const authShell = read("../../src/components/auth/AuthShell.tsx");
 
 test("returning users and invited students bypass unnecessary role selection", () => {
@@ -60,4 +61,6 @@ test("auth reuses the canonical monochrome product shell identity", () => {
   assert.doesNotMatch(css, /--pc-contrast-(?:bg|text)/);
   assert.match(css, /data-auth-view="login"[^}]*\.pc-auth-layout[\s\S]*?display: flex;/);
   assert.doesNotMatch(css, /grid-template-columns: minmax\(72px, 0\.34fr\)/);
+  assert.doesNotMatch(premiumCss, /\.pc-auth-page\{[^}]*--pp-background:/);
+  assert.doesNotMatch(premiumCss, /\[data-theme="dark"\] \.pc-auth-page\{/);
 });
