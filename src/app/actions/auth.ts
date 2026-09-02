@@ -119,6 +119,51 @@ export async function startGoogleOAuth(formData: FormData) {
   redirect(data.url);
 }
 
+export type PasswordRecoveryState = {
+  message?: string;
+  tone?: "success" | "danger";
+  emailError?: string;
+  passwordError?: string;
+  completed?: boolean;
+};
+
+export async function requestPasswordReset(_state: PasswordRecoveryState, formData: FormData): Promise<PasswordRecoveryState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return { emailError: "Informe um e-mail válido." };
+  if (!getSupabaseConfig().configured) return { message: "A recuperação não está disponível neste ambiente.", tone: "danger" };
+  const siteUrl = authSiteUrl();
+  if (!siteUrl) return { message: "A recuperação não está disponível neste ambiente.", tone: "danger" };
+
+  const context = normalizeAuthContext(formData.get("context"));
+  const nextPath = safeInternalPath(formData.get("next"), "");
+  const resetParams = new URLSearchParams();
+  if (nextPath) resetParams.set("next", nextPath);
+  if (context) resetParams.set("context", context);
+  const resetDestination = `/reset-password${resetParams.size ? `?${resetParams}` : ""}`;
+  const callback = new URL("/auth/callback", siteUrl);
+  callback.searchParams.set("next", resetDestination);
+
+  const supabase = await createClient();
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: callback.toString() });
+  return { message: "Se existir uma conta com este e-mail, enviaremos as instruções de recuperação.", tone: "success", completed: true };
+}
+
+export async function updateRecoveredPassword(_state: PasswordRecoveryState, formData: FormData): Promise<PasswordRecoveryState> {
+  const password = String(formData.get("password") ?? "");
+  const confirmation = String(formData.get("password_confirmation") ?? "");
+  if (password.length < 8 || password.length > 128) return { passwordError: "A senha deve ter entre 8 e 128 caracteres." };
+  if (password !== confirmation) return { passwordError: "As senhas precisam ser iguais." };
+  if (!getSupabaseConfig().configured) return { message: "A recuperação não está disponível neste ambiente.", tone: "danger" };
+
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return { message: "Este link não está mais válido. Solicite uma nova recuperação.", tone: "danger" };
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { message: "Não foi possível atualizar a senha. Solicite um novo link e tente novamente.", tone: "danger" };
+  await supabase.auth.signOut();
+  return { message: "Senha atualizada. Entre novamente para continuar.", tone: "success", completed: true };
+}
+
 export async function logout() {
   if (await isDemoWorkspaceRequest()) redirect("/demo/exit");
   if (getSupabaseConfig().configured) {

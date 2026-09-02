@@ -17,11 +17,12 @@ const accessState = read("../../src/components/auth/StudentAccessState.tsx");
 const migration = read("../../supabase/migrations/202608280001_unified_auth_entry.sql");
 
 test("the entry asks for a UX context without assigning authorization", () => {
-  assert.match(picker, /Como você usa o PPerfil|Escolha como você usa o PPerfil/);
-  assert.match(picker, /Sou Personal Trainer/);
-  assert.match(picker, /Crie seu site, organize seus alunos e acompanhe os treinos\./);
-  assert.match(picker, /Sou Aluno/);
-  assert.match(picker, /Acesse seus treinos e acompanhe sua evolução\./);
+  assert.match(picker, /type="radio"/);
+  assert.match(picker, /Personal Trainer/);
+  assert.match(picker, /Crie seu site e organize alunos, treinos e avaliações\./);
+  assert.match(picker, /Aluno/);
+  assert.match(picker, /Acesse treinos, avaliações e progresso com seu Personal\./);
+  assert.match(picker, /disabled=\{!selection \|\| pending\}/);
   assert.doesNotMatch(picker, /user_roles|student_profiles|trainer_profiles/);
 });
 
