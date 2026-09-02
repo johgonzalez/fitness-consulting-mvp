@@ -89,8 +89,9 @@ function ProgressHeroSummary({ workspace }: { workspace: ProgressWorkspace }) {
     ...(duration > 0 ? [{ label: "Tempo em treino", value: formatTotalDuration(duration), detail: "atividade registrada" }] : []),
     ...(recent.length > 0 ? [{ label: "Frequência", value: `${numberFormatter.format(weeklyFrequency)}x`, detail: "média por semana" }] : []),
   ];
-  return <section className={styles.progressPulse} aria-label="Resumo dos últimos 30 dias">
-    {facts.map((fact) => <div key={fact.label}><small>{fact.label}</small><strong>{fact.value}</strong><span>{fact.detail}</span></div>)}
+  return <section className={styles.progressPulse} aria-labelledby="progress-summary-title">
+    <header><h2 id="progress-summary-title">Últimos 30 dias</h2><p>Resumo calculado somente com execuções registradas.</p></header>
+    <dl>{facts.map((fact) => <div key={fact.label}><dt>{fact.label}</dt><dd>{fact.value}<small>{fact.detail}</small></dd></div>)}</dl>
   </section>;
 }
 
@@ -116,13 +117,15 @@ function TrainingFrequency({ workouts }: { workouts: ProgressWorkoutItem[] }) {
   return <section className={styles.openSection} aria-labelledby="progress-frequency-title">
     <header className={styles.openHeading}><div><small>Atividade</small><h2 id="progress-frequency-title">Seu ritmo recente</h2></div></header>
     {workouts.some((workout) => workout.status === "COMPLETED") ? <div className={styles.frequencyChart} role="img" aria-label={`Treinos concluídos nas últimas seis semanas: ${weeks.map((week) => week.count).join(", ")}`}>
-      {weeks.map((week) => <div key={week.start.toISOString()}><span><i style={{ height: `${Math.max(8, (week.count / max) * 100)}%` }} /></span><strong>{week.count}</strong><small>{shortDateFormatter.format(week.start)}</small></div>)}
+      {weeks.map((week) => <div key={week.start.toISOString()}><span><i style={{ height: week.count === 0 ? "0%" : `${(week.count / max) * 100}%` }} /></span><strong>{week.count}</strong><small>{shortDateFormatter.format(week.start)}</small></div>)}
     </div> : <div className={styles.empty}><Activity aria-hidden="true" /><strong>Seu ritmo começa no primeiro treino</strong><p>As semanas aparecerão aqui quando houver sessões concluídas.</p></div>}
   </section>;
 }
 
 function ExerciseProgression({ series }: { series: ProgressExerciseSeries[] }) {
   const focal = series[0];
+  const firstY = focal?.delta === 0 ? 48 : focal && focal.delta < 0 ? 20 : 70;
+  const latestY = focal?.delta === 0 ? 48 : focal && focal.delta < 0 ? 70 : 20;
   return <section className={styles.openSection} aria-labelledby="exercise-progress-title">
     <header className={styles.openHeading}><div><small>Exercícios</small><h2 id="exercise-progress-title">Evolução de carga</h2></div></header>
     {focal ? <>
@@ -130,8 +133,8 @@ function ExerciseProgression({ series }: { series: ProgressExerciseSeries[] }) {
         <figcaption><span><strong>{focal.exerciseName}</strong><small>{focal.recordCount} registros comparáveis</small></span><b>{numberFormatter.format(focal.latest.value)} {focal.unit}</b></figcaption>
         <svg viewBox="0 0 320 96" role="img" aria-label={`${focal.exerciseName}: de ${numberFormatter.format(focal.first.value)} para ${numberFormatter.format(focal.latest.value)} ${focal.unit}`}>
           <line x1="20" y1="78" x2="300" y2="78" />
-          <polyline points="24,70 296,20" />
-          <circle cx="24" cy="70" r="5" /><circle cx="296" cy="20" r="5" />
+          <polyline points={`24,${firstY} 296,${latestY}`} />
+          <circle cx="24" cy={firstY} r="5" /><circle cx="296" cy={latestY} r="5" />
         </svg>
         <div><span>{shortDateFormatter.format(new Date(focal.first.happenedAt))}<strong>{numberFormatter.format(focal.first.value)} {focal.unit}</strong></span><span>{shortDateFormatter.format(new Date(focal.latest.happenedAt))}<strong>{numberFormatter.format(focal.latest.value)} {focal.unit}</strong></span></div>
       </figure>
@@ -150,7 +153,7 @@ function MeasurementProgress({ measurements }: { measurements: ProgressMeasureme
 function ProgressPhotoPreview({ photos }: { photos: ProgressPhoto[] }) {
   return <section className={styles.openSection} aria-labelledby="photo-preview-title">
     <header className={styles.openHeading}><div><small>Fotos privadas</small><h2 id="photo-preview-title">Registros visuais</h2></div><Link href="/student/progress?view=photos">Ver todas</Link></header>
-    {photos.length ? <div className={styles.photoPreviewRail}>{photos.slice(0, 4).map((photo) => <figure key={photo.id}>{photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Indisponível</span></div>}<figcaption><strong>{photoViewLabel(photo)}</strong><span>{shortDateFormatter.format(new Date(photo.createdAt))}</span></figcaption></figure>)}</div> : <div className={styles.empty}><Images aria-hidden="true" /><strong>Nenhuma foto registrada</strong><p>Seus registros privados aparecerão aqui.</p></div>}
+    {photos.length ? <div className={styles.photoPreviewRail}>{photos.slice(0, 4).map((photo) => <figure key={photo.id}>{photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} loading="lazy" decoding="async" /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Indisponível</span></div>}<figcaption><strong>{photoViewLabel(photo)}</strong><span>{shortDateFormatter.format(new Date(photo.createdAt))}</span></figcaption></figure>)}</div> : <div className={styles.empty}><Images aria-hidden="true" /><strong>Nenhuma foto registrada</strong><p>Seus registros privados aparecerão aqui.</p></div>}
   </section>;
 }
 
@@ -165,21 +168,24 @@ export function StudentProgressTabs({ active }: { active: ProgressView }) {
   </nav>;
 }
 
-function FactCard({ icon: Icon, label, value, detail }: { icon: typeof Activity; label: string; value: string; detail: string }) {
-  return <article className={styles.factCard}>
-    <span><Icon aria-hidden="true" /></span>
-    <div><small>{label}</small><strong>{value}</strong><p>{detail}</p></div>
-  </article>;
+function FactItem({ icon: Icon, label, value, detail }: { icon: typeof Activity; label: string; value: string; detail: string }) {
+  return <div className={styles.factCard}>
+    <dt><span><Icon aria-hidden="true" /></span><small>{label}</small></dt>
+    <dd>{value}<small>{detail}</small></dd>
+  </div>;
 }
 
 export function ProgressFacts({ workspace }: { workspace: ProgressWorkspace }) {
   const workout = latestWorkout(workspace.workouts);
   const measurement = workspace.measurements[0] ?? null;
   const photo = latestPhoto(workspace.photos);
-  return <section className={styles.facts} aria-label="Resumo factual do progresso">
-    <FactCard icon={Dumbbell} label="Treino mais recente" value={formatDate(workout?.happenedAt)} detail={workout ? `${workout.sessionName}${workout.status === "ABANDONED" ? " · interrompido" : ""}` : "Nenhum treino concluído"} />
-    <FactCard icon={Ruler} label="Última medida" value={formatDate(measurement?.latest.measuredAt)} detail={measurement ? `${measurement.label}: ${numberFormatter.format(measurement.latest.value)} ${measurement.unit}` : "Nenhuma medida registrada"} />
-    <FactCard icon={Camera} label="Foto mais recente" value={formatDate(photo?.createdAt)} detail={photo ? "Registro privado autorizado" : "Nenhuma foto registrada"} />
+  return <section className={styles.facts} aria-labelledby="trainer-progress-summary-title">
+    <header><h2 id="trainer-progress-summary-title">Resumo factual</h2><p>Últimos registros disponíveis neste acompanhamento.</p></header>
+    <dl>
+      <FactItem icon={Dumbbell} label="Treino mais recente" value={formatDate(workout?.happenedAt)} detail={workout ? `${workout.sessionName}${workout.status === "ABANDONED" ? " · interrompido" : ""}` : "Nenhum treino concluído"} />
+      <FactItem icon={Ruler} label="Última medida" value={formatDate(measurement?.latest.measuredAt)} detail={measurement ? `${measurement.label}: ${numberFormatter.format(measurement.latest.value)} ${measurement.unit}` : "Nenhuma medida registrada"} />
+      <FactItem icon={Camera} label="Foto mais recente" value={formatDate(photo?.createdAt)} detail={photo ? "Registro privado autorizado" : "Nenhuma foto registrada"} />
+    </dl>
   </section>;
 }
 
@@ -202,15 +208,14 @@ function WorkoutHistory({ workouts, limit }: { workouts: ProgressWorkoutItem[]; 
   </ol>;
 }
 
-function AssessmentHistory({ assessments, limit }: { assessments: ProgressAssessmentItem[]; limit?: number }) {
+function AssessmentHistory({ assessments, limit, hrefFor }: { assessments: ProgressAssessmentItem[]; limit?: number; hrefFor?: (assessment: ProgressAssessmentItem) => string }) {
   const visible = typeof limit === "number" ? assessments.slice(0, limit) : assessments;
   if (visible.length === 0) return <div className={styles.empty}><FileCheck2 aria-hidden="true" /><strong>Nenhuma avaliação registrada</strong><p>Avaliações e check-ins aparecerão aqui quando existirem.</p></div>;
   return <ol className={styles.assessmentList}>
-    {visible.map((assessment) => <li key={assessment.id}>
-      <span><FileCheck2 aria-hidden="true" /></span>
-      <div><strong>{assessment.title}</strong><p>{formatDate(assessment.happenedAt)}</p></div>
-      <small data-status={assessment.status}>{assessmentStatus[assessment.status]}</small>
-    </li>)}
+    {visible.map((assessment) => {
+      const content = <><span><FileCheck2 aria-hidden="true" /></span><div><strong>{assessment.title}</strong><p>{formatDate(assessment.happenedAt)}</p></div><small data-status={assessment.status}>{assessmentStatus[assessment.status]}</small>{hrefFor ? <ChevronRight aria-hidden="true" /> : null}</>;
+      return <li key={assessment.id}>{hrefFor ? <Link href={hrefFor(assessment)}>{content}</Link> : content}</li>;
+    })}
   </ol>;
 }
 
@@ -222,7 +227,7 @@ export function ProgressOverview({ workspace }: { workspace: ProgressWorkspace }
     <ExerciseProgression series={workspace.exerciseProgress} />
     <MeasurementProgress measurements={workspace.measurements} />
     <ProgressPhotoPreview photos={workspace.photos} />
-    <section className={styles.openSection}><header className={styles.openHeading}><div><small>Avaliações</small><h2>Check-ins e avaliações</h2></div></header><AssessmentHistory assessments={workspace.assessments} limit={1} />{workspace.assessments.length > 1 ? <details className={styles.inlineDisclosure}><summary>Ver histórico completo</summary><AssessmentHistory assessments={workspace.assessments.slice(1)} /></details> : null}</section>
+    <section className={styles.openSection}><header className={styles.openHeading}><div><small>Avaliações</small><h2>Check-ins e avaliações</h2></div></header><AssessmentHistory assessments={workspace.assessments} limit={1} hrefFor={(assessment) => `/student/assessments/${assessment.id}`} />{workspace.assessments.length > 1 ? <details className={styles.inlineDisclosure}><summary>Ver histórico completo</summary><AssessmentHistory assessments={workspace.assessments.slice(1)} hrefFor={(assessment) => `/student/assessments/${assessment.id}`} /></details> : null}</section>
   </div>;
 }
 
@@ -300,7 +305,7 @@ export function ProgressPhotos({ photos, canUpload = false }: { photos: Progress
       {groupPhotos(photos).map((group) => <section key={group.date}>
         <header><CalendarDays aria-hidden="true" /><h2>{formatDate(`${group.date}T12:00:00`)}</h2><span>{group.photos.length} {group.photos.length === 1 ? "registro" : "registros"}</span></header>
         <div>{group.photos.map((photo) => <figure key={photo.id} className={styles.photoCard}>
-          {photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Imagem indisponível</span></div>}
+          {photo.signedUrl ? <img src={photo.signedUrl} alt={`Foto privada de progresso — ${photoViewLabel(photo)}`} loading="lazy" decoding="async" /> : <div className={styles.photoUnavailable}><LockKeyhole aria-hidden="true" /><span>Imagem indisponível</span></div>}
           <figcaption><strong>{photoViewLabel(photo)}</strong><span>{photo.demoSimulation ? "Simulação demo" : photo.mediaType === "PROGRESS_PHOTO" ? "Progresso" : "Avaliação"}</span></figcaption>
         </figure>)}</div>
       </section>)}
@@ -314,7 +319,7 @@ export function TrainerProgressContent({ workspace }: { workspace: ProgressWorks
     <ProgressMeasurements measurements={workspace.measurements} />
     <div className={styles.split}>
       <section className={styles.panel}><header><span><Dumbbell aria-hidden="true" /></span><div><small>Execuções</small><h2>Histórico de treinos</h2></div></header><WorkoutHistory workouts={workspace.workouts} /></section>
-      <section className={styles.panel}><header><span><FileCheck2 aria-hidden="true" /></span><div><small>Avaliações</small><h2>Check-ins e contexto</h2></div></header><AssessmentHistory assessments={workspace.assessments} /></section>
+      <section className={styles.panel}><header><span><FileCheck2 aria-hidden="true" /></span><div><small>Avaliações</small><h2>Check-ins e contexto</h2></div></header><AssessmentHistory assessments={workspace.assessments} hrefFor={(assessment) => `/dashboard/assessments/${assessment.id}`} /></section>
     </div>
     <section className={styles.trainerSection}><div className={styles.sectionHeading}><div><small>Mídia autorizada</small><h2>Fotos privadas</h2></div><p>Disponíveis ao Personal somente enquanto o relacionamento estiver ativo.</p></div><ProgressPhotos photos={workspace.photos} /></section>
   </div>;

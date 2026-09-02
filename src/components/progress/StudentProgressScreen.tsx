@@ -1,4 +1,4 @@
-import { Activity, LockKeyhole } from "lucide-react";
+import { LockKeyhole } from "lucide-react";
 import { TrainerPresence } from "@/components/student/TrainerPresence";
 import type { ProgressView, ProgressWorkspace } from "@/lib/domain/progress";
 import {
@@ -12,7 +12,7 @@ import styles from "./progress.module.css";
 export function StudentProgressScreen({ workspace, view }: { workspace: ProgressWorkspace; view: ProgressView }) {
   return <div className={`pp-student-page ${styles.studentPage}`}>
     <header className={styles.studentHero}>
-      <div><span><Activity aria-hidden="true" />Seu histórico</span><h1>Sua evolução</h1><p>O que seus treinos e registros mostram até aqui.</p></div>
+      <div><h1>Sua evolução</h1><p>Treinos e registros factuais do seu acompanhamento.</p></div>
       {workspace.relationship ? <TrainerPresence
         name={workspace.relationship.trainerName}
         imageUrl={workspace.relationship.trainerImageUrl}

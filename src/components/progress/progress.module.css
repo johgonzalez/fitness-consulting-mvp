@@ -1008,7 +1008,6 @@
   display: block;
   border-radius: inherit;
   background: var(--progress-accent);
-  transition: width 120ms linear;
 }
 
 .uploadSubmit {
@@ -1322,5 +1321,333 @@
   .uploadSubmit,
   .uploadProgress span {
     transition: none;
+  }
+}
+
+/* Visual Sprint 1E — open, factual and canonical progress hierarchy. */
+.studentHero {
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.studentHero h1 {
+  font-size: clamp(1.8rem, 7vw, 2.55rem);
+}
+
+.tabs {
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+  box-shadow: none;
+}
+
+.tabs a {
+  border-radius: calc(var(--pp-radius-sm) - 3px);
+}
+
+.tabs a[data-active],
+:global(html[data-theme="dark"]) .tabs a[data-active] {
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
+  box-shadow: none;
+}
+
+.progressPulse {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 0 24px;
+}
+
+.progressPulse > header,
+.facts > header {
+  display: grid;
+  gap: 4px;
+}
+
+.progressPulse > header h2,
+.facts > header h2 {
+  margin: 0;
+  font: 740 1rem/1.2 var(--pp-font-display);
+  letter-spacing: -.025em;
+}
+
+.progressPulse > header p,
+.facts > header p {
+  margin: 0;
+  color: var(--pp-text-muted);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+.progressPulse > dl,
+.facts > dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--pp-border);
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+.progressPulse > dl > div {
+  min-width: 0;
+  padding: 14px 12px 15px;
+}
+
+.progressPulse > dl > div:first-child {
+  padding-left: 0;
+}
+
+.progressPulse > dl > div + div {
+  border-left: 1px solid var(--pp-divider);
+}
+
+.progressPulse dt,
+.factCard dt > small {
+  color: var(--pp-text-muted);
+  font-size: .61rem;
+}
+
+.progressPulse dd,
+.factCard dd {
+  display: grid;
+  gap: 3px;
+  margin: 5px 0 0;
+  color: var(--pp-text-primary);
+  font: 750 clamp(1.2rem, 5vw, 1.65rem)/1.1 var(--pp-font-display);
+  letter-spacing: -.04em;
+}
+
+.progressPulse dd small,
+.factCard dd small {
+  color: var(--pp-text-muted);
+  font: 500 .58rem/1.4 var(--pp-font-ui);
+  letter-spacing: 0;
+}
+
+.progressSection,
+.panel,
+.trainerSection,
+.measurementCard {
+  padding: 20px 0;
+  border: 0;
+  border-top: 1px solid var(--pp-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.frequencyChart > div > span {
+  border-radius: 3px;
+}
+
+.frequencyChart i {
+  border-radius: 2px;
+  background: var(--pp-shell-solid);
+}
+
+.exerciseFocalChart svg polyline,
+.chart polyline {
+  stroke: var(--pp-text-primary);
+}
+
+.exerciseFocalChart svg circle,
+.chart circle {
+  stroke: var(--pp-text-primary);
+}
+
+.exerciseProgressGrid article,
+.measurementPreview article,
+.bodyProgressGrid article {
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: transparent;
+}
+
+.exerciseProgressGrid article {
+  padding-inline: 0;
+}
+
+.exerciseProgressGrid article > span,
+.factCard dt > span,
+.panel > header > span,
+.assessmentList li > span {
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-primary);
+}
+
+.facts {
+  gap: 14px;
+  padding: 4px 0 20px;
+  border-bottom: 1px solid var(--pp-divider);
+}
+
+.facts > dl {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.factCard {
+  min-height: 72px;
+  grid-template-columns: 44px minmax(0, 1fr);
+  padding: 12px 0;
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.factCard dt {
+  display: contents;
+}
+
+.factCard dt > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  place-items: center;
+}
+
+.factCard dt > span svg {
+  width: 20px;
+  height: 20px;
+}
+
+.factCard dt > small {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.factCard:last-child {
+  border-bottom: 0;
+}
+
+.factCard dd {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+  margin-top: 2px;
+  font-size: .9rem;
+  letter-spacing: -.015em;
+}
+
+.chart,
+:global(html[data-theme="dark"]) .chart {
+  padding-inline: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.assessmentList li,
+.assessmentList li > a {
+  min-height: 64px;
+}
+
+.assessmentList li > a {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto 18px;
+  gap: 10px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.assessmentList li > a:focus-visible {
+  outline: 3px solid var(--pp-focus-ring);
+  outline-offset: 2px;
+}
+
+.assessmentList li > a > small {
+  color: var(--pp-text-secondary);
+  font-size: .65rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.assessmentList li > a > svg:last-child {
+  color: var(--pp-text-muted);
+}
+
+.photoPreviewRail img,
+.photoPreviewRail .photoUnavailable,
+.photoCard img,
+.photoUnavailable {
+  border-radius: var(--pp-radius-sm);
+}
+
+.privacyNotice {
+  border-color: var(--pp-border);
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+}
+
+.privacyNotice > svg {
+  border-radius: var(--pp-radius-sm);
+  color: var(--pp-text-primary);
+}
+
+@media (min-width: 640px) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .facts > dl {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .factCard {
+    grid-template-columns: 40px minmax(0, 1fr);
+    border-right: 1px solid var(--pp-divider);
+    border-bottom: 0;
+    padding-inline: 14px;
+  }
+
+  .factCard dt > span {
+    width: 40px;
+    height: 40px;
+  }
+
+  .factCard:first-child {
+    padding-left: 0;
+  }
+
+  .factCard:last-child {
+    border-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .progressPulse > dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .progressPulse > dl > div {
+    padding-inline: 10px;
+  }
+
+  .progressPulse > dl > div:nth-child(3) {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-top: 1px solid var(--pp-divider);
+    border-left: 0;
+  }
+
+  .assessmentList li > a {
+    grid-template-columns: 34px minmax(0, 1fr) 18px;
+  }
+
+  .assessmentList li > a > small {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .assessmentList li > a > svg:last-child {
+    grid-column: 3;
+    grid-row: 1 / span 2;
   }
 }
