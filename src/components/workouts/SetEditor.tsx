@@ -1,6 +1,6 @@
 "use client";
 
-import { Copy, Plus, Trash2 } from "lucide-react";
+import { Copy, Plus, SlidersHorizontal, Trash2 } from "lucide-react";
 import type { WorkoutSetInput, WorkoutSetPrescription } from "@/lib/domain/workouts";
 import { workoutSetTypeLabels } from "@/lib/workouts/presentation";
 import styles from "./workouts.module.css";
@@ -41,7 +41,7 @@ export function SetEditor({
       const mode = modeFor(set);
       return <div className={styles.setRow} key={set.id}>
         <span className={styles.setNumber}>{set.setNumber}</span>
-        <label><span>Tipo</span><select value={set.setType} disabled={!editable} onChange={(event) => onUpdate(set.id, { setType: event.target.value as WorkoutSetInput["setType"] }, true)}>{Object.entries(workoutSetTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label className={styles.desktopSetAdvanced}><span>Tipo</span><select value={set.setType} disabled={!editable} onChange={(event) => onUpdate(set.id, { setType: event.target.value as WorkoutSetInput["setType"] }, true)}>{Object.entries(workoutSetTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <div className={styles.targetEditor}>
           <label><span>Alvo</span><select value={mode} disabled={!editable} onChange={(event) => {
             const next = event.target.value;
@@ -61,9 +61,10 @@ export function SetEditor({
         </div>
         <span className={styles.valueWithUnit}><label><span>Carga</span><input aria-label={`Carga da série ${set.setNumber}`} inputMode="decimal" value={set.targetLoad ?? ""} disabled={!editable} onChange={(event) => onUpdate(set.id, { targetLoad: numeric(event.target.value), loadUnit: numeric(event.target.value) == null ? null : set.loadUnit ?? "kg" })} onBlur={() => onUpdate(set.id, {}, true)} /></label><select aria-label={`Unidade de carga da série ${set.setNumber}`} value={set.loadUnit ?? "kg"} disabled={!editable || set.targetLoad == null} onChange={(event) => onUpdate(set.id, { loadUnit: event.target.value as "kg" | "lb" }, true)}><option value="kg">kg</option><option value="lb">lb</option></select></span>
         <label><span>Descanso</span><span className={styles.inputSuffix}><input aria-label={`Descanso da série ${set.setNumber}`} inputMode="numeric" value={set.restSeconds ?? ""} disabled={!editable} onChange={(event) => onUpdate(set.id, { restSeconds: numeric(event.target.value) })} onBlur={() => onUpdate(set.id, {}, true)} /><i>s</i></span></label>
-        <label><span>RPE</span><input aria-label={`RPE da série ${set.setNumber}`} inputMode="decimal" value={set.targetRpe ?? ""} disabled={!editable} onChange={(event) => onUpdate(set.id, { targetRpe: numeric(event.target.value) })} onBlur={() => onUpdate(set.id, {}, true)} /></label>
+        <label className={styles.desktopSetAdvanced}><span>RPE</span><input aria-label={`RPE da série ${set.setNumber}`} inputMode="decimal" value={set.targetRpe ?? ""} disabled={!editable} onChange={(event) => onUpdate(set.id, { targetRpe: numeric(event.target.value) })} onBlur={() => onUpdate(set.id, {}, true)} /></label>
         {editable ? <span className={styles.setActions}><button type="button" onClick={() => onDuplicate(set)} aria-label={`Duplicar série ${set.setNumber}`}><Copy aria-hidden="true" /></button><button type="button" onClick={() => onRemove(set.id)} aria-label={`Remover série ${set.setNumber}`}><Trash2 aria-hidden="true" /></button></span> : null}
-        <label className={styles.setNotes}><span>Nota da série</span><input value={set.notes ?? ""} disabled={!editable} placeholder="Nota opcional" maxLength={1000} onChange={(event) => onUpdate(set.id, { notes: event.target.value || null })} onBlur={() => onUpdate(set.id, {}, true)} /></label>
+        <label className={`${styles.setNotes} ${styles.desktopSetAdvanced}`}><span>Nota da série</span><input value={set.notes ?? ""} disabled={!editable} placeholder="Nota opcional" maxLength={1000} onChange={(event) => onUpdate(set.id, { notes: event.target.value || null })} onBlur={() => onUpdate(set.id, {}, true)} /></label>
+        <details className={styles.mobileSetAdvanced}><summary><SlidersHorizontal aria-hidden="true" />Mais opções</summary><div><label><span>Tipo</span><select value={set.setType} disabled={!editable} onChange={(event) => onUpdate(set.id, { setType: event.target.value as WorkoutSetInput["setType"] }, true)}>{Object.entries(workoutSetTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label><label><span>RPE</span><input aria-label={`RPE da série ${set.setNumber}`} inputMode="decimal" value={set.targetRpe ?? ""} disabled={!editable} onChange={(event) => onUpdate(set.id, { targetRpe: numeric(event.target.value) })} onBlur={() => onUpdate(set.id, {}, true)} /></label><label><span>Nota da série</span><input value={set.notes ?? ""} disabled={!editable} placeholder="Nota opcional" maxLength={1000} onChange={(event) => onUpdate(set.id, { notes: event.target.value || null })} onBlur={() => onUpdate(set.id, {}, true)} /></label></div></details>
       </div>;
     })}
     {editable ? <button type="button" className={styles.addSet} onClick={onAdd}><Plus aria-hidden="true" />Adicionar série <small>herda valores da anterior</small></button> : null}
