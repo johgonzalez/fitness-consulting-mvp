@@ -296,6 +296,24 @@
   font: 540 .66rem/1.4 var(--pp-font-ui);
 }
 
+.pc-auth-login-social .pc-auth-divider {
+  margin: 22px 0 16px;
+}
+
+.pc-auth-login-social .cheipi-provider-control {
+  width: 52px;
+  height: 52px;
+}
+
+.pc-auth-login-social .cheipi-provider-control img {
+  width: 50px;
+  height: 50px;
+}
+
+.pc-auth-login-social .cheipi-provider-notice {
+  color: var(--pp-text-secondary);
+}
+
 .cheipi-welcome__email {
   min-height: 44px;
   display: inline-flex;

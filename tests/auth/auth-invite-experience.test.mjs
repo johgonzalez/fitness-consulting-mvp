@@ -12,6 +12,7 @@ const acceptForm = read("../../src/components/students/AcceptInvitationForm.tsx"
 const confirmRoute = read("../../src/app/auth/confirm/route.ts");
 const confirmResult = read("../../src/app/auth/confirm/result/page.tsx");
 const logoutForm = read("../../src/components/auth/SecureLogoutForm.tsx");
+const demoExit = read("../../src/app/demo/exit/route.ts");
 const trainerHeader = read("../../src/components/dashboard/DashboardHeader.tsx");
 const studentProfile = read("../../src/app/student/profile/page.tsx");
 const proxy = read("../../src/lib/supabase/proxy.ts");
@@ -66,7 +67,8 @@ test("trainer and student logout entry points require explicit confirmation", ()
   assert.match(logoutForm, /type="button" onClick=\{\(\) => setConfirmationOpen\(true\)\}/);
   assert.match(logoutForm, /type="button" disabled=\{pending\} onClick=\{logoutWithLocalCleanup\}/);
   assert.match(logoutForm, /await logout\(\)/);
-  assert.match(authActions, /redirect\("\/login"\)/);
+  assert.match(authActions, /export async function logout\(\)[\s\S]*redirect\("\/"\)/);
+  assert.match(demoExit, /new URL\("\/", request\.url\)/);
 });
 
 test("authenticated auth-route redirect respects explicit next and role-aware home", () => {
