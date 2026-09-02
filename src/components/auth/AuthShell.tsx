@@ -2,8 +2,8 @@ import { BrandLogo } from "@/components/dashboard/BrandLogo";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 
 export function AuthShell({ title, subtitle, children, view = "default" }: { title: string; subtitle: string; children: React.ReactNode; view?: "default" | "login" | "selection" }) {
-  return <main className="pc-auth-page" data-auth-view={view}>
-    <header className="pc-auth-header"><BrandLogo href="/" /><ThemeToggle /></header>
+  return <main className="pc-auth-page pp-app-shell-v1" data-auth-view={view}>
+    <header className="pc-auth-header"><BrandLogo href="/" monochrome /><ThemeToggle /></header>
     <div className="pc-auth-layout">
       <aside className="pc-auth-media" aria-label="PPerfil para Personal Trainers e alunos">
         <div className="pc-auth-media__line" aria-hidden="true" />
