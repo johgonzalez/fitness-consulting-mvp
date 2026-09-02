@@ -360,6 +360,7 @@ export function SiteBuilder({
           <div className="pp-site-overview-facts">
             <article><span>Contato e conversão</span><strong>{profile.whatsapp}</strong><p>{profile.instagram ? `Instagram: ${profile.instagram}` : "Instagram não informado"}</p><button type="button" onClick={() => setSection("contact")}>Revisar contato</button></article>
             <article><span>Conteúdo do site</span><strong>{services.length} serviço{services.length === 1 ? "" : "s"}</strong><p>{testimonials.length} depoimento{testimonials.length === 1 ? "" : "s"} cadastrado{testimonials.length === 1 ? "" : "s"}</p><button type="button" onClick={() => openEditor("services")}>Gerenciar conteúdo</button></article>
+            <article><span>Aquisição</span><strong>Leads PPerfil</strong><p>O canal específico de origem ainda não é registrado; nenhuma visita ou conversão é estimada.</p><Link href="/dashboard/leads">Abrir leads</Link></article>
           </div>
         </section>
       ) : null}

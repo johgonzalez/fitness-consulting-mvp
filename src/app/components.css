@@ -17,5 +17,10 @@
 .billing-plan-price { display: flex; align-items: baseline; gap: .4rem; }
 .billing-plan-price strong { font-size: clamp(1.8rem, 5vw, 2.5rem); letter-spacing: -.04em; }
 .billing-plan-price span, .billing-current-state { color: var(--pp-text-secondary); }
+.billing-status-summary { display: grid; gap: .35rem; padding: 1rem; border: 1px solid var(--pp-border); border-radius: var(--pp-radius-md); background: var(--pp-surface-subtle); }
+.billing-status-summary > span { color: var(--pp-text-muted); font-size: .7rem; font-weight: 650; }
+.billing-status-summary > strong { font-size: .9rem; }
+.billing-status-summary > p { max-width: 620px; margin: 0; color: var(--pp-text-secondary); font-size: .78rem; line-height: 1.5; }
+.billing-status-summary > small { color: var(--pp-text-muted); font-size: .7rem; }
 .billing-checkout-action { display: grid; justify-items: start; gap: .75rem; }
 .billing-checkout-error { margin: 0; color: var(--pp-danger); }

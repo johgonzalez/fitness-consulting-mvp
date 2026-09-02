@@ -29,13 +29,15 @@ function safeUrl(value: string | null) {
 }
 
 export function resolveStudentWorkoutMedia(exerciseId: string | null, media: MediaItem[], demoMode: boolean) {
+  const deterministicDemoMedia = demoMode && exerciseId ? demoWorkoutMediaRegistry.get(exerciseId) ?? null : null;
+  if (deterministicDemoMedia) return deterministicDemoMedia;
   const sorted = [...media].sort((left, right) => left.sortOrder - right.sortOrder);
   for (const item of sorted) {
     if (item.mediaType !== "IMAGE") continue;
     const resolved = safeUrl(item.thumbnailUrlOrPath) ?? safeUrl(item.urlOrStoragePath);
     if (resolved) return resolved;
   }
-  return demoMode && exerciseId ? demoWorkoutMediaRegistry.get(exerciseId) ?? null : null;
+  return null;
 }
 
 export function StudentWorkoutMedia({

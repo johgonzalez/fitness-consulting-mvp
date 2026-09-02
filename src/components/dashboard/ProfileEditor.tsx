@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, Camera, ChevronRight, CreditCard, Database, Mail, Palette, Plug, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import { Camera, ChevronRight, CreditCard, Mail, Palette, ShieldCheck, Trash2, UserRound } from "lucide-react";
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { removeProfilePhoto, requestEmailChange, saveProfileBasics } from "@/app/actions/profile";
 import { uploadIdentityImage, type SiteActionState } from "@/app/actions/site-builder";
@@ -17,11 +18,8 @@ type SettingsSectionId = "profile" | "account" | "appearance";
 const settingsNavigation = [
   { id: "profile", label: "Perfil profissional", description: "Foto e dados públicos", icon: UserRound, available: true },
   { id: "account", label: "Conta e segurança", description: "E-mail e acesso", icon: ShieldCheck, available: true },
-  { id: "notifications", label: "Notificações", description: "Em breve", icon: Bell, available: false },
   { id: "appearance", label: "Aparência", description: "Tema do aplicativo", icon: Palette, available: true },
-  { id: "integrations", label: "Integrações", description: "Em breve", icon: Plug, available: false },
-  { id: "plan", label: "Plano PPerfil", description: "Em breve", icon: CreditCard, available: false },
-  { id: "privacy", label: "Privacidade e dados", description: "Em breve", icon: Database, available: false },
+  { id: "plan", label: "Plano PPerfil", description: "Assinatura e cobrança", icon: CreditCard, available: true, href: "/dashboard/settings/billing" },
 ] as const;
 
 function Message({ state }: { state: SiteActionState }) {
@@ -41,17 +39,21 @@ export function ProfileEditor({ profile, email }: { profile: TrainerProfile; ema
       {settingsNavigation.map((item) => {
         const Icon = item.icon;
         const active = item.available && item.id === activeSection;
+        if ("href" in item) return <Link key={item.id} href={item.href}>
+          <span className="pp-settings-navigation__icon"><Icon aria-hidden="true" /></span>
+          <span><strong>{item.label}</strong><small>{item.description}</small></span>
+          <ChevronRight aria-hidden="true" />
+        </Link>;
         return <button
           type="button"
           key={item.id}
           className={active ? "active" : undefined}
           onClick={() => item.available && setActiveSection(item.id as SettingsSectionId)}
-          disabled={!item.available}
           aria-current={active ? "page" : undefined}
         >
           <span className="pp-settings-navigation__icon"><Icon aria-hidden="true" /></span>
           <span><strong>{item.label}</strong><small>{item.description}</small></span>
-          {item.available ? <ChevronRight aria-hidden="true" /> : <small className="pp-settings-navigation__soon">Em breve</small>}
+          <ChevronRight aria-hidden="true" />
         </button>;
       })}
     </nav>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarDays, Clock3, Mail, MapPin, Phone, Radar, Target } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock3, Mail, MapPin, MessageCircle, Phone, Radar, Target } from "lucide-react";
 import { LeadLifecycleActions } from "@/components/leads/LeadLifecycleActions";
 import { ActionGroup, ContextPanel, MasterDetail } from "@/components/ui/PPerfilOperational";
 import { Avatar, Status } from "@/components/ui/PPerfilPrimitives";
@@ -40,6 +40,10 @@ function remaining(deadline: string) {
   return `${Math.max(0, Math.ceil(milliseconds / 60_000))}min`;
 }
 
+function phoneDigits(value: string) {
+  return value.replace(/\D/g, "");
+}
+
 export default async function LeadDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const match = await getLead(id);
@@ -48,6 +52,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
   const lead = match.lead;
   const isActionable = match.state === "new" || match.state === "pending";
   const location = [lead.city, lead.state].filter(Boolean).join(", ") || "Não informado";
+  const contactPhone = phoneDigits(lead.whatsapp);
 
   return <main className="dashboard-main pp-record-page pp-lead-record">
     <Link href="/dashboard/leads" className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para leads</Link>
@@ -59,6 +64,12 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
         <p>{valueLabel(leadsConfig.goals, lead.goal)} · {serviceModeLabel(lead.serviceMode)}</p>
       </div>
     </header>
+
+    <div className="pp-lead-contact-actions" aria-label="Atalhos de contato">
+      <a href={`https://wa.me/${contactPhone}`} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" />WhatsApp</a>
+      <a href={`tel:${contactPhone}`}><Phone aria-hidden="true" />Ligar</a>
+      {lead.email ? <a href={`mailto:${lead.email}`}><Mail aria-hidden="true" />E-mail</a> : null}
+    </div>
 
     <nav className="pp-record-tabs" aria-label="Seções do lead"><span aria-current="page">Visão geral</span></nav>
 
@@ -86,8 +97,8 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
 
       <ContextPanel title="Identidade e contato" description="Informações fornecidas pela própria pessoa.">
         <dl className="pp-detail-list pp-detail-list--contact">
-          <div><dt><Phone aria-hidden="true" />WhatsApp</dt><dd>{lead.whatsapp}</dd></div>
-          <div><dt><Mail aria-hidden="true" />E-mail</dt><dd>{lead.email ?? "Não informado"}</dd></div>
+          <div><dt><Phone aria-hidden="true" />WhatsApp</dt><dd><a href={`https://wa.me/${contactPhone}`} target="_blank" rel="noreferrer">{lead.whatsapp}</a></dd></div>
+          <div><dt><Mail aria-hidden="true" />E-mail</dt><dd>{lead.email ? <a href={`mailto:${lead.email}`}>{lead.email}</a> : "Não informado"}</dd></div>
           <div><dt><CalendarDays aria-hidden="true" />Recebido em</dt><dd>{new Date(match.createdAt).toLocaleString("pt-BR")}</dd></div>
           <div><dt>Origem</dt><dd>Ecossistema PPerfil<small>Canal específico não registrado</small></dd></div>
         </dl>

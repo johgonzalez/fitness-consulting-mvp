@@ -7,7 +7,22 @@ type BillingSummary = {
   product_code?: string;
   billing_state?: string;
   current_period_end?: string | null;
+  cancel_at_period_end?: boolean;
+  grace_until?: string | null;
 };
+
+const billingStateCopy: Record<string, { label: string; description: string }> = {
+  FREE: { label: "Plano gratuito", description: "Seu espaço e seus dados continuam disponíveis. Ative o Pro quando quiser publicar e usar os recursos incluídos no plano." },
+  ACTIVE: { label: "Assinatura ativa", description: "Seu acesso ao PPerfil Pro está ativo." },
+  GRACE: { label: "Pagamento em regularização", description: "Seu acesso continua disponível durante o período de regularização." },
+  SUSPENDED: { label: "Acesso Pro suspenso", description: "Seus dados foram preservados. Regularize o plano para reativar os recursos Pro." },
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) ? date.toLocaleDateString("pt-BR") : null;
+}
 
 export default async function BillingSettingsPage({
   searchParams,
@@ -24,6 +39,9 @@ export default async function BillingSettingsPage({
   }
   const paid = summary.product_code === "PRO"
     && (summary.billing_state === "ACTIVE" || summary.billing_state === "GRACE");
+  const state = billingStateCopy[summary.billing_state ?? "FREE"] ?? billingStateCopy.FREE;
+  const periodEnd = formatDate(summary.current_period_end);
+  const graceUntil = formatDate(summary.grace_until);
 
   return <main className="dashboard-main pp-workspace pp-settings-page billing-settings-page">
     <header className="pp-page-header">
@@ -50,11 +68,18 @@ export default async function BillingSettingsPage({
         <p>Site profissional, gestão de alunos, avaliações, treinos e progresso.</p>
       </div>
       <div className="billing-plan-price"><strong>R$ 59,90</strong><span>/ mês</span></div>
-      {demoMode
-        ? <p className="billing-current-state">Workspace demo: cobrança disponível apenas em uma conta real.</p>
-        : paid
-        ? <p className="billing-current-state">Plano atual: {summary.billing_state}</p>
-        : <BillingCheckoutButton />}
+      {demoMode ? <div className="billing-status-summary">
+        <span>Workspace de demonstração</span>
+        <strong>Plano e cobrança sem alterações reais</strong>
+        <p>A cobrança fica disponível somente em uma conta real.</p>
+      </div> : <div className="billing-status-summary" role="status">
+        <span>{summary.product_code === "PRO" ? "PPerfil Pro" : "PPerfil Free"}</span>
+        <strong>{summary.cancel_at_period_end ? "Cancelamento programado" : state.label}</strong>
+        <p>{summary.cancel_at_period_end && periodEnd ? `O acesso Pro permanece ativo até ${periodEnd}. Seus dados serão preservados.` : state.description}</p>
+        {summary.billing_state === "ACTIVE" && periodEnd && !summary.cancel_at_period_end ? <small>Próximo ciclo em {periodEnd}</small> : null}
+        {summary.billing_state === "GRACE" && graceUntil ? <small>Período de regularização até {graceUntil}</small> : null}
+      </div>}
+      {!demoMode && !paid ? <BillingCheckoutButton /> : null}
     </section>
   </main>;
 }
