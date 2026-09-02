@@ -457,6 +457,10 @@ insert into workout_gate_results values
       (select value from workout_gate_context where key='draft_version_a'),'Student mutation'
     ))
   ),
+  ('Student cannot discard Trainer Draft', pg_temp.raises(format(
+    'select public.discard_workout_draft(%L::uuid)',
+    (select value from workout_gate_context where key='ai_version_a')
+  ))),
   ('Student A cannot read Student B published plan', not exists(
     select 1 from public.workout_plan_versions
     where id = (select value from workout_gate_context where key='published_version_b')
@@ -496,7 +500,63 @@ insert into workout_gate_results values
   ('Trainer A cannot publish to Trainer B student', pg_temp.raises(format(
     'select public.publish_workout_version(%L::uuid)',
     (select value from workout_gate_context where key='approved_version_b')
+  ))),
+  ('Trainer A cannot discard Trainer B Draft', pg_temp.raises(format(
+    'select public.discard_workout_draft(%L::uuid)',
+    (select value from workout_gate_context where key='draft_version_b')
   )));
+
+select public.discard_workout_draft((select value from workout_gate_context where key='ai_version_a'));
+insert into workout_gate_results values
+  ('Trainer discards own Draft without deleting history', (
+    select status = 'ARCHIVED' and archived_at is not null
+    from public.workout_plan_versions
+    where id = (select value from workout_gate_context where key='ai_version_a')
+  )),
+  ('Discard appends an auditable lifecycle event', exists(
+    select 1 from public.workout_events
+    where workout_plan_version_id = (select value from workout_gate_context where key='ai_version_a')
+      and event_type = 'ARCHIVED'
+      and actor_user_id = '4a000000-0000-4000-8000-000000000001'::uuid
+      and metadata ->> 'reason' = 'DRAFT_DISCARDED'
+  )),
+  ('Discarded Draft cannot be discarded twice', pg_temp.raises(format(
+    'select public.discard_workout_draft(%L::uuid)',
+    (select value from workout_gate_context where key='ai_version_a')
+  ))),
+  ('Approved workout cannot be discarded', pg_temp.raises(format(
+    'select public.discard_workout_draft(%L::uuid)',
+    (select value from workout_gate_context where key='approved_version_a')
+  ))),
+  ('Published workout cannot be discarded', pg_temp.raises(format(
+    'select public.discard_workout_draft(%L::uuid)',
+    (select value from workout_gate_context where key='published_v1_a')
+  ))),
+  ('Discard preserves the Trainer-Student relationship', exists(
+    select 1 from public.trainer_student_relationships
+    where id = '4a300000-0000-4000-8000-000000000001'::uuid
+      and status = 'active'
+  ));
+
+set local role postgres;
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"4a000000-0000-4000-8000-000000000003","role":"authenticated"}';
+insert into workout_gate_results values
+  ('Student cannot read a discarded Draft through RLS', not exists(
+    select 1 from public.workout_plan_versions
+    where id = (select value from workout_gate_context where key='ai_version_a')
+  )),
+  ('Student cannot open a discarded Draft projection', pg_temp.raises(format(
+    'select public.get_student_workout_version(%L::uuid)',
+    (select value from workout_gate_context where key='ai_version_a')
+  ))),
+  ('Discarded Draft is absent from Student workout list', public.list_student_published_workouts()::text not like
+    '%' || (select value::text from workout_gate_context where key='ai_version_a') || '%'
+  );
+
+set local role postgres;
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"4a000000-0000-4000-8000-000000000001","role":"authenticated"}';
 insert into workout_gate_context
 select 'published_v2_draft_a', public.create_new_draft_from_published_version(
   (select value from workout_gate_context where key='published_v1_a')
@@ -608,6 +668,7 @@ insert into workout_gate_results values
   ),
   ('Anonymous cannot execute workout RPC',
     not has_function_privilege('anon','public.create_workout_plan(uuid,text,text)','EXECUTE')
+    and not has_function_privilege('anon','public.discard_workout_draft(uuid)','EXECUTE')
     and pg_temp.raises($sql$
       select public.create_workout_plan(
         '4a300000-0000-4000-8000-000000000001','Anonymous plan',null

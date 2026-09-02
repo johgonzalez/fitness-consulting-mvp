@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CalendarDays, Clock3, Dumbbell, Plus, Sparkles, UserRound } from "lucide-react";
 import { WorkoutStatusBadge } from "@/components/workouts/WorkoutStatusBadge";
+import { WorkoutDraftDiscardButton } from "@/components/workouts/WorkoutDraftDiscardButton";
 import { Avatar, EmptyState } from "@/components/ui/PPerfilPrimitives";
 import { OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { formatWorkoutDate } from "@/lib/workouts/presentation";
@@ -10,7 +11,7 @@ import { StudentRecordChrome } from "@/components/students/StudentRecordChrome";
 import styles from "@/components/workouts/workouts.module.css";
 
 type WorkoutFilter = "all" | "draft" | "published" | "archived";
-type WorkoutsSearchParams = { status?: string | string[]; student?: string | string[] };
+type WorkoutsSearchParams = { status?: string | string[]; student?: string | string[]; discarded?: string | string[] };
 
 const relationshipIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -27,7 +28,7 @@ function filterHref(filter: WorkoutFilter, relationshipId: string | null) {
 }
 
 function accepts(status: string, filter: WorkoutFilter) {
-  if (filter === "all") return true;
+  if (filter === "all") return status !== "ARCHIVED";
   if (filter === "draft") return status === "DRAFT";
   if (filter === "published") return status === "PUBLISHED";
   return status === "ARCHIVED";
@@ -42,9 +43,11 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
   ]);
   const relationshipId = selectedStudent?.id === requestedRelationshipId ? requestedRelationshipId : null;
   const status = typeof query.status === "string" ? query.status : "";
+  const discardedId = typeof query.discarded === "string" && relationshipIdPattern.test(query.discarded) ? query.discarded : null;
   const filter: WorkoutFilter = ["draft", "published", "archived"].includes(status) ? status as WorkoutFilter : "all";
   const scopedItems = workspace.items.filter((item) => !relationshipId || item.plan.trainerStudentRelationshipId === relationshipId);
   const visible = scopedItems
+    .filter((item) => item.currentVersion.id !== discardedId)
     .filter((item) => accepts(item.currentVersion.status, filter))
     .toSorted((left, right) => Date.parse(right.plan.updatedAt) - Date.parse(left.plan.updatedAt));
   const count = (key: WorkoutFilter) => scopedItems.filter((item) => accepts(item.currentVersion.status, key)).length;
@@ -68,7 +71,8 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
 
     {visible.length ? <section className={styles.planList} aria-label="Planos de treino">
       <div className={styles.planListHeader} aria-hidden="true"><span>Aluno e plano</span><span>Estrutura</span><span>Versão</span><span>Status</span><span>Atualização</span><span /></div>
-      {visible.map((item) => <Link href={`/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}`} className={styles.planRow} key={item.currentVersion.id}>
+      {visible.map((item) => <article className={styles.planRow} key={item.currentVersion.id}>
+        <Link href={`/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}`} className={styles.planRowLink}>
         <span className={styles.planIdentity}>
           <Avatar name={item.student?.name ?? "Aluno"} size="medium" />
           <span><strong>{item.plan.name}</strong><small><UserRound aria-hidden="true" />{item.student?.name ?? "Relacionamento protegido"}</small><em>{item.plan.goal ?? "Objetivo não informado"}</em></span>
@@ -78,7 +82,9 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
         <span><WorkoutStatusBadge status={item.currentVersion.status} /></span>
         <span className={styles.planDate}><CalendarDays aria-hidden="true" />{formatWorkoutDate(item.currentVersion.publishedAt ?? item.plan.updatedAt)}</span>
         <span className={styles.planOpen} aria-hidden="true">Abrir</span>
-      </Link>)}
+        </Link>
+        {item.currentVersion.status === "DRAFT" ? <WorkoutDraftDiscardButton versionId={item.currentVersion.id} planName={item.plan.name} /> : null}
+      </article>)}
     </section> : <section className="pp-panel">
       <EmptyState icon={Dumbbell} title={filter === "all" ? "Crie o primeiro treino" : "Nenhum treino neste filtro"} description={filter === "all" ? "Comece manualmente ou use um Draft com IA para acelerar a primeira estrutura." : "Os treinos aparecerão aqui conforme avançam no ciclo."} action={filter === "all" ? <div className={styles.emptyActions}><Link href="/dashboard/workouts/new?mode=manual" className="pp-button pp-button--primary">Criar manualmente</Link><Link href="/dashboard/workouts/new?mode=ai" className="pp-button pp-button--secondary">Criar com IA</Link></div> : null} />
     </section>}

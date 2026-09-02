@@ -63,6 +63,7 @@ function friendlyWorkoutError(error: unknown, fallback: string) {
   if (message.includes("Authentication required")) return "Sua sessão expirou. Entre novamente para continuar.";
   if (message.includes("relationship_not_active")) return "O relacionamento com este aluno não está ativo.";
   if (message.includes("workout_not_available") || message.includes("workout_version_not_available")) return "Este treino não está disponível para esta ação.";
+  if (message.includes("workout_draft_not_available_for_discard")) return "Somente um Draft seu e ativo pode ser excluído.";
   if (message.includes("workout_version_not_draft")) return "Somente versões em Draft podem ser editadas.";
   if (message.includes("invalid_workout_transition")) return "A mudança de status solicitada não é permitida.";
   if (message.includes("workout_structure_invalid")) return "Complete a estrutura do treino antes de avançar.";
@@ -291,7 +292,7 @@ export async function mutateWorkoutAction(versionId: string, mutation: WorkoutMu
 
 export async function changeWorkoutLifecycleAction(input: {
   versionId: string;
-  action: "APPROVE" | "PUBLISH" | "ARCHIVE" | "CLONE";
+  action: "APPROVE" | "PUBLISH" | "ARCHIVE" | "DISCARD" | "CLONE";
 }): Promise<WorkoutActionResult> {
   if (!uuidPattern.test(input.versionId)) return { ok: false, message: "Versão de treino inválida." };
   if (await isDemoWorkspaceRequest()) {
@@ -303,10 +304,11 @@ export async function changeWorkoutLifecycleAction(input: {
     if (input.action === "APPROVE") await service.approve(input.versionId);
     if (input.action === "PUBLISH") await service.publish(input.versionId);
     if (input.action === "ARCHIVE") await service.archive(input.versionId);
+    if (input.action === "DISCARD") await service.discardDraft(input.versionId);
     if (input.action === "CLONE") resultId = await service.clonePublished(input.versionId);
     revalidateWorkout(input.versionId);
     if (resultId !== input.versionId) revalidateWorkout(resultId);
-    return { ok: true, resultId, message: input.action === "APPROVE" ? "Treino aprovado." : input.action === "PUBLISH" ? "Treino publicado para o aluno." : input.action === "ARCHIVE" ? "Versão arquivada." : "Nova versão Draft criada." };
+    return { ok: true, resultId, message: input.action === "APPROVE" ? "Treino aprovado." : input.action === "PUBLISH" ? "Treino publicado para o aluno." : input.action === "ARCHIVE" ? "Versão arquivada." : input.action === "DISCARD" ? "Rascunho excluído." : "Nova versão Draft criada." };
   } catch (error) {
     return { ok: false, message: friendlyWorkoutError(error, "Não foi possível avançar o treino.") };
   }

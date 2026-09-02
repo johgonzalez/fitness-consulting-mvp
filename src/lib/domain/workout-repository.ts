@@ -50,6 +50,7 @@ export interface WorkoutRepository {
   approve(versionId: string): Promise<void>;
   publish(versionId: string): Promise<void>;
   archive(versionId: string): Promise<void>;
+  discardDraft(versionId: string): Promise<void>;
   clonePublished(versionId: string): Promise<string>;
   getTrainerVersion(versionId: string): Promise<WorkoutVersionProjection>;
   getStudentVersion(versionId: string): Promise<WorkoutVersionProjection>;
