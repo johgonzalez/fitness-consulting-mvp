@@ -62,6 +62,10 @@
   box-shadow:var(--pp-focus-ring);
 }
 
+[data-theme="light"] .pp-app-shell-v1 .pp-status--danger {
+  color:var(--pp-danger-700);
+}
+
 .dashboard-shell.pp-app-shell-v1 {
   grid-template-columns:var(--pp-shell-sidebar) minmax(0,1fr);
   background:var(--pp-background);
@@ -267,6 +271,7 @@
 @media (max-width:767px) {
   .dashboard-shell.pp-app-shell-v1 { display:block;padding-bottom:calc(70px + env(safe-area-inset-bottom)); }
   .pp-app-shell-v1 .dashboard-sidebar { position:sticky;z-index:50;top:0;height:62px;min-height:0;display:block;overflow:visible;border:0;background:var(--pp-sidebar); }
+  .pp-app-shell-v1 .dashboard-header { z-index:1; }
   .pp-app-shell-v1 .dashboard-header>div { height:62px;justify-content:flex-start;padding:0 14px;border-bottom:1px solid var(--pp-border); }
   .pp-app-shell-v1 .dashboard-header .brand-logo { min-height:44px;padding:0; }
   .pp-app-shell-v1 .pp-demo-indicator { min-height:32px;margin:0 140px 0 auto; }
