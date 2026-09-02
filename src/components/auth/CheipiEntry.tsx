@@ -8,7 +8,8 @@ import { AuthProviderControls } from "./AuthProviderControls";
 import { CheipiBrand } from "./CheipiBrand";
 import { CheipiSplash } from "./CheipiSplash";
 
-const SPLASH_DURATION_MS = 720;
+const SPLASH_DURATION_MS = 900;
+const SPLASH_SESSION_KEY = "pperfil:entry-splash:v1";
 
 const mosaic = [
   { src: "/images/saas/auth-coaching.webp", className: "cheipi-welcome__tile--coaching", priority: true },
@@ -19,14 +20,30 @@ const mosaic = [
 ] as const;
 
 export function CheipiEntry({ googleEnabled, nextPath }: { googleEnabled: boolean; nextPath?: string }) {
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [entryStage, setEntryStage] = useState<"checking" | "splash" | "welcome">("checking");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setShowWelcome(true), SPLASH_DURATION_MS);
-    return () => window.clearTimeout(timer);
+    let timer: number | undefined;
+    const frame = window.requestAnimationFrame(() => {
+      const splashSeen = Boolean(window.sessionStorage.getItem(SPLASH_SESSION_KEY));
+      if (splashSeen) {
+        setEntryStage("welcome");
+        return;
+      }
+      setEntryStage("splash");
+      timer = window.setTimeout(() => {
+        window.sessionStorage.setItem(SPLASH_SESSION_KEY, "seen");
+        setEntryStage("welcome");
+      }, SPLASH_DURATION_MS);
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (timer) window.clearTimeout(timer);
+    };
   }, []);
 
-  if (!showWelcome) return <CheipiSplash />;
+  if (entryStage === "checking") return <main className="cheipi-entry-pending" aria-hidden="true" />;
+  if (entryStage === "splash") return <CheipiSplash />;
 
   const emailParams = new URLSearchParams();
   if (nextPath) emailParams.set("next", nextPath);
@@ -36,14 +53,18 @@ export function CheipiEntry({ googleEnabled, nextPath }: { googleEnabled: boolea
     <AppFullscreenController />
     <div className="cheipi-welcome__mosaic" aria-hidden="true">
       {mosaic.map((item) => <figure className={`cheipi-welcome__tile ${item.className}`} key={item.src}>
-        <Image src={item.src} alt="" fill sizes="(max-width: 760px) 62vw, 38vw" priority={item.priority} loading={item.priority ? undefined : "eager"} unoptimized />
+        <Image src={item.src} alt="" fill sizes="(max-width: 760px) 62vw, 38vw" priority={item.priority} loading={item.priority ? undefined : "lazy"} unoptimized />
       </figure>)}
     </div>
     <div className="cheipi-welcome__shade" aria-hidden="true" />
     <CheipiBrand href="/" className="cheipi-welcome__wordmark" />
-    <section className="cheipi-welcome__orb" aria-labelledby="cheipi-welcome-title">
-      <h1 id="cheipi-welcome-title"><span>TREINO.</span><span>EVOLUÇÃO.</span><strong>JUNTOS.</strong></h1>
-      <CheipiBrand symbolOnly className="cheipi-welcome__orb-brand" />
+    <section className="cheipi-welcome__hero" aria-labelledby="cheipi-welcome-title">
+      <div className="cheipi-welcome__orb" aria-hidden="true">
+        <span className="cheipi-welcome__orb-ring" />
+        <CheipiBrand symbolOnly className="cheipi-welcome__orb-brand" />
+      </div>
+      <h1 id="cheipi-welcome-title"><span>Todo treino.</span><span>Toda evolução.</span><strong>Juntos.</strong></h1>
+      <p>A plataforma que conecta Personal Trainers e Alunos para resultados reais.</p>
     </section>
     <div className="cheipi-welcome__actions">
       <AuthProviderControls googleEnabled={googleEnabled} nextPath={nextPath} />

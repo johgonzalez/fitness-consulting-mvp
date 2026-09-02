@@ -17,7 +17,7 @@ test("Google remains real while Apple is an announced future preview only", asyn
   assert.match(providers, /Entrar com Apple — em breve/);
   assert.match(providers, /role="status"/);
   assert.match(css, /\.cheipi-provider-controls/);
-  assert.match(css, /width: 52px/);
+  assert.match(css, /width: 58px/);
   assert.doesNotMatch(providers, /signInWithOAuth[\s\S]{0,300}apple|provider:\s*["']apple["']/i);
   assert.doesNotMatch(form, /startGoogleOAuth|apple-black-square|google-dark-square/);
   assert.match(action, /provider: "google"/);

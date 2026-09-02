@@ -14,18 +14,21 @@ const resolver = read("../../src/lib/navigation/authenticated-home.ts");
 const validation = read("../../src/lib/validation/auth.ts");
 const css = read("../../src/app/cheipi-auth-entry-v1.css");
 
-test("Cheipi root is session-aware and does not flash Welcome for a valid session", () => {
+test("Auth root is session-aware and does not flash Welcome for a valid session", () => {
   assert.match(root, /supabase\.auth\.getUser\(\)/);
   assert.match(root, /redirect\(await resolveAuthenticatedHome/);
   assert.match(root, /return <CheipiEntry/);
 });
 
 test("Welcome keeps the approved sparse fitness composition", () => {
-  assert.match(entry, /SPLASH_DURATION_MS = 720/);
+  assert.match(entry, /SPLASH_DURATION_MS = 900/);
+  assert.match(entry, /SPLASH_SESSION_KEY = "pperfil:entry-splash:v1"/);
+  assert.match(entry, /"checking" \| "splash" \| "welcome"/);
+  assert.match(entry, /if \(splashSeen\) \{[\s\S]*setEntryStage\("welcome"\)/);
   assert.equal((entry.match(/className: "cheipi-welcome__tile--/g) ?? []).length, 5);
-  assert.match(entry, /TREINO\./);
-  assert.match(entry, /EVOLUÇÃO\./);
-  assert.match(entry, /JUNTOS\./);
+  assert.match(entry, /Todo treino\./);
+  assert.match(entry, /Toda evolução\./);
+  assert.match(entry, /Juntos\./);
   assert.match(entry, /<CheipiBrand symbolOnly className="cheipi-welcome__orb-brand"/);
   assert.match(entry, />Usar e-mail<\/Link>/);
   assert.match(css, /prefers-reduced-motion: reduce/);

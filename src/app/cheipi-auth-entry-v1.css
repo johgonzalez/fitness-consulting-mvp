@@ -1,4 +1,4 @@
-/* Sprint Auth 2A — Cheipi presentation over the canonical Monochrome Product tokens. */
+/* Experimental Auth Entry — provisional identity over canonical Monochrome Product tokens. */
 
 .cheipi-brand {
   --cheipi-mark-tile: var(--pp-shell-solid);
@@ -12,13 +12,24 @@
 }
 
 .cheipi-brand__mark {
-  width: 25px;
+  width: 32px;
   height: 32px;
-  display: block;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
 }
 
-.cheipi-brand__mark .brand-logo__tile { fill: var(--cheipi-mark-tile); }
-.cheipi-brand__mark .brand-logo__glyph { fill: var(--cheipi-mark-glyph); }
+.cheipi-brand__mark-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1);
+  transform: scale(1.18);
+}
+
+[data-theme="dark"] .cheipi-brand__mark-image,
+.cheipi-splash .cheipi-brand__mark-image,
+.cheipi-welcome .cheipi-brand__mark-image { filter: none; }
 
 .cheipi-brand strong {
   font: 720 1.05rem/1 var(--pp-font-display);
@@ -26,9 +37,16 @@
 }
 
 .cheipi-brand--symbol {
+  width: 44px;
+  height: 44px;
   min-width: 44px;
   justify-content: center;
   gap: 0;
+}
+
+.cheipi-entry-pending {
+  min-height: 100svh;
+  background: #0e0e0e;
 }
 
 .cheipi-splash {
@@ -45,13 +63,23 @@
 }
 
 .cheipi-splash__halo {
-  width: 116px;
-  height: 116px;
+  width: 132px;
+  height: 132px;
   position: absolute;
   border: 1px solid rgb(245 245 243 / 10%);
   border-radius: 50%;
-  box-shadow: 0 28px 70px rgb(0 0 0 / 36%);
-  animation: cheipi-splash-halo 720ms cubic-bezier(.2,.8,.2,1) both;
+  background: radial-gradient(circle at 38% 30%, rgb(255 255 255 / 12%), transparent 42%), #111;
+  box-shadow: 0 0 0 10px rgb(255 255 255 / 2%), 0 28px 70px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(255 255 255 / 18%);
+  animation: cheipi-splash-halo 900ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.cheipi-splash__orbit {
+  width: 174px;
+  height: 174px;
+  position: absolute;
+  border: 1px solid rgb(245 245 243 / 6%);
+  border-radius: 50%;
+  animation: cheipi-splash-orbit 900ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .cheipi-splash__brand {
@@ -60,25 +88,28 @@
   position: relative;
   z-index: 1;
   transform: scale(.96);
-  animation: cheipi-splash-mark 720ms cubic-bezier(.2,.8,.2,1) both;
+  animation: cheipi-splash-mark 900ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .cheipi-splash__brand .cheipi-brand__mark {
-  width: 36px;
-  height: 45px;
+  width: 54px;
+  height: 54px;
 }
 
 .cheipi-welcome {
   width: 100%;
+  max-width: 540px;
   min-height: 100svh;
   height: 100dvh;
   position: relative;
   overflow: hidden;
+  margin: 0 auto;
   background: #0e0e0e;
   color: #f5f5f3;
   color-scheme: dark;
   isolation: isolate;
-  animation: cheipi-welcome-in 420ms cubic-bezier(.2,.8,.2,1) both;
+  box-shadow: 0 0 90px rgb(0 0 0 / 46%);
+  animation: cheipi-welcome-in 460ms cubic-bezier(.2,.8,.2,1) both;
 }
 
 .cheipi-welcome ::selection {
@@ -98,10 +129,12 @@
 }
 
 .cheipi-welcome__tile {
+  --tile-rotate: 0deg;
   position: absolute;
   margin: 0;
   overflow: hidden;
-  border-radius: 18px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 22px;
   background: #171717;
   box-shadow: 0 24px 60px rgb(0 0 0 / 34%);
   animation: cheipi-tile-drift 16s ease-in-out infinite alternate;
@@ -118,17 +151,17 @@
 .cheipi-welcome__tile--conditioning img { object-position: 68% 30%; filter: saturate(.82) contrast(1.02) brightness(1.5); }
 .cheipi-welcome__tile--focus img { object-position: 62% 38%; filter: saturate(.82) contrast(1.02) brightness(1.32); }
 
-.cheipi-welcome__tile--coaching { inset: 5% auto auto 3.5%; width: 31%; height: 48%; }
-.cheipi-welcome__tile--strength { inset: 2.5% 3.5% auto auto; width: 27%; height: 39%; animation-delay: -4s; }
-.cheipi-welcome__tile--movement { inset: auto auto 4.5% 6%; width: 29%; height: 36%; animation-delay: -8s; }
-.cheipi-welcome__tile--conditioning { inset: auto 5% 3.5% auto; width: 31%; height: 48%; animation-delay: -11s; }
-.cheipi-welcome__tile--focus { inset: 8% auto auto 38%; width: 24%; height: 30%; animation-delay: -6s; }
+.cheipi-welcome__tile--coaching { --tile-rotate: -3deg; inset: 1.5% auto auto -7%; width: 67%; height: 28%; }
+.cheipi-welcome__tile--strength { --tile-rotate: 3deg; inset: .5% -8% auto auto; width: 46%; height: 24%; animation-delay: -4s; }
+.cheipi-welcome__tile--movement { --tile-rotate: 2deg; inset: 25% auto auto -10%; width: 56%; height: 27%; animation-delay: -8s; }
+.cheipi-welcome__tile--conditioning { --tile-rotate: -2deg; inset: 23.5% -9% auto auto; width: 57%; height: 29%; animation-delay: -11s; }
+.cheipi-welcome__tile--focus { --tile-rotate: -3deg; inset: 49% auto auto 4%; width: 51%; height: 24%; animation-delay: -6s; }
 
 .cheipi-welcome__shade {
   z-index: -2;
   background:
-    radial-gradient(circle at 50% 45%, rgb(14 14 14 / 2%) 0 16%, rgb(14 14 14 / 28%) 38%, rgb(14 14 14 / 76%) 90%),
-    linear-gradient(180deg, rgb(14 14 14 / 10%), rgb(14 14 14 / 28%) 58%, rgb(14 14 14 / 82%));
+    radial-gradient(circle at 50% 42%, rgb(14 14 14 / 0%) 0 15%, rgb(14 14 14 / 22%) 35%, rgb(14 14 14 / 66%) 70%),
+    linear-gradient(180deg, rgb(14 14 14 / 3%), rgb(14 14 14 / 8%) 35%, rgb(14 14 14 / 64%) 67%, #0e0e0e 86%);
   pointer-events: none;
 }
 
@@ -137,48 +170,69 @@
   --cheipi-mark-glyph: #0e0e0e;
   position: absolute;
   z-index: 4;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(24px, env(safe-area-inset-bottom));
+  top: max(18px, env(safe-area-inset-top));
+  left: max(18px, env(safe-area-inset-left));
   color: #f5f5f3;
   opacity: .78;
 }
 
-.cheipi-welcome__wordmark .cheipi-brand__mark { width: 21px; height: 27px; }
-.cheipi-welcome__wordmark strong { font-size: .8rem; }
+.cheipi-welcome__wordmark .cheipi-brand__mark { width: 34px; height: 34px; }
 
-.cheipi-welcome__orb {
-  width: clamp(214px, 24vw, 298px);
-  aspect-ratio: 1;
+.cheipi-welcome__hero {
+  width: min(calc(100% - 44px), 390px);
   display: grid;
-  align-content: center;
   justify-items: center;
-  gap: 18px;
+  gap: 0;
   position: absolute;
   z-index: 2;
-  top: 46%;
+  top: 39%;
   left: 50%;
-  padding: 30px;
-  border: 1px solid rgb(245 245 243 / 16%);
-  border-radius: 50%;
-  background: rgb(14 14 14 / 78%);
-  box-shadow: 0 32px 80px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(255 255 255 / 11%);
-  backdrop-filter: blur(13px);
-  transform: translate(-50%, -50%);
+  text-align: center;
+  transform: translateX(-50%);
 }
 
-.cheipi-welcome__orb h1 {
+.cheipi-welcome__orb {
+  width: clamp(128px, 34vw, 152px);
+  aspect-ratio: 1;
   display: grid;
-  gap: 3px;
-  margin: 0;
+  place-items: center;
+  position: relative;
+  border: 1px solid rgb(245 245 243 / 16%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 24%, rgb(255 255 255 / 15%), transparent 34%), rgb(12 12 12 / 88%);
+  box-shadow: 0 22px 54px rgb(0 0 0 / 52%), 0 0 0 8px rgb(255 255 255 / 2%), inset 0 1px 0 rgb(255 255 255 / 18%);
+  backdrop-filter: blur(14px);
+  animation: cheipi-orb-float 5.5s ease-in-out infinite;
+}
+
+.cheipi-welcome__orb-ring {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: inherit;
+}
+
+.cheipi-welcome__hero h1 {
+  display: grid;
+  gap: 0;
+  margin: 18px 0 0;
   color: #f5f5f3;
-  font: 590 clamp(.82rem, 1.25vw, 1rem)/1.14 var(--pp-font-display);
-  letter-spacing: .105em;
+  font: 650 clamp(1.55rem, 7vw, 2rem)/1.05 var(--pp-font-display);
+  letter-spacing: -.045em;
   text-align: center;
 }
 
-.cheipi-welcome__orb h1 span,
-.cheipi-welcome__orb h1 strong { display: block; }
-.cheipi-welcome__orb h1 strong { font-weight: 780; }
+.cheipi-welcome__hero h1 span,
+.cheipi-welcome__hero h1 strong { display: block; }
+.cheipi-welcome__hero h1 strong { font-weight: 790; }
+
+.cheipi-welcome__hero > p {
+  max-width: 290px;
+  margin: 10px 0 0;
+  color: #b7b7b2;
+  font: 480 .73rem/1.45 var(--pp-font-ui);
+  text-wrap: balance;
+}
 
 .cheipi-welcome__orb-brand {
   --cheipi-mark-tile: #f5f5f3;
@@ -186,17 +240,17 @@
   color: #f5f5f3;
 }
 
-.cheipi-welcome__orb-brand .cheipi-brand__mark { width: 25px; height: 32px; }
+.cheipi-welcome__orb-brand .cheipi-brand__mark { width: 64px; height: 64px; }
 
 .cheipi-welcome__actions {
-  width: min(100% - 40px, 250px);
+  width: min(100% - 40px, 280px);
   display: grid;
   justify-items: center;
-  gap: 13px;
+  gap: 10px;
   position: absolute;
   z-index: 5;
   left: 50%;
-  bottom: max(28px, calc(18px + env(safe-area-inset-bottom)));
+  bottom: max(24px, calc(14px + env(safe-area-inset-bottom)));
   transform: translateX(-50%);
 }
 
@@ -210,28 +264,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 18px;
 }
 
 .cheipi-provider-controls form { display: contents; }
 
 .cheipi-provider-control {
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   display: grid;
   place-items: center;
   padding: 0;
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: 50%;
+  background: rgb(18 18 18 / 82%);
   color: #f5f5f3;
-  box-shadow: 0 13px 30px rgb(0 0 0 / 24%);
+  box-shadow: 0 13px 30px rgb(0 0 0 / 32%), inset 0 1px 0 rgb(255 255 255 / 8%);
   cursor: pointer;
   transition: border-color var(--pp-motion-fast) var(--pp-ease), background-color var(--pp-motion-fast) var(--pp-ease), transform var(--pp-motion-fast) var(--pp-ease);
 }
 
-.cheipi-provider-control img { width: 52px; height: 52px; display: block; border-radius: 10px; object-fit: contain; }
-.cheipi-provider-control:hover:not(:disabled) { background: transparent; transform: translateY(-1px); filter: brightness(1.12); }
+.cheipi-provider-control img { width: 56px; height: 56px; display: block; border-radius: 50%; object-fit: contain; }
+.cheipi-provider-control:hover:not(:disabled) { border-color: rgb(255 255 255 / 44%); background: #171717; transform: translateY(-2px); filter: brightness(1.1); }
 .cheipi-provider-control:active:not(:disabled) { transform: translateY(0) scale(.97); }
 .cheipi-provider-control:focus-visible { outline: 2px solid #f5f5f3; outline-offset: 3px; }
 .cheipi-provider-control:disabled { cursor: not-allowed; opacity: .48; }
@@ -249,7 +303,7 @@
   justify-content: center;
   padding-inline: 12px;
   color: #f5f5f3;
-  font: 650 .72rem/1 var(--pp-font-ui);
+  font: 670 .75rem/1 var(--pp-font-ui);
   text-decoration: underline;
   text-decoration-color: rgb(245 245 243 / 42%);
   text-underline-offset: 5px;
@@ -264,13 +318,14 @@
 .pc-auth-page .pc-auth-layout,
 .pc-auth-page[data-auth-view="login"] .pc-auth-layout,
 .pc-auth-page[data-auth-view="selection"] .pc-auth-layout {
-  width: min(calc(100% - 40px), 720px);
+  width: min(calc(100% - 40px), 620px);
   min-height: calc(100dvh - 82px);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  place-items: center;
+  place-items: start center;
   position: relative;
   margin: 0 auto;
+  padding-top: clamp(34px, 9dvh, 110px);
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -279,13 +334,7 @@
 }
 
 .pc-auth-watermark {
-  position: absolute;
-  right: -74px;
-  bottom: -100px;
-  color: var(--pp-text-primary);
-  opacity: .035;
-  transform: rotate(-8deg);
-  pointer-events: none;
+  display: none;
 }
 
 .pc-auth-watermark .cheipi-brand__mark { width: 350px; height: 440px; }
@@ -298,7 +347,7 @@
   justify-content: center;
   position: relative;
   z-index: 1;
-  padding: 56px 34px 76px;
+  padding: 38px 34px 42px;
   border: 0;
   background: transparent;
 }
@@ -312,14 +361,19 @@
 
 .pc-auth-page .pc-auth-content > h1,
 .pc-auth-page[data-auth-view="login"] .pc-auth-content > h1 {
-  font: 690 clamp(1.95rem, 4vw, 2.45rem)/1.04 var(--pp-font-display);
+  font: 710 clamp(2rem, 4vw, 2.55rem)/1.03 var(--pp-font-display);
   letter-spacing: -.035em;
 }
 
 .pc-auth-page[data-auth-view="selection"] .pc-auth-panel { width: min(100%, 520px); }
 .pc-auth-page[data-auth-view="selection"] .pc-auth-content { width: min(100%, 440px); }
 
-.pc-auth-page .pc-auth-panel > footer { display: none; }
+.pc-auth-page .pc-auth-panel > footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 34px;
+  color: var(--pp-text-muted);
+}
 .pc-auth-page .pc-auth-form > .pp-button { margin-top: 14px; }
 .pc-auth-page .pc-auth-switch { margin-top: 24px; }
 
@@ -348,29 +402,80 @@
   100% { opacity: .72; transform: scale(1.04); }
 }
 
+@keyframes cheipi-splash-orbit {
+  0% { opacity: 0; transform: scale(.72) rotate(-18deg); }
+  70% { opacity: .65; }
+  100% { opacity: .18; transform: scale(1.08) rotate(8deg); }
+}
+
 @keyframes cheipi-welcome-in {
   from { opacity: .65; filter: blur(4px); }
   to { opacity: 1; filter: blur(0); }
 }
 
 @keyframes cheipi-tile-drift {
-  from { transform: translate3d(0, -4px, 0); }
-  to { transform: translate3d(0, 7px, 0); }
+  from { transform: translate3d(0, -4px, 0) rotate(var(--tile-rotate)); }
+  to { transform: translate3d(0, 7px, 0) rotate(calc(var(--tile-rotate) + .5deg)); }
+}
+
+@keyframes cheipi-orb-float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.012); }
+}
+
+@media (min-width: 900px) {
+  .cheipi-welcome {
+    max-width: none;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .cheipi-welcome__mosaic {
+    right: 42%;
+  }
+
+  .cheipi-welcome__shade {
+    background:
+      linear-gradient(90deg, rgb(14 14 14 / 4%) 0 38%, rgb(14 14 14 / 34%) 50%, #0e0e0e 64%),
+      linear-gradient(180deg, rgb(14 14 14 / 2%), rgb(14 14 14 / 12%) 58%, #0e0e0e 96%);
+  }
+
+  .cheipi-welcome__wordmark {
+    top: 30px;
+    left: 34px;
+  }
+
+  .cheipi-welcome__hero {
+    width: min(34vw, 460px);
+    top: 18%;
+    left: 79%;
+  }
+
+  .cheipi-welcome__orb {
+    width: clamp(144px, 12vw, 176px);
+  }
+
+  .cheipi-welcome__hero h1 {
+    margin-top: 24px;
+    font-size: clamp(2rem, 3.1vw, 2.9rem);
+  }
+
+  .cheipi-welcome__hero > p {
+    max-width: 360px;
+    margin-top: 16px;
+    font-size: .84rem;
+  }
+
+  .cheipi-welcome__actions {
+    width: min(32vw, 320px);
+    left: 79%;
+    bottom: 8%;
+  }
 }
 
 @media (max-width: 760px) {
-  .cheipi-welcome__tile { border-radius: 15px; }
-  .cheipi-welcome__tile--coaching { inset: 2% auto auto -8%; width: 61%; height: 34%; }
-  .cheipi-welcome__tile--strength { inset: 2% -5% auto auto; width: 48%; height: 27%; }
-  .cheipi-welcome__tile--movement { inset: 31% auto auto -11%; width: 47%; height: 31%; }
-  .cheipi-welcome__tile--conditioning { inset: 27% -12% auto auto; width: 47%; height: 35%; }
-  .cheipi-welcome__tile--focus { inset: auto auto 7% 9%; width: 42%; height: 25%; }
-  .cheipi-welcome__shade { background: radial-gradient(circle at 50% 43%, rgb(14 14 14 / 3%) 0 18%, rgb(14 14 14 / 30%) 42%, rgb(14 14 14 / 62%) 90%), linear-gradient(180deg, rgb(14 14 14 / 4%), rgb(14 14 14 / 16%) 52%, rgb(14 14 14 / 88%)); }
-  .cheipi-welcome__orb { width: clamp(188px, 54vw, 218px); top: 43%; padding: 24px; }
-  .cheipi-welcome__orb h1 { font-size: .78rem; }
-  .cheipi-welcome__actions { bottom: max(24px, calc(14px + env(safe-area-inset-bottom))); }
-  .cheipi-welcome__wordmark { top: max(14px, env(safe-area-inset-top)); right: 16px; bottom: auto; }
-  .cheipi-welcome__wordmark strong { font-size: .72rem; }
+  .cheipi-welcome__tile { border-radius: 18px; }
+  .cheipi-welcome__wordmark { top: max(14px, env(safe-area-inset-top)); left: 14px; }
   .pc-auth-page .pc-auth-header { width: calc(100% - 32px); }
   .pc-auth-page .pc-auth-layout,
   .pc-auth-page[data-auth-view="login"] .pc-auth-layout,
@@ -383,9 +488,11 @@
 }
 
 @media (max-width: 360px) {
-  .cheipi-welcome__orb { width: 184px; }
+  .cheipi-welcome__hero { top: 37%; }
+  .cheipi-welcome__orb { width: 122px; }
+  .cheipi-welcome__hero h1 { font-size: 1.45rem; }
+  .cheipi-welcome__hero > p { max-width: 260px; font-size: .68rem; }
   .cheipi-welcome__actions { width: min(100% - 28px, 230px); }
-  .pc-auth-page .pc-auth-header .cheipi-brand strong { display: block; }
   .pc-auth-page .pc-auth-header .cheipi-brand { width: auto; }
   .pc-auth-page .pc-auth-panel,
   .pc-auth-page[data-auth-view="login"] .pc-auth-panel,
@@ -393,16 +500,21 @@
 }
 
 @media (max-height: 620px) and (pointer: coarse) {
-  .cheipi-welcome__orb { width: 166px; top: 38%; gap: 10px; padding: 18px; }
+  .cheipi-welcome__hero { top: 29%; }
+  .cheipi-welcome__orb { width: 108px; }
+  .cheipi-welcome__hero h1 { margin-top: 10px; font-size: 1.32rem; }
+  .cheipi-welcome__hero > p { display: none; }
   .cheipi-welcome__actions { bottom: max(10px, env(safe-area-inset-bottom)); gap: 5px; }
   .cheipi-provider-control { width: 48px; height: 48px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cheipi-splash__halo,
+  .cheipi-splash__orbit,
   .cheipi-splash__brand,
   .cheipi-welcome,
-  .cheipi-welcome__tile { animation: none; }
+  .cheipi-welcome__tile,
+  .cheipi-welcome__orb { animation: none; }
   .cheipi-splash__brand { opacity: 1; transform: none; filter: none; }
   .cheipi-provider-control { transition: none; }
 }

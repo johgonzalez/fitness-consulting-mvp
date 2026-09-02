@@ -8,6 +8,7 @@ export function AuthShell({ title, subtitle, children, view = "default" }: { tit
       <div className="pc-auth-watermark" aria-hidden="true"><CheipiBrand symbolOnly /></div>
       <section className="pc-auth-panel" aria-labelledby="pc-auth-title">
         <div className="pc-auth-content"><h1 id="pc-auth-title">{title}</h1>{subtitle ? <p>{subtitle}</p> : null}{children}</div>
+        <footer><span aria-hidden="true" />Acesso protegido pelo PPerfil.</footer>
       </section>
     </div>
   </main>;

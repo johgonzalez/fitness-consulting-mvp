@@ -23,7 +23,7 @@ export function AuthContextPicker({ route, nextPath }: { route: "/login" | "/sig
 
   return <form className="pc-auth-context-form" onSubmit={(event) => { event.preventDefault(); continueWithSelection(); }}>
     <fieldset className="pc-auth-contexts" aria-describedby="pc-auth-context-help">
-      <legend className="sr-only">Escolha como você vai usar o Cheipi</legend>
+      <legend className="sr-only">Escolha como você vai usar o PPerfil</legend>
       <p id="pc-auth-context-help" className="sr-only">Esta escolha define somente a experiência de entrada. O acesso depende da sua conta e dos vínculos existentes.</p>
       {options.map(({ id, title, description, icon: Icon }) => <label key={id} data-selected={selection === id ? "true" : "false"}>
         <input type="radio" name="context" value={id} checked={selection === id} onChange={() => setSelection(id)} />

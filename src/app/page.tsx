@@ -6,7 +6,7 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { safeInternalPath } from "@/lib/validation/auth";
 
-export const metadata: Metadata = { title: "cheipi", description: "Treino. Evolução. Juntos." };
+export const metadata: Metadata = { title: "PPerfil", description: "Todo treino. Toda evolução. Juntos." };
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const { next: rawNext } = await searchParams;

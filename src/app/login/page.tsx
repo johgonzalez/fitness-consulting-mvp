@@ -9,7 +9,7 @@ import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
 
-export const metadata: Metadata = { title: "Entrar — cheipi" };
+export const metadata: Metadata = { title: "Entrar — PPerfil" };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; oauth?: string; error?: string }> }) {
   const { next: rawNext, context: rawContext, choose, oauth, error } = await searchParams;
@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   }
   if (choose === "1") {
     if (!authenticated) redirect("/login");
-    return <AuthShell view="selection" title="Como você vai usar o Cheipi?" subtitle="Escolha uma opção para continuar."><AuthContextPicker route="/login" nextPath={next} /></AuthShell>;
+    return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} /></AuthShell>;
   }
   const title = invited ? "Acesse seu convite" : "Entre na sua conta";
   const subtitle = invited ? "Use a mesma conta que recebeu o convite." : "";
