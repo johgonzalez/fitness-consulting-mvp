@@ -62,7 +62,11 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
   </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>ou</span></div><form action={startGoogleOAuth} className="pc-auth-oauth">
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
     {context ? <input type="hidden" name="context" value={context} /> : null}
-    <button className="pp-button pp-button--secondary" type="submit">Continuar com Google</button>
+    <button className="pc-auth-provider" type="submit" aria-label="Continuar com Google" title="Continuar com Google">
+      {/* Official Google identity mark from the provider's current branding assets. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="https://developers.google.com/static/identity/images/g-logo.png" alt="" width="22" height="22" aria-hidden="true" />
+    </button>
   </form></> : null}<p className="pc-auth-switch">{signupMode ? "Já tem uma conta?" : "Ainda não tem acesso?"} <Link href={alternateAuthHref}>{signupMode ? "Entrar" : context === "student" ? "Criar acesso para aguardar convite" : "Criar acesso"}</Link></p>
     {backHref ? <Link className="pc-auth-back" href={backHref}>Voltar</Link> : null}
   </div>;

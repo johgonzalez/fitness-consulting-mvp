@@ -18,7 +18,9 @@ test("Google OAuth preserves only a validated internal next path", () => {
   assert.match(callback, /exchangeCodeForSession/);
   assert.match(callback, /accept_student_invitation/);
   assert.doesNotMatch(callback, /new URL\(url\.searchParams\.get\("next"\)/);
-  assert.match(form, /Continuar com Google/);
+  assert.match(form, /aria-label="Continuar com Google"/);
+  assert.match(form, /developers\.google\.com\/static\/identity\/images\/g-logo\.png/);
+  assert.doesNotMatch(form, />Continuar com Google<|aria-label="[^"]*Apple/);
 });
 
 test("password signup uses provider OTP verification and supported resend", () => {
