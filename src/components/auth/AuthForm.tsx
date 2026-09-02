@@ -59,7 +59,7 @@ export function AuthForm({ mode, action, nextPath, context, oauthEnabled = true 
     {state.message ? <p className={`pc-auth-feedback pc-auth-feedback--${state.tone ?? "danger"}`} role={state.tone === "success" ? "status" : "alert"}>{state.message}</p> : null}
     {!signupMode ? <Link className="pc-auth-forgot" href={recoveryHref}>Esqueci minha senha</Link> : null}
     <button className="pp-button pp-button--primary" type="submit" disabled={pending}><span>{pending ? "Aguarde…" : signupMode ? "Criar acesso" : "Entrar"}</span></button>
-  </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>ou</span></div><form action={startGoogleOAuth} className="pc-auth-oauth">
+  </form>{oauthEnabled ? <><div className="pc-auth-divider"><span>{signupMode ? "ou" : "ou continue com"}</span></div><form action={startGoogleOAuth} className="pc-auth-oauth">
     {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
     {context ? <input type="hidden" name="context" value={context} /> : null}
     <button className="pc-auth-provider" type="submit" aria-label="Continuar com Google" title="Continuar com Google">
