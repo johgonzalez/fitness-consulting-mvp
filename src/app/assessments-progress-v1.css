@@ -1,0 +1,362 @@
+/* Visual Sprint 1E — canonical assessment and progress migration layer. */
+
+.pp-assessments-workspace .pp-operational-toolbar {
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pp-assessments-workspace .pp-filter-tabs {
+  padding: 3px;
+  border: 1px solid var(--pp-border);
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+}
+
+.pp-assessments-workspace .pp-filter-tabs a {
+  min-height: 38px;
+  border-radius: calc(var(--pp-radius-sm) - 3px);
+}
+
+.pp-assessments-workspace .pp-data-list {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pp-assessments-workspace .pp-data-list__head {
+  border-bottom: 1px solid var(--pp-border-strong);
+  background: transparent;
+}
+
+.pp-assessments-workspace .pp-data-list__row {
+  min-height: 72px;
+  border-bottom: 1px solid var(--pp-divider);
+  background: transparent;
+}
+
+.pp-assessments-workspace .pp-data-list__row:hover {
+  background: var(--pp-surface-subtle);
+}
+
+.pp-assessment-list__action {
+  color: var(--pp-text-primary);
+}
+
+.pp-assessments-workspace .pp-status {
+  font-size: .68rem;
+}
+
+.pp-assessments-workspace .pp-status--info {
+  border-color: var(--pp-border);
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-primary);
+}
+
+.pp-assessment-record .pp-master-detail {
+  gap: clamp(20px, 3vw, 40px);
+}
+
+.pp-assessment-record .pp-detail-panel,
+.pp-assessment-record .pp-context-panel {
+  border: 0;
+  border-top: 1px solid var(--pp-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pp-assessment-record .pp-detail-panel {
+  padding: 22px 0 0;
+}
+
+.pp-assessment-record .pp-context-panel {
+  padding: 18px 0 0;
+}
+
+.pp-assessment-record .pp-detail-tabs {
+  border-bottom: 1px solid var(--pp-border);
+}
+
+.pp-assessment-record .pp-detail-tabs a {
+  min-height: 44px;
+  border-radius: 0;
+}
+
+.pp-assessment-record .pp-action-confirm,
+.pp-assessment-record .pp-draft-metadata-form .pp-switch-field--compact {
+  border-color: var(--pp-border);
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+}
+
+.pp-assessment-create .pp-wizard-surface,
+.pp-assessment-success {
+  border: 0;
+  border-top: 1px solid var(--pp-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pp-assessment-create .pp-wizard-step {
+  padding: clamp(22px, 4vw, 40px) 0;
+}
+
+.pp-assessment-create .pp-choice-grid label,
+.pp-assessment-create .pp-template-choice label {
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+}
+
+.pp-assessment-create .pp-choice-grid label.selected,
+.pp-assessment-create .pp-template-choice label.selected {
+  border-color: var(--pp-text-primary);
+  background: var(--pp-surface-elevated);
+}
+
+.pp-assessment-create .pp-choice-grid label.selected > i,
+.pp-assessment-create .pp-template-choice label.selected > i {
+  border-color: var(--pp-shell-solid);
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
+}
+
+.pp-assessment-create .pp-field input,
+.pp-assessment-create .pp-field textarea,
+.pp-assessment-create .pp-field select,
+.pp-student-field input,
+.pp-student-field textarea,
+.pp-student-field select {
+  min-height: 48px;
+  border-color: transparent;
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-primary);
+  font-size: 1rem;
+}
+
+.pp-assessment-create .pp-field input:hover,
+.pp-assessment-create .pp-field textarea:hover,
+.pp-assessment-create .pp-field select:hover,
+.pp-student-field input:hover,
+.pp-student-field textarea:hover,
+.pp-student-field select:hover {
+  border-color: var(--pp-border-strong);
+}
+
+.pp-assessment-create .pp-field input:focus,
+.pp-assessment-create .pp-field textarea:focus,
+.pp-assessment-create .pp-field select:focus,
+.pp-student-field input:focus,
+.pp-student-field textarea:focus,
+.pp-student-field select:focus {
+  border-color: var(--pp-text-primary);
+}
+
+.pp-student-assessment {
+  min-height: calc(100svh - 68px);
+  padding: clamp(20px, 4vw, 48px) 16px max(96px, calc(48px + env(safe-area-inset-bottom)));
+}
+
+.pp-student-card {
+  border: 0;
+  border-top: 1px solid var(--pp-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pp-student-assessment--intro .pp-student-card,
+.pp-student-assessment--readonly .pp-student-card,
+.pp-student-assessment--review .pp-student-card,
+.pp-student-assessment--success .pp-student-card,
+.pp-student-assessment--question .pp-student-card {
+  padding: clamp(24px, 5vw, 40px) 0 0;
+}
+
+.pp-student-progress {
+  height: 2px;
+  border-radius: 0;
+  background: var(--pp-divider);
+}
+
+.pp-student-progress > span {
+  border-radius: 0;
+  background: var(--pp-text-primary);
+}
+
+.pp-student-options button,
+.pp-scale-field button {
+  min-height: 48px;
+  border-color: var(--pp-border);
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-primary);
+}
+
+.pp-student-options button[aria-pressed="true"],
+.pp-scale-field button[aria-pressed="true"] {
+  border-color: var(--pp-shell-solid);
+  background: var(--pp-shell-solid);
+  color: var(--pp-shell-on-solid);
+}
+
+.pp-student-feedback,
+.pp-student-review-note,
+.pp-photo-unavailable,
+.pp-measurement-field > p,
+.pp-student-submit-confirm {
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-surface-subtle);
+}
+
+.pp-student-assessment .matrix-message.error {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--pp-danger) 38%, var(--pp-border));
+  border-radius: var(--pp-radius-sm);
+  background: var(--pp-danger-soft);
+  color: var(--pp-danger);
+  font-size: .78rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.pp-student-question-actions {
+  position: sticky;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  z-index: 2;
+  margin-top: 24px;
+  padding: 12px 0;
+  border-top: 1px solid var(--pp-divider);
+  background: color-mix(in srgb, var(--pp-background) 94%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+@media (max-width: 880px) {
+  .pp-assessment-record .pp-master-detail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pp-assessment-record .pp-master-detail > aside {
+    grid-row: 1;
+  }
+
+  .pp-assessment-record .pp-detail-tabs {
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 700px) {
+  .pp-assessments-workspace .pp-operational-toolbar {
+    align-items: stretch;
+  }
+
+  .pp-assessments-workspace .pp-filter-tabs {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .pp-assessment-list .pp-data-list__head {
+    display: none;
+  }
+
+  .pp-assessment-list .pp-data-list__row {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px 14px;
+    padding: 17px 0;
+  }
+
+  .pp-assessment-list .pp-data-cell {
+    min-width: 0;
+  }
+
+  .pp-assessment-list .pp-data-cell:nth-child(1),
+  .pp-assessment-list .pp-data-cell:nth-child(2),
+  .pp-assessment-list .pp-data-cell:nth-child(6) {
+    grid-column: 1;
+  }
+
+  .pp-assessment-list .pp-data-cell:nth-child(3),
+  .pp-assessment-list .pp-data-cell:nth-child(4),
+  .pp-assessment-list .pp-data-cell:nth-child(7) {
+    grid-column: 2;
+  }
+
+  .pp-assessment-list .pp-data-cell:nth-child(5) {
+    display: none;
+  }
+
+  .pp-assessment-list .pp-data-cell--status {
+    grid-row: 1 / span 2;
+    justify-self: end;
+  }
+
+  .pp-assessment-list .pp-data-cell--date {
+    grid-row: 3;
+    justify-self: end;
+  }
+
+  .pp-assessment-list__action {
+    padding-top: 3px;
+    font-size: .72rem;
+  }
+
+  .pp-assessment-create .pp-form-grid,
+  .pp-assessment-create .pp-choice-grid,
+  .pp-assessment-create .pp-template-choice,
+  .pp-review-summary,
+  .pp-review-questions ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pp-assessment-create .pp-template-choice label {
+    min-height: 150px;
+  }
+
+  .pp-assessment-create .pp-review-summary > div,
+  .pp-assessment-create .pp-review-summary > div:nth-child(2n),
+  .pp-assessment-create .pp-review-summary > div:nth-last-child(-n+2) {
+    border-right: 0;
+    border-bottom: 1px solid var(--pp-divider);
+  }
+
+  .pp-assessment-create .pp-review-summary > div:last-child {
+    border-bottom: 0;
+  }
+
+  .pp-student-assessment {
+    display: block;
+    padding-inline: 20px;
+  }
+
+  .pp-student-question-actions {
+    grid-template-columns: minmax(88px, auto) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 390px) {
+  .pp-student-assessment {
+    padding-inline: 16px;
+  }
+
+  .pp-wizard-progress li small {
+    max-width: 66px;
+    text-align: center;
+  }
+}
+
+@media (max-height: 600px) {
+  .pp-student-question-actions {
+    position: static;
+    backdrop-filter: none;
+  }
+}
