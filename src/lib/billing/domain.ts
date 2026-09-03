@@ -55,6 +55,7 @@ export interface BillingAccessContext {
   now: string | Date;
   productCode: string;
   billingState: string;
+  currentSubscriptionCount: number;
   market: string | null;
   currency: string | null;
   currentPeriodEnd?: string | Date | null;

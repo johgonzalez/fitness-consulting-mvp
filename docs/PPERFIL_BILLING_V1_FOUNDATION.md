@@ -34,6 +34,8 @@ The only PPerfil billing states are:
 
 Provider status is stored separately and is never used directly by product screens.
 
+The pure resolver also receives the number of current subscription snapshots. `PRO` requires exactly one current subscription; a missing or conflicting current snapshot fails closed. `FREE` does not require a synthetic provider subscription and accepts zero current snapshots. The database independently enforces at most one current subscription per Billing account through a partial unique index.
+
 ## Grace and recovery
 
 Grace may start only after prior paid access and lasts at most seven days. A repeated event preserves the original `grace_started_at` and `grace_until`, so retries cannot extend access. A first-payment failure cannot create grace. `unpaid`, `canceled` and `paused` are expected to be normalized by the future provider adapter to `SUSPENDED`.
@@ -128,3 +130,7 @@ Display strings such as `R$` and `Brasil` are not billing authority.
 7. Wire semantic capability checks and student continuity into paid domain operations.
 
 Pix, refunds and disputes remain outside this foundation. Cancellation is not a refund, and disputes do not automatically revoke entitlement without a future explicit policy.
+
+## Revalidation against the current staging baseline
+
+The canonical staging baseline used for this revalidation already contains later Stripe provider and Checkout work. Billing 1A did not install or call Stripe, and this revalidation does not create provider resources, invoke provider APIs, process payment, or expand those later integrations. The original additive migration `202608240004_billing_v1_foundation.sql` is already present in both local and hosted migration history, so no duplicate migration is created.

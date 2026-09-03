@@ -54,6 +54,7 @@ insert into billing_results values
   ('RLS enabled on checkout attempts', (select relrowsecurity from pg_class where oid='public.billing_checkout_attempts'::regclass)),
   ('RLS enabled on event receipts', (select relrowsecurity from pg_class where oid='public.billing_event_receipts'::regclass)),
   ('Anon cannot read billing', not has_table_privilege('anon','public.billing_accounts','select')),
+  ('Anon cannot mutate billing', not has_table_privilege('anon','public.billing_accounts','insert,update,delete')),
   ('Authenticated cannot read billing account internals', not has_table_privilege('authenticated','public.billing_accounts','select')),
   ('Authenticated cannot read event receipts', not has_table_privilege('authenticated','public.billing_event_receipts','select')),
   ('Authenticated cannot write billing accounts', not has_table_privilege('authenticated','public.billing_accounts','insert')),
@@ -70,6 +71,18 @@ insert into billing_results values
   ('Client cannot insert billing account', pg_temp.raises($sql$
     insert into public.billing_accounts(app_user_id,market) values ('b1a00000-0000-4000-8000-000000000001','BR')
   $sql$)),
+  ('Client cannot insert subscription', pg_temp.raises($sql$
+    insert into public.billing_subscriptions(
+      billing_account_id,provider,provider_subscription_id,provider_product_id,provider_price_id,
+      product_code,market,currency,billing_interval,provider_status,billing_state,last_synced_at
+    ) values (
+      gen_random_uuid(),'stripe','sub_forged','prod_forged','price_forged',
+      'PRO','BR','BRL','month','active','ACTIVE',now()
+    )
+  $sql$)),
+  ('Client cannot read another user billing account', pg_temp.raises($sql$
+    select * from public.billing_accounts where app_user_id='b1a00000-0000-4000-8000-000000000002'
+  $sql$)),
   ('Client cannot forge subscription state', pg_temp.raises($sql$
     update public.billing_subscriptions set billing_state='ACTIVE'
   $sql$)),
@@ -81,6 +94,9 @@ insert into billing_results values
   $sql$)),
   ('Client cannot forge grace', pg_temp.raises($sql$
     update public.billing_subscriptions set grace_until=now()+interval '7 days'
+  $sql$)),
+  ('Client cannot forge suspension', pg_temp.raises($sql$
+    update public.billing_subscriptions set suspended_at=now()
   $sql$)),
   ('Client cannot mark subscription current', pg_temp.raises($sql$
     update public.billing_subscriptions set is_current=true
@@ -105,6 +121,12 @@ select public.reconcile_billing_subscription(
   '2026-08-24T00:00:00Z',true,true
 );
 
+insert into public.billing_event_receipts(
+  provider,provider_event_id,event_type,provider_livemode,payload_sha256
+) values (
+  'stripe','evt_billing_once','customer.subscription.updated',false,repeat('a',64)
+);
+
 insert into billing_results values
   ('Trusted role reconciles FREE', exists(
     select 1 from public.billing_subscriptions subscription
@@ -118,6 +140,31 @@ insert into billing_results values
     where account.app_user_id='b1a00000-0000-4000-8000-000000000002'
       and subscription.billing_state='ACTIVE' and subscription.is_current
   )),
+  ('Malformed trusted snapshot fails', pg_temp.raises($sql$
+    select public.reconcile_billing_subscription(
+      'b1a00000-0000-4000-8000-000000000003','INVALID PROVIDER','cus_billing_c','sub_billing_c',
+      'prod_pro','price_br_monthly',null,'PRO','BR','BRL','month','active','ACTIVE',
+      '2026-08-24T00:00:00Z','2026-09-24T00:00:00Z',false,null,null,
+      '2026-08-24T00:00:00Z',true,true
+    )
+  $sql$)),
+  ('Duplicate provider event receipt is rejected idempotently', pg_temp.raises($sql$
+    insert into public.billing_event_receipts(
+      provider,provider_event_id,event_type,provider_livemode,payload_sha256
+    ) values (
+      'stripe','evt_billing_once','customer.subscription.updated',false,repeat('a',64)
+    )
+  $sql$)),
+  ('Conflicting current subscriptions are rejected', pg_temp.raises($sql$
+    insert into public.billing_subscriptions(
+      billing_account_id,provider,provider_subscription_id,provider_product_id,provider_price_id,
+      product_code,market,currency,billing_interval,provider_status,billing_state,last_synced_at,is_current
+    )
+    select billing_account_id,'other_provider','sub_billing_conflict','prod_pro','price_br_monthly',
+      'PRO','BR','BRL','month','active','ACTIVE','2026-08-24T00:00:00Z',true
+    from public.billing_subscriptions
+    where provider='stripe' and provider_subscription_id='sub_billing_b'
+  $sql$)),
   ('First payment failure receives no grace', pg_temp.raises($sql$
     select public.reconcile_billing_subscription(
       'b1a00000-0000-4000-8000-000000000003','stripe','cus_billing_c','sub_billing_c',
@@ -157,6 +204,7 @@ set local role anon;
 set local request.jwt.claims = '{"role":"anon"}';
 insert into billing_results values
   ('Published FREE site is offline', not exists(select 1 from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000001')),
+  ('Missing Billing authority fails public site closed', not exists(select 1 from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000003')),
   ('Published ACTIVE site is online', exists(select 1 from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000002')),
   ('FREE public services are offline', (select count(*)=0 from public.get_public_site_services('b1a10000-0000-4000-8000-000000000001'))),
   ('ACTIVE public services are online', (select count(*)=1 from public.get_public_site_services('b1a10000-0000-4000-8000-000000000002'))),
@@ -179,14 +227,14 @@ set local role service_role;
 select public.reconcile_billing_subscription(
   'b1a00000-0000-4000-8000-000000000002','stripe','cus_billing_b','sub_billing_b',
   'prod_pro','price_br_monthly','in_billing_b_2','PRO','BR','BRL','month','past_due','GRACE',
-  '2026-08-24T00:00:00Z','2026-09-24T00:00:00Z',false,null,null,
-  '2026-08-25T00:00:00Z',true,true
+  '2098-12-01T00:00:00Z','2099-02-01T00:00:00Z',false,null,null,
+  '2099-01-01T00:00:00Z',true,true
 );
 select public.reconcile_billing_subscription(
   'b1a00000-0000-4000-8000-000000000002','stripe','cus_billing_b','sub_billing_b',
   'prod_pro','price_br_monthly','in_billing_b_3','PRO','BR','BRL','month','past_due','GRACE',
-  '2026-08-24T00:00:00Z','2026-09-24T00:00:00Z',false,null,null,
-  '2026-08-26T00:00:00Z',true,true
+  '2098-12-01T00:00:00Z','2099-02-01T00:00:00Z',false,null,null,
+  '2099-01-02T00:00:00Z',true,true
 );
 
 insert into billing_results values
@@ -194,13 +242,13 @@ insert into billing_results values
     select 1 from public.billing_subscriptions
     where provider='stripe' and provider_subscription_id='sub_billing_b'
       and billing_state='GRACE'
-      and grace_started_at='2026-08-25T00:00:00Z'
-      and grace_until='2026-09-01T00:00:00Z'
+      and grace_started_at='2099-01-01T00:00:00Z'
+      and grace_until='2099-01-08T00:00:00Z'
   )),
   ('Repeated event does not extend grace', exists(
     select 1 from public.billing_subscriptions
     where provider='stripe' and provider_subscription_id='sub_billing_b'
-      and grace_until='2026-09-01T00:00:00Z'
+      and grace_until='2099-01-08T00:00:00Z'
   ));
 
 reset role;
@@ -213,13 +261,24 @@ set local role service_role;
 select public.reconcile_billing_subscription(
   'b1a00000-0000-4000-8000-000000000002','stripe','cus_billing_b','sub_billing_b',
   'prod_pro','price_br_monthly','in_billing_b_3','PRO','BR','BRL','month','unpaid','SUSPENDED',
-  '2026-08-24T00:00:00Z','2026-09-24T00:00:00Z',false,null,null,
-  '2026-08-27T00:00:00Z',true,true
+  '2098-12-01T00:00:00Z','2099-02-01T00:00:00Z',false,null,null,
+  '2099-01-03T00:00:00Z',true,true
+);
+select public.reconcile_billing_subscription(
+  'b1a00000-0000-4000-8000-000000000002','stripe','cus_billing_b','sub_billing_b',
+  'prod_pro','price_br_monthly','in_billing_b_3','PRO','BR','BRL','month','unpaid','SUSPENDED',
+  '2098-12-01T00:00:00Z','2099-02-01T00:00:00Z',false,null,null,
+  '2099-01-04T00:00:00Z',true,true
 );
 
 reset role;
 insert into billing_results values
-  ('Suspension preserves publication intent', (select published from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000002'));
+  ('Suspension preserves publication intent', (select published from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000002')),
+  ('Repeated event does not restart Student continuity', exists(
+    select 1 from public.billing_subscriptions
+    where provider='stripe' and provider_subscription_id='sub_billing_b'
+      and suspended_at='2099-01-03T00:00:00Z'
+  ));
 set local role anon;
 insert into billing_results values
   ('SUSPENDED site is offline', not exists(select 1 from public.trainer_profiles where id='b1a10000-0000-4000-8000-000000000002')),
@@ -232,8 +291,8 @@ set local role service_role;
 select public.reconcile_billing_subscription(
   'b1a00000-0000-4000-8000-000000000002','stripe','cus_billing_b','sub_billing_b',
   'prod_pro','price_br_monthly','in_billing_b_4','PRO','BR','BRL','month','active','ACTIVE',
-  '2026-08-27T00:00:00Z','2026-09-27T00:00:00Z',false,null,null,
-  '2026-08-28T00:00:00Z',true,true
+  '2099-01-03T00:00:00Z','2099-02-03T00:00:00Z',false,null,null,
+  '2099-01-05T00:00:00Z',true,true
 );
 
 reset role;

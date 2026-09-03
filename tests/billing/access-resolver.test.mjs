@@ -6,6 +6,7 @@ const base = {
   now: "2026-08-24T12:00:00.000Z",
   productCode: "PRO",
   billingState: "ACTIVE",
+  currentSubscriptionCount: 1,
   market: "BR",
   currency: "BRL",
   currentPeriodEnd: "2026-09-24T12:00:00.000Z",
@@ -20,8 +21,15 @@ function assertAllCapabilities(decision, expected) {
   assert.equal(Object.values(decision.capabilities).every((value) => value === expected), true);
 }
 
-test("FREE fails closed for every paid capability", () => {
-  const decision = resolveBillingAccess({ ...base, productCode: "FREE", billingState: "FREE", market: null, currency: null });
+test("FREE without a synthetic provider subscription denies every paid capability", () => {
+  const decision = resolveBillingAccess({
+    ...base,
+    productCode: "FREE",
+    billingState: "FREE",
+    currentSubscriptionCount: 0,
+    market: null,
+    currency: null,
+  });
   assert.equal(decision.effectiveState, "FREE");
   assertAllCapabilities(decision, false);
 });
@@ -31,6 +39,7 @@ test("active Founder Access grants capabilities without changing FREE Billing", 
     ...base,
     productCode: "FREE",
     billingState: "FREE",
+    currentSubscriptionCount: 0,
     market: null,
     currency: null,
     accessGrant: { grantType: "FOUNDER_ACCESS", status: "ACTIVE", expiresAt: null },
@@ -49,6 +58,7 @@ test("expired or revoked Founder Access grants nothing", () => {
       ...base,
       productCode: "FREE",
       billingState: "FREE",
+      currentSubscriptionCount: 0,
       market: null,
       currency: null,
       accessGrant,
@@ -139,6 +149,8 @@ for (const [label, override] of [
   ["unknown provider state", { providerSnapshotRecognized: false }],
   ["unknown product", { productCode: "ENTERPRISE" }],
   ["invalid currency", { currency: "REAL" }],
+  ["missing current subscription", { currentSubscriptionCount: 0 }],
+  ["conflicting current subscriptions", { currentSubscriptionCount: 2 }],
   ["unrecognized provider Price", { providerPriceRecognized: false }],
 ]) {
   test(`${label} fails closed`, () => {

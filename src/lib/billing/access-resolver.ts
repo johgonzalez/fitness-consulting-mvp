@@ -37,6 +37,11 @@ export function resolveBillingAccess(context: BillingAccessContext): BillingAcce
   const reasons: string[] = [];
   const validState = isBillingState(context.billingState);
   const validProduct = context.productCode === "FREE" || context.productCode === "PRO";
+  const currentSubscriptionCountValid = Number.isInteger(context.currentSubscriptionCount)
+    && context.currentSubscriptionCount >= 0;
+  const subscriptionAuthorityValid = context.productCode === "FREE"
+    ? currentSubscriptionCountValid && context.currentSubscriptionCount <= 1
+    : currentSubscriptionCountValid && context.currentSubscriptionCount === 1;
   const providerAuthorityValid = context.productCode === "FREE"
     || (context.providerSnapshotRecognized && context.providerPriceRecognized);
   const internationalPrimitivesValid = context.productCode === "FREE"
@@ -45,6 +50,11 @@ export function resolveBillingAccess(context: BillingAccessContext): BillingAcce
   if (now === null) reasons.push("invalid_now");
   if (!validState) reasons.push("unknown_billing_state");
   if (!validProduct) reasons.push("unknown_product");
+  if (!subscriptionAuthorityValid) {
+    reasons.push(context.currentSubscriptionCount === 0
+      ? "missing_current_subscription"
+      : "conflicting_current_subscriptions");
+  }
   if (!providerAuthorityValid) reasons.push("unrecognized_provider_authority");
   if (!internationalPrimitivesValid) reasons.push("invalid_market_or_currency");
 
