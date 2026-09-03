@@ -20,12 +20,14 @@ test("Auth root is session-aware and does not flash Welcome for a valid session"
   assert.match(root, /return <CheipiEntry/);
 });
 
-test("Welcome keeps the approved sparse fitness composition", () => {
+test("Welcome keeps the approved animated fitness collage composition", () => {
   assert.match(entry, /SPLASH_DURATION_MS = 900/);
   assert.match(entry, /SPLASH_SESSION_KEY = "pperfil:entry-splash:v1"/);
   assert.match(entry, /"checking" \| "splash" \| "welcome"/);
   assert.match(entry, /if \(splashSeen\) \{[\s\S]*setEntryStage\("welcome"\)/);
-  assert.match(entry, /cheipi-welcome__media/);
+  assert.match(entry, /cheipi-welcome__mosaic/);
+  assert.match(entry, /welcomeMosaic\.map/);
+  assert.match(entry, /auth-coaching\.webp/);
   assert.match(entry, /\/images\/saas\/auth-trainer\.webp/);
   assert.match(entry, /Todo treino\./);
   assert.match(entry, /Toda evolução\./);

@@ -1,16 +1,6 @@
 /* Visual Launch 02 — approved mobile app foundation. Uses App Shell tokens only. */
 
-/* Immersive first entry */
-.cheipi-welcome__media{position:absolute;z-index:-3;inset:0}
-.cheipi-welcome__media img{object-fit:cover;object-position:58% 35%;filter:saturate(.78) contrast(1.04)}
-.cheipi-welcome__mosaic{display:none}
-.cheipi-welcome__shade{background:linear-gradient(180deg,rgba(14,14,14,.04) 0 38%,rgba(14,14,14,.56) 63%,#0e0e0e 88%)}
-.cheipi-welcome__wordmark{opacity:1}.cheipi-welcome__wordmark strong{color:#f5f5f3;font-size:1rem}
-.cheipi-welcome__hero{top:auto;bottom:172px;justify-items:start;text-align:left}
-.cheipi-welcome__hero h1{margin:0;text-align:left;font-size:clamp(2rem,10vw,2.75rem)}
-.cheipi-welcome__hero>p{max-width:320px;text-align:left;font-size:.78rem}
-.cheipi-welcome__actions{width:min(100% - 40px,390px);grid-template-columns:58px minmax(0,1fr);align-items:center;justify-items:start;gap:14px}
-.cheipi-welcome__actions .cheipi-provider-control{grid-column:1}.cheipi-welcome__email{width:100%;grid-column:2;border:1px solid rgba(255,255,255,.28);border-radius:10px;text-decoration:none}
+/* Immersive first entry keeps the established animated fitness mosaic. */
 .cheipi-provider-control.is-disabled{pointer-events:none;opacity:.5}
 
 /* Consecutive app screens for Auth. */
@@ -44,10 +34,10 @@
 @keyframes pc-auth-step-in{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
 @keyframes pc-otp-spin{to{transform:rotate(360deg)}}
 
-@media(min-width:900px){.cheipi-welcome__media{right:42%}.cheipi-welcome__media img{object-position:66% 36%}.cheipi-welcome__shade{background:linear-gradient(90deg,rgba(14,14,14,.08) 0 34%,rgba(14,14,14,.72) 56%,#0e0e0e 70%)}.cheipi-welcome__hero{width:min(34vw,440px);left:78%;bottom:240px}.cheipi-welcome__actions{width:min(32vw,390px);left:78%}.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:620px}}
+@media(min-width:900px){.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:620px}}
 @media(max-width:760px){.pc-auth-page[data-auth-view="signup"] .pc-auth-header{height:64px}.pc-auth-page[data-auth-view="signup"] .pc-auth-layout{min-height:calc(100dvh - 64px)}.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:calc(100dvh - 64px);display:block;padding-top:12px}.pc-signup-flow{min-height:calc(100dvh - 100px)}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:22px}.pc-dashboard--v1b{width:calc(100% - 32px);padding-top:18px}.pc-dashboard--v1b .pc-pulse{min-height:74px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;margin-bottom:18px}.pc-dashboard--v1b .pc-pulse>div{min-width:0;min-height:52px;flex-direction:column;gap:4px;padding-inline:5px;text-align:center}.pc-dashboard--v1b .pc-pulse strong{font-size:.96rem}.pc-dashboard--v1b .pc-pulse span{white-space:normal;line-height:1.15;font-size:.5rem}.pc-dashboard--v1b .pc-pulse .pp-status{padding:0;border:0;background:transparent;text-align:center}.pc-dashboard--v1b .pc-site-panel{margin-top:6px}.pc-today-workout{min-height:360px}}
-@media(max-width:360px){.cheipi-welcome__hero{bottom:164px}.cheipi-welcome__hero h1{font-size:1.9rem}.pc-signup-flow{padding-top:56px}.pc-otp-code>div{gap:4px}.pc-otp-code span{height:50px;border-radius:7px;font-size:.94rem}.pc-dashboard--v1b{width:calc(100% - 24px)}.pc-today-workout{min-height:330px}}
-@media(max-height:650px) and (pointer:coarse){.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{overflow-y:auto}.pc-signup-flow{min-height:520px}.pc-signup-flow h2{margin-block:12px}.pc-auth-form>label{margin-top:10px}.pc-auth-form input{min-height:48px}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:12px}.cheipi-welcome__hero{bottom:142px}.cheipi-welcome__hero>p{display:none}}
+@media(max-width:360px){.pc-signup-flow{padding-top:56px}.pc-otp-code>div{gap:4px}.pc-otp-code span{height:50px;border-radius:7px;font-size:.94rem}.pc-dashboard--v1b{width:calc(100% - 24px)}.pc-today-workout{min-height:330px}}
+@media(max-height:650px) and (pointer:coarse){.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{overflow-y:auto}.pc-signup-flow{min-height:520px}.pc-signup-flow h2{margin-block:12px}.pc-auth-form>label{margin-top:10px}.pc-auth-form input{min-height:48px}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:12px}}
 @media(prefers-reduced-motion:reduce){.pc-signup-flow{animation:none}.pc-otp-verifying svg{animation:none}}
 
 /* Smart Auth: verified invitation continuation after identity resolution. */
