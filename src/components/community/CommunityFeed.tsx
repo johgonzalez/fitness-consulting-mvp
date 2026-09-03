@@ -8,19 +8,20 @@ import { useRef, useState, useTransition } from "react";
 import { createCommunityCommentAction, createCommunityPostAction, deleteCommunityCommentAction, deleteCommunityPostAction, moderateCommunityContentAction, pinCommunityPostAction, reportCommunityContentAction, setCommunityLikeAction, updateCommunityPostAction } from "@/app/actions/community";
 import type { CommunityFilter, CommunityPost, CommunityWorkspace } from "@/lib/domain/community";
 import { Avatar } from "@/components/ui/PPerfilPrimitives";
+import { COMMUNITY_PHOTO_POSTING_ENABLED } from "@/lib/community/features";
 
 const filters: Array<{ id: CommunityFilter; label: string }> = [{ id: "ALL", label: "Todos" }, { id: "WORKOUTS", label: "Treinos" }, { id: "ANNOUNCEMENTS", label: "Avisos" }];
 function dateLabel(value: string) { const date = new Date(value); return Number.isNaN(date.getTime()) ? "Agora" : new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(date); }
 function roleLabel(post: CommunityPost) { return post.author.role === "TRAINER" ? "Personal Trainer" : post.postType === "WORKOUT_COMPLETION" ? "Treino concluído" : "Aluno"; }
 
-export function CommunityFeed({ workspace, audience, focusPostId, shareWorkoutExecutionId, studentPhotosEnabled = false }: { workspace: CommunityWorkspace; audience: "trainer" | "student"; focusPostId?: string; shareWorkoutExecutionId?: string; studentPhotosEnabled?: boolean }) {
+export function CommunityFeed({ workspace, audience, focusPostId, shareWorkoutExecutionId }: { workspace: CommunityWorkspace; audience: "trainer" | "student"; focusPostId?: string; shareWorkoutExecutionId?: string }) {
   const router = useRouter(), dialog = useRef<HTMLDialogElement>(null);
   const [pending, startTransition] = useTransition(), [message, setMessage] = useState<string | null>(null), [composerType, setComposerType] = useState<"TEXT" | "TRAINER_ANNOUNCEMENT" | "WORKOUT_COMPLETION" | "PHOTO">(shareWorkoutExecutionId ? "WORKOUT_COMPLETION" : "TEXT"), [draft, setDraft] = useState(""), [files, setFiles] = useState<File[]>([]);
   const community = workspace.activeCommunity;
   const posts = focusPostId ? workspace.posts.filter((post) => post.id === focusPostId) : workspace.posts;
   const base = audience === "trainer" ? "/dashboard/community" : "/student/community";
   const olderPostsHref = workspace.nextCursor ? `${base}?${new URLSearchParams({ ...(workspace.filter !== "ALL" ? { filter: workspace.filter } : {}), ...(workspace.communities.length > 1 ? { community: community?.id ?? "" } : {}), beforeAt: workspace.nextCursor.createdAt, beforeId: workspace.nextCursor.id }).toString()}` : null;
-  const photosAllowed = audience === "trainer" || studentPhotosEnabled;
+  const photosAllowed = COMMUNITY_PHOTO_POSTING_ENABLED;
   function run(operation: () => Promise<{ ok: boolean; message: string }>) { startTransition(async () => { const result = await operation(); setMessage(result.message); if (result.ok) router.refresh(); }); }
   function closeComposer() { if (draft.trim() || files.length) { if (!window.confirm("Descartar esta publicação?")) return; } dialog.current?.close(); setDraft(""); setFiles([]); }
   async function publish() {

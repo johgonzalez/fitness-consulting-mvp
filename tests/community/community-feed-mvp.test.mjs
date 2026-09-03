@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = (path) => readFile(new URL(path, import.meta.url), "utf8");
-const [migration, feed, studentShell, trainerNav, completion, upload, workspace] = await Promise.all([
-  read("../../supabase/migrations/202609030002_community_feed_mvp.sql"), read("../../src/components/community/CommunityFeed.tsx"), read("../../src/components/student/StudentAppShell.tsx"), read("../../src/components/dashboard/BottomNavigation.tsx"), read("../../src/components/student/WorkoutCompletionShare.tsx"), read("../../src/app/api/community/photos/route.ts"), read("../../src/lib/community/workspace.ts"),
+const [migration, feed, studentShell, trainerNav, completion, upload, workspace, features] = await Promise.all([
+  read("../../supabase/migrations/202609030002_community_feed_mvp.sql"), read("../../src/components/community/CommunityFeed.tsx"), read("../../src/components/student/StudentAppShell.tsx"), read("../../src/components/dashboard/BottomNavigation.tsx"), read("../../src/components/student/WorkoutCompletionShare.tsx"), read("../../src/app/api/community/photos/route.ts"), read("../../src/lib/community/workspace.ts"), read("../../src/lib/community/features.ts"),
 ]);
 
 test("Community is one private Trainer-led workspace with relationship-derived access", () => {
@@ -39,10 +39,12 @@ test("workout Community publishing is explicit, private and separate from extern
   assert.doesNotMatch(migration, /actual_load|actual_reps|student_note/);
 });
 
-test("private media validates signatures and gates Student photos on the server", () => {
+test("private media foundation is preserved while launch photo posting is disabled", () => {
   assert.match(migration, /'community-post-media','community-post-media',false/);
   assert.match(migration, /community members read private post media/);
-  assert.match(upload, /COMMUNITY_STUDENT_PHOTO_POSTS_ENABLED/);
+  assert.match(features, /COMMUNITY_PHOTO_POSTING_ENABLED = false/);
+  assert.match(feed, /COMMUNITY_PHOTO_POSTING_ENABLED/);
+  assert.match(upload, /if \(!COMMUNITY_PHOTO_POSTING_ENABLED\).*403/);
   assert.match(upload, /bytes\[0\] === 0xff/);
   assert.match(upload, /RIFF/);
   assert.match(upload, /MAX_FILES = 4/);

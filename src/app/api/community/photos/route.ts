@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createCommunityAdminClient } from "@/lib/community/admin";
+import { COMMUNITY_PHOTO_POSTING_ENABLED } from "@/lib/community/features";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -25,13 +26,13 @@ export async function POST(request: Request) {
   if (!Number.isFinite(contentLength) || contentLength < 1 || contentLength > MAX_MULTIPART_SIZE) return jsonError("Envie até 4 imagens de 8 MB cada.", 413);
   const supabase = await createClient(); const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError || !auth.user) return jsonError("Sua sessão expirou. Entre novamente.", 401);
+  if (!COMMUNITY_PHOTO_POSTING_ENABLED) return jsonError("Publicação de fotos ainda não está disponível.", 403);
   let form: FormData; try { form = await request.formData(); } catch { return jsonError("Não foi possível interpretar o envio.", 400); }
   const communityId = String(form.get("communityId") ?? ""), body = String(form.get("body") ?? "").trim(), files = form.getAll("images");
   if (!UUID.test(communityId) || body.length > 2000 || files.length < 1 || files.length > MAX_FILES || files.some((file) => !(file instanceof File))) return jsonError("Revise a publicação e as imagens.", 400);
   const { data: available, error: accessError } = await supabase.rpc("get_my_communities");
   const membership = Array.isArray(available) ? available.find((item) => item && typeof item === "object" && "id" in item && item.id === communityId) as { role?: string } | undefined : undefined;
   if (accessError || !membership) return jsonError("Você não tem acesso a esta Comunidade.", 403);
-  if (membership.role === "STUDENT" && process.env.COMMUNITY_STUDENT_PHOTO_POSTS_ENABLED !== "true") return jsonError("Publicação de fotos por alunos ainda não está disponível.", 403);
   const admin = createCommunityAdminClient(), postId = crypto.randomUUID(), uploaded: string[] = [], metadata: Array<Record<string, unknown>> = [];
   try {
     for (const [index, entry] of files.entries()) {
