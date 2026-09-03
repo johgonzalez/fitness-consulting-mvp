@@ -20,19 +20,21 @@ test("Auth root is session-aware and does not flash Welcome for a valid session"
   assert.match(root, /return <CheipiEntry/);
 });
 
-test("Welcome keeps the approved sparse fitness composition", () => {
+test("Welcome keeps the approved cinematic PPerfil composition", () => {
   assert.match(entry, /SPLASH_DURATION_MS = 900/);
   assert.match(entry, /SPLASH_SESSION_KEY = "pperfil:entry-splash:v1"/);
   assert.match(entry, /"checking" \| "splash" \| "welcome"/);
   assert.match(entry, /if \(splashSeen\) \{[\s\S]*setEntryStage\("welcome"\)/);
   assert.equal((entry.match(/className: "cheipi-welcome__tile--/g) ?? []).length, 5);
-  assert.match(entry, /Todo treino\./);
-  assert.match(entry, /Toda evolução\./);
-  assert.match(entry, /Juntos\./);
-  assert.match(entry, /<CheipiBrand symbolOnly className="cheipi-welcome__orb-brand"/);
-  assert.match(entry, />Usar e-mail<\/Link>/);
+  assert.match(entry, /aria-label="PPerfil">PPERFIL<\/h1>/);
+  assert.match(entry, /A plataforma que conecta\./);
+  assert.match(entry, /<Mail aria-hidden="true"/);
+  assert.match(entry, /<span>Usar e-mail<\/span>/);
+  assert.match(entry, /href="\/terms">Termos de Uso/);
+  assert.match(entry, /href="\/privacy">Política de Privacidade/);
+  assert.doesNotMatch(entry, /Todo treino\.|Toda evolução\.|Juntos\.|cheipi-welcome__orb/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /\.cheipi-welcome__tile \{[\s\S]*animation: cheipi-tile-drift 16s/);
+  assert.match(css, /\.cheipi-welcome__tile \{[\s\S]*animation: cheipi-tile-drift 24s/);
 });
 
 test("social providers remain available at Welcome and the email login", () => {
