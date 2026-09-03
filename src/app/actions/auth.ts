@@ -119,6 +119,24 @@ export async function startGoogleOAuth(formData: FormData) {
   redirect(data.url);
 }
 
+export type PendingInvitationActionState = { message?: string };
+
+export async function acceptPendingStudentInvitation(
+  _state: PendingInvitationActionState,
+  formData: FormData,
+): Promise<PendingInvitationActionState> {
+  const invitationId = String(formData.get("invitation_id") ?? "");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(invitationId)) {
+    return { message: "Este convite não está mais disponível." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("accept_my_pending_student_invitation", { p_invitation_id: invitationId });
+  if (error) return { message: "Este convite não está mais disponível. Atualize a página ou fale com seu Personal." };
+  await clearDemoWorkspaceSession();
+  redirect("/student/today");
+}
+
 export type PasswordRecoveryState = {
   message?: string;
   tone?: "success" | "danger";

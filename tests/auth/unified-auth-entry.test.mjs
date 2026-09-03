@@ -16,12 +16,12 @@ const accessPage = read("../../src/app/access/student/page.tsx");
 const accessState = read("../../src/components/auth/StudentAccessState.tsx");
 const migration = read("../../supabase/migrations/202608280001_unified_auth_entry.sql");
 
-test("the entry asks for a UX context without assigning authorization", () => {
+test("the authenticated chooser selects a workspace or safe starting path without assigning authorization", () => {
   assert.match(picker, /type="radio"/);
   assert.match(picker, /Personal Trainer/);
-  assert.match(picker, /Organize alunos, treinos e sua presença profissional\./);
+  assert.match(picker, /Criar meu perfil como Personal Trainer/);
   assert.match(picker, /Aluno/);
-  assert.match(picker, /Acesse o app pelo convite do seu Personal\./);
+  assert.match(picker, /Sou aluno e ainda não tenho convite/);
   assert.match(picker, /disabled=\{!selection \|\| pending\}/);
   assert.doesNotMatch(picker, /user_roles|student_profiles|trainer_profiles/);
 });
@@ -37,6 +37,7 @@ test("context and invitation continuation survive password, OTP and Google", () 
 
 test("one server resolver authorizes requested workspaces from backend state", () => {
   assert.match(resolver, /get_my_app_identity/);
+  assert.match(resolver, /get_my_pending_student_invitations/);
   assert.match(resolver, /get_my_trainer_profile/);
   assert.match(resolver, /get_my_student_entry_state/);
   assert.match(resolver, /student_role_active !== true/);
@@ -64,7 +65,7 @@ test("student entry RPCs are authenticated-only and derive email from auth", () 
   assert.match(migration, /set search_path = ''/);
 });
 
-test("proxy keeps role isolation and lets an authenticated user choose a workspace", () => {
+test("proxy keeps role isolation and lets only an authenticated user choose a workspace", () => {
   assert.match(proxy, /trainerRoute && !roles\.includes\("trainer"\)/);
   assert.match(proxy, /studentRoute && !roles\.includes\("student"\)/);
   assert.match(proxy, /searchParams\.get\("choose"\) === "1"/);

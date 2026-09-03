@@ -10,7 +10,8 @@ export async function updateSession(request: NextRequest) {
   const trainerRoute = pathname.startsWith("/dashboard");
   const studentRoute = pathname.startsWith("/student");
   const studentAccessRoute = pathname === "/access/student";
-  const protectedRoute = trainerRoute || studentRoute || studentAccessRoute || pathname.startsWith("/onboarding");
+  const pendingInvitationRoute = pathname === "/access/invitations";
+  const protectedRoute = trainerRoute || studentRoute || studentAccessRoute || pendingInvitationRoute || pathname.startsWith("/onboarding");
   const authRoute = pathname === "/login" || pathname === "/signup";
   const demoWorkspace = isActiveDemoCookie(request.cookies.get(DEMO_COOKIE_NAME)?.value);
 

@@ -31,8 +31,8 @@ test("Welcome keeps the approved sparse fitness composition", () => {
   assert.match(entry, /Toda evolução\./);
   assert.match(entry, /Juntos\./);
   assert.match(entry, />Usar e-mail<\/Link>/);
-  assert.match(entry, /method: "email"/);
-  assert.match(entry, /method: "google"/);
+  assert.match(entry, /form action=\{startGoogleOAuth\}/);
+  assert.doesNotMatch(entry, /pick|method/);
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
@@ -54,7 +54,8 @@ test("new account confirms its password and resolves role after verified identit
   assert.doesNotMatch(form, /password:\s*signupPassword/);
   assert.match(validation, /options\.requireConfirmation && password !== passwordConfirmation/);
   assert.doesNotMatch(signup, /AuthContextPicker/);
-  assert.match(resolver, /roles\.length === 0\) return "\/login\?choose=1"/);
+  assert.match(resolver, /roles\.length === 0/);
+  assert.match(resolver, /return "\/login\?choose=1"/);
   assert.match(login, /if \(choose === "1"\)/);
 });
 

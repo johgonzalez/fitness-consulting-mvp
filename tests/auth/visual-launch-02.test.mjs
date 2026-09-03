@@ -8,6 +8,7 @@ const form = read("../../src/components/auth/AuthForm.tsx");
 const otp = read("../../src/components/auth/OtpVerificationForm.tsx");
 const providers = read("../../src/components/auth/AuthProviderControls.tsx");
 const login = read("../../src/app/login/page.tsx");
+const entry = read("../../src/components/auth/CheipiEntry.tsx");
 const today = read("../../src/app/student/today/page.tsx");
 const studentScreen = read("../../src/components/student/StudentTodayScreen.tsx");
 const dashboard = read("../../src/app/dashboard/page.tsx");
@@ -41,9 +42,9 @@ test("progressive signup persists no password and autoverifies without a continu
   assert.doesNotMatch(otp, />Confirmar código</);
 });
 
-test("provider intent follows context selection and unsupported launch destinations are absent", () => {
-  assert.match(login, /pick === "1"/);
-  assert.match(login, /normalizeAuthMethodIntent/);
+test("providers authenticate before context resolution and unsupported launch destinations are absent", () => {
+  assert.match(entry, /form action=\{startGoogleOAuth\}/);
+  assert.doesNotMatch(entry + login, /pick === "1"|normalizeAuthMethodIntent/);
   assert.match(providers, /startGoogleOAuth/);
   assert.doesNotMatch(providers, /Apple|Community|Comunidade|Mensagens/);
 });

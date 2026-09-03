@@ -9,18 +9,17 @@ import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
-import { normalizeAuthMethodIntent } from "@/lib/auth/ui-config";
 
 export const metadata: Metadata = { title: "Entrar — Cheipi" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; pick?: string; method?: string; oauth?: string; error?: string }> }) {
-  const { next: rawNext, context: rawContext, choose, pick, method: rawMethod, oauth, error } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; oauth?: string; error?: string }> }) {
+  const { next: rawNext, context: rawContext, choose, oauth, error } = await searchParams;
   const next = safeInternalPath(rawNext ?? null, "") || undefined;
   const invited = /^\/invite\/[a-f0-9]{64}$/.test(next ?? "");
   const context = invited ? "student" : normalizeAuthContext(rawContext ?? null);
-  const method = normalizeAuthMethodIntent(rawMethod);
   const configured = getSupabaseConfig().configured;
   let authenticated = false;
+  let chooserMode: "workspace" | "start" = "start";
   if (configured) {
     const supabase = await createClient();
     const { data: auth } = await supabase.auth.getUser();
@@ -28,12 +27,18 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     if (auth.user) {
       const destination = await resolveAuthenticatedHome(supabase, { context, nextPath: next });
       if (choose !== "1" || destination !== "/login?choose=1") redirect(destination);
+      const { data: identity } = await supabase.rpc("get_my_app_identity");
+      const roles = Array.isArray((identity as { roles?: unknown } | null)?.roles)
+        ? (identity as { roles: unknown[] }).roles
+        : [];
+      chooserMode = roles.includes("trainer") && roles.includes("student") ? "workspace" : "start";
     }
   }
-  if (pick === "1" && !invited && !context) return <AuthShell view="selection" title="Como você vai usar a Cheipi?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} method={method} /></AuthShell>;
   if (choose === "1") {
     if (!authenticated) redirect("/login");
-    return <AuthShell view="selection" title="Como você vai usar a Cheipi?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} method={method} /></AuthShell>;
+    const title = chooserMode === "workspace" ? "Onde você quer entrar?" : "Como você quer começar?";
+    const subtitle = chooserMode === "workspace" ? "Escolha seu workspace para continuar." : "Sua identidade está confirmada. Escolha o próximo passo.";
+    return <AuthShell view="selection" title={title} subtitle={subtitle}><AuthContextPicker route="/login" nextPath={next} mode={chooserMode} /></AuthShell>;
   }
   const title = invited ? "Acesse seu convite" : "Entre na sua conta";
   const subtitle = invited ? "Use a mesma conta que recebeu o convite." : "";

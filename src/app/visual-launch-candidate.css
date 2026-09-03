@@ -49,3 +49,12 @@
 @media(max-width:360px){.cheipi-welcome__hero{bottom:164px}.cheipi-welcome__hero h1{font-size:1.9rem}.pc-signup-flow{padding-top:56px}.pc-otp-code>div{gap:4px}.pc-otp-code span{height:50px;border-radius:7px;font-size:.94rem}.pc-dashboard--v1b{width:calc(100% - 24px)}.pc-today-workout{min-height:330px}}
 @media(max-height:650px) and (pointer:coarse){.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{overflow-y:auto}.pc-signup-flow{min-height:520px}.pc-signup-flow h2{margin-block:12px}.pc-auth-form>label{margin-top:10px}.pc-auth-form input{min-height:48px}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:12px}.cheipi-welcome__hero{bottom:142px}.cheipi-welcome__hero>p{display:none}}
 @media(prefers-reduced-motion:reduce){.pc-signup-flow{animation:none}.pc-otp-verifying svg{animation:none}}
+
+/* Smart Auth: verified invitation continuation after identity resolution. */
+.pc-pending-invites{display:grid;margin-top:24px;border-top:1px solid var(--pp-divider)}
+.pc-pending-invite{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;padding:18px 0;border-bottom:1px solid var(--pp-divider)}
+.pc-pending-invite>div{display:grid;gap:5px;min-width:0}.pc-pending-invite strong{color:var(--pp-text-primary);font:700 .82rem/1.3 var(--pp-font-display)}
+.pc-pending-invite span{color:var(--pp-text-muted);font:500 .66rem/1.45 var(--pp-font-ui)}
+.pc-pending-invite__action{display:grid;gap:8px}.pc-pending-invite__action>.pp-button,.pc-pending-invite__retry{min-height:48px}
+.pc-pending-invite__action>.pc-auth-feedback{max-width:240px;margin:0}
+@media(max-width:560px){.pc-pending-invite{grid-template-columns:1fr;gap:14px}.pc-pending-invite__action>.pp-button{width:100%}}

@@ -7,6 +7,7 @@ type TrainerProfileState = { onboarding_completed_at?: unknown; publication_requ
 type TrainerWorkspaceState = { relationships?: unknown; invitations?: unknown };
 type TrainerAccessState = { founder_access_active?: unknown; waitlist_joined?: unknown };
 type StudentEntryState = { active_relationship?: unknown; student_role_active?: unknown };
+type PendingInvitation = { invitation_id?: unknown };
 
 function hasRows(value: unknown): boolean {
   return Array.isArray(value) && value.length > 0;
@@ -64,12 +65,27 @@ export async function resolveAuthenticatedHome(
   const invitationNext = authorizedWorkspaceNext(options.nextPath, roles, options.context);
   if (invitationNext && invitePathPattern.test(invitationNext)) return invitationNext;
 
-  if (options.context === "student") return resolveStudentHome(supabase, roles, options.nextPath);
-  if (options.context === "trainer") return resolveTrainerHome(supabase, roles, options.nextPath);
+  const { data: pendingInvitationData } = await supabase.rpc("get_my_pending_student_invitations");
+  const pendingInvitations = Array.isArray(pendingInvitationData) ? pendingInvitationData as PendingInvitation[] : [];
+  if (pendingInvitations.some((invitation) => typeof invitation.invitation_id === "string")) {
+    return "/access/invitations";
+  }
 
   if (identityError) return defaultAuthenticatedHome(roles);
-  if (typeof safeIdentity?.id !== "string" || roles.length === 0) return "/login?choose=1";
-  if (roles.includes("trainer")) return resolveTrainerHome(supabase, roles, options.nextPath);
-  if (roles.includes("student")) return resolveStudentHome(supabase, roles, options.nextPath);
+  const trainer = roles.includes("trainer");
+  const student = roles.includes("student");
+
+  if (trainer && student) {
+    if (options.context === "trainer") return resolveTrainerHome(supabase, roles, options.nextPath);
+    if (options.context === "student") return resolveStudentHome(supabase, roles, options.nextPath);
+    return "/login?choose=1";
+  }
+  if (trainer) return resolveTrainerHome(supabase, roles, options.nextPath);
+  if (student) return resolveStudentHome(supabase, roles, options.nextPath);
+  if (typeof safeIdentity?.id !== "string" || roles.length === 0) {
+    if (options.context === "trainer") return "/onboarding";
+    if (options.context === "student") return "/access/student";
+    return "/login?choose=1";
+  }
   return defaultAuthenticatedHome(roles);
 }
