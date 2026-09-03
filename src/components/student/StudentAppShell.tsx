@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Dumbbell, House, UserRound } from "lucide-react";
+import { BarChart3, Dumbbell, House, UsersRound, UserRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
@@ -11,6 +11,7 @@ import { AppFullscreenController } from "@/components/app-shell/AppFullscreenCon
 const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
   { label: "Treinos", href: "/student/workouts", icon: Dumbbell },
+  { label: "Comunidade", href: "/student/community", icon: UsersRound },
   { label: "Progresso", href: "/student/progress", icon: BarChart3 },
   { label: "Perfil", href: "/student/profile", icon: UserRound },
 ] as const;
@@ -35,7 +36,7 @@ export function StudentAppShell({ children, demoMode, identity }: { children: Re
     <main className="pp-student-app__main">{children}</main>
     <nav className="pp-student-nav" aria-label="Navegação do aluno">
       {navigation.map(({ label, href, icon: Icon }) => {
-        const active = pathname === href || (href === "/student/workouts" && pathname.startsWith(`${href}/`));
+        const active = pathname === href || ((href === "/student/workouts" || href === "/student/community") && pathname.startsWith(`${href}/`));
         return <Link key={href} href={href} aria-current={active ? "page" : undefined}><Icon aria-hidden="true" /><span>{label}</span></Link>;
       })}
     </nav>

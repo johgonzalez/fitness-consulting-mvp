@@ -31,11 +31,13 @@ const destinations: readonly Destination[] = [
   { label: "Leads", href: "/dashboard/leads", icon: UsersRound, group: "Gestão" },
   { label: "Avaliações", href: "/dashboard/assessments", icon: ClipboardCheck, group: "Acompanhamento" },
   { label: "Treinos", href: "/dashboard/workouts", icon: Dumbbell, group: "Acompanhamento" },
+  { label: "Comunidade", href: "/dashboard/community", icon: UsersRound, group: "Acompanhamento" },
   { label: "Meu Site", href: "/dashboard/site", icon: Monitor, group: "Negócio" },
 ] as const;
 
 const mobileDestinations = [destinations[0], destinations[1], destinations[4], destinations[2]] as const;
 const moreDestinations = [
+  destinations[6],
   destinations[5],
   destinations[3],
   { label: "Configurações", href: "/dashboard/profile", icon: Settings2 },

@@ -817,6 +817,7 @@ export function WorkoutExecutionExperience({
         <button className="pp-workout-primary" type="button" onClick={sendFeedback} disabled={!feedback || busy}><Send aria-hidden="true" />Enviar feedback</button>
       </div>}
       <WorkoutCompletionShare
+        executionId={snapshot.execution.id}
         durationMinutes={activeMinutes(snapshot)}
         completedExercises={snapshot.metrics.completedExercises}
         completedSets={snapshot.metrics.completedSets}

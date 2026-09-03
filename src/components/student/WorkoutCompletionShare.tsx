@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Check, Copy, MessageCircle, Share2, TrendingUp } from "lucide-react";
+import { Check, Copy, Dumbbell, MessageCircle, Share2, TrendingUp } from "lucide-react";
 import { useMemo, useState, useSyncExternalStore } from "react";
 
 const subscribeToBrowserCapabilities = () => () => {};
 
 export function WorkoutCompletionShare({
+  executionId,
   durationMinutes,
   completedExercises,
   completedSets,
 }: {
+  executionId: string;
   durationMinutes: number;
   completedExercises: number;
   completedSets: number;
@@ -23,7 +25,7 @@ export function WorkoutCompletionShare({
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const shareText = useMemo(
-    () => `Concluí meu treino no PPerfil: ${completedExercises} exercícios, ${completedSets} séries e ${durationMinutes} min.`,
+    () => `Concluí meu treino no Cheipi: ${completedExercises} exercícios, ${completedSets} séries e ${durationMinutes} min.`,
     [completedExercises, completedSets, durationMinutes],
   );
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
@@ -54,6 +56,7 @@ export function WorkoutCompletionShare({
       <p>Compartilhe somente o resumo, sem dados pessoais ou observações da sessão.</p>
     </div>
     <div className="pp-completion-share__actions">
+      <Link href={`/student/community?shareWorkout=${encodeURIComponent(executionId)}`}><Dumbbell aria-hidden="true" />Publicar na comunidade</Link>
       {webShareAvailable ? <button type="button" onClick={share}><Share2 aria-hidden="true" />Compartilhar</button> : null}
       <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle aria-hidden="true" />WhatsApp</a>
       <button type="button" onClick={copySummary}>{copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}{copied ? "Copiado" : "Copiar resumo"}</button>

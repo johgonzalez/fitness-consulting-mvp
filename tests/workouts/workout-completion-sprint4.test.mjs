@@ -41,6 +41,6 @@ test("sharing exposes only aggregate workout facts with honest fallbacks", () =>
   assert.match(shareUi, /https:\/\/wa\.me\/\?text=/);
   assert.match(shareUi, /navigator\.clipboard\.writeText/);
   assert.match(shareUi, /Instagram ou TikTok/);
-  assert.match(shareUi, /Concluí meu treino no PPerfil/);
+  assert.match(shareUi, /Concluí meu treino no Cheipi/);
   assert.doesNotMatch(shareUi, /studentNote|actualLoad|difficulty|trainerName|studentName/);
 });

@@ -87,6 +87,7 @@ export interface TrainerEntitlements {
   can_use_assessments?: boolean;
   can_use_workouts?: boolean;
   can_manage_progress?: boolean;
+  can_use_community_feed?: boolean;
   access_source?: "FREE" | "BILLING" | "FOUNDER_ACCESS";
 }
 
