@@ -14,7 +14,10 @@ test("auth and invite surfaces keep a keyboard-safe mobile layout", async () => 
 });
 
 test("student detail uses factual domain workspaces without changing mutations", async () => {
-  const page = await read("src/app/dashboard/students/[id]/page.tsx");
+  const [page, css] = await Promise.all([
+    read("src/app/dashboard/students/[id]/page.tsx"),
+    read("src/app/premium-consumer-v1a.css"),
+  ]);
 
   assert.match(page, /getWorkoutIndex/);
   assert.match(page, /getTrainerAssessmentIndex/);
@@ -22,6 +25,7 @@ test("student detail uses factual domain workspaces without changing mutations",
   assert.match(page, /Treino atual/);
   assert.match(page, /O que pede atenção/);
   assert.match(page, /deactivateStudentAction/);
+  assert.match(css, /\.pp-student-quick-actions a:first-child\{[^}]*color:var\(--pp-accent-contrast\)/);
 });
 
 test("workout execution separates prescription from optional actual reporting", async () => {

@@ -252,10 +252,11 @@
   .pp-app-shell-v1 .dashboard-header .brand-logo { width:44px;justify-content:center;padding:0; }
   .pp-app-shell-v1 .dashboard-header .brand-logo strong,.pp-app-shell-v1 .pp-demo-indicator { display:none; }
   .pp-app-shell-v1 .bottom-navigation { position:static;inset:auto;width:auto;height:auto;display:flex;padding:0 10px 6px;border:0;background:transparent;backdrop-filter:none; }
-  .pp-primary-nav--desktop { display:grid;overflow-y:auto; }
+  .pp-primary-nav--desktop { width:100%;display:grid;grid-template-columns:1fr;align-content:start;overflow-y:auto; }
   .pp-primary-nav--mobile { display:none; }
   .pp-primary-nav--desktop { gap:5px; }
-  .pp-primary-nav--desktop .pp-nav-section { gap:1px; }
+  .pp-primary-nav--desktop .pp-nav-section { display:grid;grid-template-columns:1fr;gap:1px;margin:0; }
+  .pp-primary-nav--desktop .pp-nav-list { display:grid;grid-template-columns:1fr; }
   .pp-primary-nav--desktop .pp-nav-section__label { position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0); }
   .pp-primary-nav--desktop a { width:48px;min-height:44px;justify-content:center;padding:0; }
   .pp-primary-nav--desktop .pp-nav-item__label { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }

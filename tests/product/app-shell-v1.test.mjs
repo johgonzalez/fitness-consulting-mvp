@@ -46,6 +46,8 @@ test("approved monochrome shell remains scoped and responsive", async () => {
   assert.match(trainerLayout, /pp-app-shell-v1/);
   assert.match(css, /\.pp-app-shell-v1/);
   assert.match(css, /@media \(min-width:768px\) and \(max-width:1179px\)/);
+  assert.match(css, /\.pp-primary-nav--desktop \{ width:100%;display:grid;grid-template-columns:1fr;align-content:start;overflow-y:auto; \}/);
+  assert.match(css, /\.pp-primary-nav--desktop \.pp-nav-section \{ display:grid;grid-template-columns:1fr;/);
   assert.match(css, /@media \(max-width:767px\)/);
   assert.match(css, /grid-template-columns:repeat\(5,minmax\(0,1fr\)\)/);
   assert.match(css, /\.pp-mobile-more:not\(\[open\]\)\s*\{\s*display:none/);
