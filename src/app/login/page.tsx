@@ -9,14 +9,16 @@ import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeAuthContext, safeInternalPath } from "@/lib/validation/auth";
+import { normalizeAuthMethodIntent } from "@/lib/auth/ui-config";
 
 export const metadata: Metadata = { title: "Entrar — PPerfil" };
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; oauth?: string; error?: string }> }) {
-  const { next: rawNext, context: rawContext, choose, oauth, error } = await searchParams;
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; context?: string; choose?: string; pick?: string; method?: string; oauth?: string; error?: string }> }) {
+  const { next: rawNext, context: rawContext, choose, pick, method: rawMethod, oauth, error } = await searchParams;
   const next = safeInternalPath(rawNext ?? null, "") || undefined;
   const invited = /^\/invite\/[a-f0-9]{64}$/.test(next ?? "");
   const context = invited ? "student" : normalizeAuthContext(rawContext ?? null);
+  const method = normalizeAuthMethodIntent(rawMethod);
   const configured = getSupabaseConfig().configured;
   let authenticated = false;
   if (configured) {
@@ -28,9 +30,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       if (choose !== "1" || destination !== "/login?choose=1") redirect(destination);
     }
   }
+  if (pick === "1" && !invited && !context) return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} method={method} /></AuthShell>;
   if (choose === "1") {
     if (!authenticated) redirect("/login");
-    return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} /></AuthShell>;
+    return <AuthShell view="selection" title="Como você vai usar o PPerfil?" subtitle="Escolha sua experiência para continuar."><AuthContextPicker route="/login" nextPath={next} method={method} /></AuthShell>;
   }
   const title = invited ? "Acesse seu convite" : "Entre na sua conta";
   const subtitle = invited ? "Use a mesma conta que recebeu o convite." : "";

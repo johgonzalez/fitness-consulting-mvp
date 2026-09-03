@@ -5,20 +5,23 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { authRouteWithNext } from "@/lib/navigation/student-invitation";
 import type { AuthContext } from "@/lib/validation/auth";
+import type { AuthMethodIntent } from "@/lib/auth/ui-config";
 
-export function AuthContextPicker({ route, nextPath }: { route: "/login" | "/signup"; nextPath?: string }) {
+export function AuthContextPicker({ route, nextPath, method }: { route: "/login" | "/signup"; nextPath?: string; method?: AuthMethodIntent }) {
   const router = useRouter();
   const [selection, setSelection] = useState<AuthContext | null>(null);
   const [pending, startTransition] = useTransition();
 
   function continueWithSelection() {
     if (!selection) return;
-    startTransition(() => router.push(authRouteWithNext(route, nextPath, selection)));
+    const destination = new URL(authRouteWithNext(route, nextPath, selection), "https://pperfil.invalid");
+    if (method) destination.searchParams.set("method", method);
+    startTransition(() => router.push(`${destination.pathname}${destination.search}`));
   }
 
   const options = [
-    { id: "trainer" as const, title: "Personal Trainer", description: "Crie seu site e organize alunos, treinos e avaliações.", icon: BriefcaseBusiness },
-    { id: "student" as const, title: "Aluno", description: "Acesse treinos, avaliações e progresso com seu Personal.", icon: BookOpen },
+    { id: "trainer" as const, title: "Sou Personal Trainer", description: "Organize alunos, treinos e sua presença profissional.", icon: BriefcaseBusiness },
+    { id: "student" as const, title: "Sou Aluno", description: "Acesse o app pelo convite do seu Personal.", icon: BookOpen },
   ];
 
   return <form className="pc-auth-context-form" onSubmit={(event) => { event.preventDefault(); continueWithSelection(); }}>

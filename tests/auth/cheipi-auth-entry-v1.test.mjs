@@ -25,29 +25,33 @@ test("Welcome keeps the approved sparse fitness composition", () => {
   assert.match(entry, /SPLASH_SESSION_KEY = "pperfil:entry-splash:v1"/);
   assert.match(entry, /"checking" \| "splash" \| "welcome"/);
   assert.match(entry, /if \(splashSeen\) \{[\s\S]*setEntryStage\("welcome"\)/);
-  assert.equal((entry.match(/className: "cheipi-welcome__tile--/g) ?? []).length, 5);
+  assert.match(entry, /cheipi-welcome__media/);
+  assert.match(entry, /\/images\/saas\/auth-trainer\.webp/);
   assert.match(entry, /Todo treino\./);
   assert.match(entry, /Toda evolução\./);
   assert.match(entry, /Juntos\./);
-  assert.match(entry, /<CheipiBrand symbolOnly className="cheipi-welcome__orb-brand"/);
   assert.match(entry, />Usar e-mail<\/Link>/);
+  assert.match(entry, /method: "email"/);
+  assert.match(entry, /method: "google"/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /\.cheipi-welcome__tile \{[\s\S]*animation: cheipi-tile-drift 16s/);
 });
 
 test("social providers remain available at Welcome and the email login", () => {
   assert.match(providers, /startGoogleOAuth/);
-  assert.match(providers, /Entrar com Apple — em breve/);
+  assert.doesNotMatch(providers, /Apple/);
   assert.doesNotMatch(providers, /provider:\s*["']apple["']/i);
   assert.match(form, /socialOptions\?: ReactNode/);
-  assert.match(form, /!signupMode \? socialOptions : null/);
+  assert.match(form, /socialOptions/);
   assert.match(login, /<AuthProviderControls googleEnabled=\{configured\} googleFirst nextPath=\{next\} context=\{context\} \/>/);
   assert.match(login, /ou continue com/);
 });
 
 test("new account confirms its password and resolves role after verified identity", () => {
-  assert.match(form, />Confirmar senha</);
+  assert.match(form, />Confirme sua senha</);
   assert.match(form, /name="password_confirmation"/);
+  assert.match(form, /SIGNUP_PROGRESS_PREFIX/);
+  assert.match(form, /JSON\.stringify\(\{ step: "password", email: signupEmail, context, nextPath \}\)/);
+  assert.doesNotMatch(form, /password:\s*signupPassword/);
   assert.match(validation, /options\.requireConfirmation && password !== passwordConfirmation/);
   assert.doesNotMatch(signup, /AuthContextPicker/);
   assert.match(resolver, /roles\.length === 0\) return "\/login\?choose=1"/);

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { signup } from "@/app/actions/auth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthShell } from "@/components/auth/AuthShell";
+import { AuthProviderControls } from "@/components/auth/AuthProviderControls";
 import { resolveAuthenticatedHome } from "@/lib/navigation/authenticated-home";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -22,5 +23,6 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
     if (auth.user) redirect(await resolveAuthenticatedHome(supabase, { context, nextPath: next }));
   }
   const subtitle = invited ? "Use o mesmo e-mail que recebeu o convite." : "Comece sua presença profissional no PPerfil.";
-  return <AuthShell title="Crie seu acesso" subtitle={subtitle}><AuthForm mode="signup" action={signup} nextPath={next} context={context} /></AuthShell>;
+  const socialOptions = <div className="pc-auth-login-social"><div className="pc-auth-divider"><span>ou</span></div><AuthProviderControls googleEnabled={configured} nextPath={next} context={context} /></div>;
+  return <AuthShell view="signup" title="Crie seu acesso" subtitle={subtitle}><AuthForm mode="signup" action={signup} nextPath={next} context={context} socialOptions={socialOptions} /></AuthShell>;
 }

@@ -1,7 +1,7 @@
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { CheipiBrand } from "./CheipiBrand";
 
-export function AuthShell({ title, subtitle, children, view = "default" }: { title: string; subtitle: string; children: React.ReactNode; view?: "default" | "login" | "selection" }) {
+export function AuthShell({ title, subtitle, children, view = "default" }: { title: string; subtitle: string; children: React.ReactNode; view?: "default" | "login" | "signup" | "selection" }) {
   return <main className="pc-auth-page pp-app-shell-v1" data-auth-view={view}>
     <header className="pc-auth-header"><CheipiBrand href="/" /><ThemeToggle /></header>
     <div className="pc-auth-layout">

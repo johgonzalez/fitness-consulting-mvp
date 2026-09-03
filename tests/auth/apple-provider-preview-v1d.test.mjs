@@ -4,7 +4,7 @@ import test from "node:test";
 
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), "utf8");
 
-test("Google remains real while Apple is an announced future preview only", async () => {
+test("Early Access keeps real Google and omits unsupported Apple", async () => {
   const [providers, form, action, css] = await Promise.all([
     read("src/components/auth/AuthProviderControls.tsx"),
     read("src/components/auth/AuthForm.tsx"),
@@ -13,9 +13,7 @@ test("Google remains real while Apple is an announced future preview only", asyn
   ]);
   assert.match(providers, /action=\{startGoogleOAuth\}/);
   assert.match(providers, /\/auth\/providers\/google-dark-square@2x\.png/);
-  assert.match(providers, /\/auth\/providers\/apple-black-square@2x\.png/);
-  assert.match(providers, /Entrar com Apple — em breve/);
-  assert.match(providers, /role="status"/);
+  assert.doesNotMatch(providers, /apple/i);
   assert.match(css, /\.cheipi-provider-controls/);
   assert.match(css, /width: 58px/);
   assert.doesNotMatch(providers, /signInWithOAuth[\s\S]{0,300}apple|provider:\s*["']apple["']/i);

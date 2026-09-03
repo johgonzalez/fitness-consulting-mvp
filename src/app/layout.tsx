@@ -21,6 +21,7 @@ import "./students-detail-mobile-v1.css";
 import "./mobile-app-hardening-v1.css";
 import "./assessments-progress-v1.css";
 import "./cheipi-auth-entry-v1.css";
+import "./visual-launch-candidate.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });

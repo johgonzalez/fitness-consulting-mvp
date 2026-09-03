@@ -13,7 +13,7 @@ export function CheipiBrand({ href, symbolOnly = false, className = "" }: Cheipi
     <span className="cheipi-brand__mark" aria-hidden="true">
       <Image className="cheipi-brand__mark-image" src="/auth/provisional-app-mark.png" alt="" width={256} height={256} priority />
     </span>
-    {symbolOnly ? null : <span className="sr-only">PPerfil</span>}
+    {symbolOnly ? null : <strong>PPerfil</strong>}
   </>;
   const classes = `cheipi-brand${symbolOnly ? " cheipi-brand--symbol" : ""}${className ? ` ${className}` : ""}`;
 

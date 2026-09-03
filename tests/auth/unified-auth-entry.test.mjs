@@ -19,9 +19,9 @@ const migration = read("../../supabase/migrations/202608280001_unified_auth_entr
 test("the entry asks for a UX context without assigning authorization", () => {
   assert.match(picker, /type="radio"/);
   assert.match(picker, /Personal Trainer/);
-  assert.match(picker, /Crie seu site e organize alunos, treinos e avaliações\./);
+  assert.match(picker, /Organize alunos, treinos e sua presença profissional\./);
   assert.match(picker, /Aluno/);
-  assert.match(picker, /Acesse treinos, avaliações e progresso com seu Personal\./);
+  assert.match(picker, /Acesse o app pelo convite do seu Personal\./);
   assert.match(picker, /disabled=\{!selection \|\| pending\}/);
   assert.doesNotMatch(picker, /user_roles|student_profiles|trainer_profiles/);
 });

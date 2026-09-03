@@ -1,0 +1,51 @@
+/* Visual Launch 02 — approved mobile app foundation. Uses App Shell tokens only. */
+
+/* Immersive first entry */
+.cheipi-welcome__media{position:absolute;z-index:-3;inset:0}
+.cheipi-welcome__media img{object-fit:cover;object-position:58% 35%;filter:saturate(.78) contrast(1.04)}
+.cheipi-welcome__mosaic{display:none}
+.cheipi-welcome__shade{background:linear-gradient(180deg,rgba(14,14,14,.04) 0 38%,rgba(14,14,14,.56) 63%,#0e0e0e 88%)}
+.cheipi-welcome__wordmark{opacity:1}.cheipi-welcome__wordmark strong{color:#f5f5f3;font-size:1rem}
+.cheipi-welcome__hero{top:auto;bottom:172px;justify-items:start;text-align:left}
+.cheipi-welcome__hero h1{margin:0;text-align:left;font-size:clamp(2rem,10vw,2.75rem)}
+.cheipi-welcome__hero>p{max-width:320px;text-align:left;font-size:.78rem}
+.cheipi-welcome__actions{width:min(100% - 40px,390px);grid-template-columns:58px minmax(0,1fr);align-items:center;justify-items:start;gap:14px}
+.cheipi-welcome__actions .cheipi-provider-control{grid-column:1}.cheipi-welcome__email{width:100%;grid-column:2;border:1px solid rgba(255,255,255,.28);border-radius:10px;text-decoration:none}
+.cheipi-provider-control.is-disabled{pointer-events:none;opacity:.5}
+
+/* Consecutive app screens for Auth. */
+.pc-auth-page[data-auth-view="signup"] .pc-auth-content>h1,.pc-auth-page[data-auth-view="signup"] .pc-auth-content>p{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}
+.pc-auth-page[data-auth-view="signup"] .pc-auth-layout{padding-top:0;place-items:stretch center}
+.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:calc(100dvh - 82px);padding-top:24px}
+.pc-signup-flow{position:relative;min-height:560px;align-content:start;padding-top:62px;animation:pc-auth-step-in 200ms var(--pp-ease) both}
+.pc-signup-flow h2,.pc-auth-otp__heading h2{margin:24px 0 20px;color:var(--pp-text-primary);font:710 clamp(1.55rem,6vw,2rem)/1.08 var(--pp-font-display);letter-spacing:-.035em}
+.pc-signup-progress{position:absolute;top:0;right:0;left:0;height:44px;display:grid;grid-template-columns:1fr 78px;align-items:center;gap:18px;color:var(--pp-text-muted);font:560 .68rem/1 var(--pp-font-ui)}
+.pc-signup-progress>span{text-align:center}.pc-signup-progress>div{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pc-signup-progress i{height:3px;border-radius:3px;background:var(--pp-border-strong)}.pc-signup-progress i[data-active],.pc-signup-progress i[data-complete]{background:var(--pp-text-primary)}
+.pc-signup-back{width:44px;height:44px;display:grid;place-items:center;position:absolute;z-index:1;top:0;left:0;padding:0;border:0;border-radius:9px;background:transparent;color:var(--pp-text-primary);cursor:pointer}
+.pc-signup-back svg{width:20px;height:20px}.pc-field-hint{margin:6px 0 0;color:var(--pp-success);font:550 .66rem/1.35 var(--pp-font-ui)}
+.pc-signup-flow>.pc-auth-login-social{margin-top:4px}.pc-signup-flow>.pc-auth-switch{text-align:center}
+
+/* One logical OTP input, eight visual cells derived from SIGNUP_OTP_LENGTH. */
+.pc-auth-otp{display:grid;gap:18px}.pc-auth-otp__heading{margin-top:0}.pc-auth-otp__heading h2{margin-bottom:8px}.pc-auth-otp__heading p{margin:0;color:var(--pp-text-secondary);font:500 .75rem/1.45 var(--pp-font-ui)}.pc-auth-otp__heading strong{color:var(--pp-text-primary);font-weight:600}
+.pc-auth-otp>form{position:relative}.pc-otp-code{position:relative;margin-top:10px}.pc-otp-code>input{position:absolute;z-index:2;inset:0;width:100%;height:58px;padding:0;border:0;opacity:.01;caret-color:transparent}.pc-otp-code>div{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}.pc-otp-code span{height:56px;display:grid;place-items:center;border:1px solid var(--pp-border-strong);border-radius:8px;background:var(--pp-surface-subtle);color:var(--pp-text-primary);font:680 1.05rem/1 var(--pp-font-display);transition:border-color var(--pp-motion-fast) var(--pp-ease),background var(--pp-motion-fast) var(--pp-ease)}
+.pc-otp-code:has(input:focus-visible) span[data-current]{border-color:var(--pp-text-primary);background:var(--pp-surface);box-shadow:var(--pp-focus-ring)}.pc-otp-code span[data-filled]{border-color:var(--pp-text-secondary)}
+.pc-otp-verifying{min-height:38px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--pp-text-secondary);font:550 .69rem/1 var(--pp-font-ui)}.pc-otp-verifying svg{width:17px;animation:pc-otp-spin 800ms linear infinite}
+.pc-auth-otp__resend{justify-items:center}.pc-auth-otp__resend button{min-height:44px;padding:0 8px;border:0;background:transparent;color:var(--pp-text-primary);font:600 .68rem/1 var(--pp-font-ui);text-decoration:underline;text-underline-offset:4px;cursor:pointer}.pc-auth-otp__resend button:disabled{color:var(--pp-text-muted);text-decoration:none}.pc-auth-otp-nav{margin-top:-8px}
+
+/* Student Today: Trainer-first, one action, calm factual frequency. */
+.pp-student-app .pp-student-app__bar{height:78px}.pp-student-app .pp-student-coach strong{font-size:.8rem}.pp-student-app .pp-student-coach small{font-size:.6rem}
+.pc-student-today{padding-top:12px}.pc-today-header{min-height:42px}.pc-today-header>div:first-child>span{display:none}.pc-today-header h1{font-size:1rem}.pc-today-workout{height:min(56svh,520px);border-radius:12px}.pc-today-workout__content{inset:auto 16px 16px}.pc-today-workout h2{font-size:clamp(1.75rem,8vw,2.4rem)}.pc-today-workout__content>a{background:var(--pp-shell-solid);color:var(--pp-shell-on-solid)}
+.pc-today-frequency{margin-top:24px;padding-top:18px}.pc-today-frequency i{width:11px;height:11px;background:transparent;border:1px solid var(--pp-border-strong)}.pc-today-frequency i[data-completed]{border-color:var(--pp-success);background:var(--pp-success)}
+
+/* Trainer dashboard: open operational hierarchy, compact business pulse. */
+.pc-dashboard--v1b{width:min(calc(100% - 64px),1180px);padding-top:30px}.pc-dashboard--v1b .pc-dashboard__header span{max-width:34ch}.pc-dashboard--v1b .pc-pulse{border-inline:0;border-radius:0;background:transparent}.pc-dashboard--v1b .pc-pulse>div:first-child{border-left:0}.pc-dashboard--v1b .pc-dashboard__workspace{grid-template-columns:minmax(0,1.65fr) minmax(280px,.7fr)}.pc-dashboard--v1b .pc-site-panel{padding:20px!important;border:0!important;border-radius:12px;background:var(--pp-shell-solid);color:var(--pp-shell-on-solid)}.pc-dashboard--v1b .pc-site-panel :is(header>svg,header strong,>a,>p,>div a){color:inherit}.pc-dashboard--v1b .pc-site-panel>div a{border-color:color-mix(in srgb,var(--pp-shell-on-solid) 24%,transparent)}
+
+@keyframes pc-auth-step-in{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+@keyframes pc-otp-spin{to{transform:rotate(360deg)}}
+
+@media(min-width:900px){.cheipi-welcome__media{right:42%}.cheipi-welcome__media img{object-position:66% 36%}.cheipi-welcome__shade{background:linear-gradient(90deg,rgba(14,14,14,.08) 0 34%,rgba(14,14,14,.72) 56%,#0e0e0e 70%)}.cheipi-welcome__hero{width:min(34vw,440px);left:78%;bottom:240px}.cheipi-welcome__actions{width:min(32vw,390px);left:78%}.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:620px}}
+@media(max-width:760px){.pc-auth-page[data-auth-view="signup"] .pc-auth-header{height:64px}.pc-auth-page[data-auth-view="signup"] .pc-auth-layout{min-height:calc(100dvh - 64px)}.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{min-height:calc(100dvh - 64px);display:block;padding-top:12px}.pc-signup-flow{min-height:calc(100dvh - 100px)}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:22px}.pc-dashboard--v1b{width:calc(100% - 32px);padding-top:18px}.pc-dashboard--v1b .pc-pulse{min-height:74px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible;margin-bottom:18px}.pc-dashboard--v1b .pc-pulse>div{min-width:0;min-height:52px;flex-direction:column;gap:4px;padding-inline:5px;text-align:center}.pc-dashboard--v1b .pc-pulse strong{font-size:.96rem}.pc-dashboard--v1b .pc-pulse span{white-space:normal;line-height:1.15;font-size:.5rem}.pc-dashboard--v1b .pc-pulse .pp-status{padding:0;border:0;background:transparent;text-align:center}.pc-dashboard--v1b .pc-site-panel{margin-top:6px}.pc-today-workout{min-height:360px}}
+@media(max-width:360px){.cheipi-welcome__hero{bottom:164px}.cheipi-welcome__hero h1{font-size:1.9rem}.pc-signup-flow{padding-top:56px}.pc-otp-code>div{gap:4px}.pc-otp-code span{height:50px;border-radius:7px;font-size:.94rem}.pc-dashboard--v1b{width:calc(100% - 24px)}.pc-today-workout{min-height:330px}}
+@media(max-height:650px) and (pointer:coarse){.pc-auth-page[data-auth-view="signup"] .pc-auth-panel{overflow-y:auto}.pc-signup-flow{min-height:520px}.pc-signup-flow h2{margin-block:12px}.pc-auth-form>label{margin-top:10px}.pc-auth-form input{min-height:48px}.pc-signup-flow .pc-auth-form>.pp-button{margin-top:12px}.cheipi-welcome__hero{bottom:142px}.cheipi-welcome__hero>p{display:none}}
+@media(prefers-reduced-motion:reduce){.pc-signup-flow{animation:none}.pc-otp-verifying svg{animation:none}}

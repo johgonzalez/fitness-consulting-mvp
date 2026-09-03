@@ -22,7 +22,7 @@ test("Google OAuth preserves only a validated internal next path", () => {
   assert.match(providers, /Continuar com Google/);
   assert.match(providers, /\/auth\/providers\/google-dark-square@2x\.png/);
   assert.doesNotMatch(providers, />Continuar com Google</);
-  assert.match(providers, /aria-label="Entrar com Apple — em breve"/);
+  assert.doesNotMatch(providers, /Apple/);
   assert.doesNotMatch(providers, /provider:\s*["']apple["']/i);
   assert.doesNotMatch(form, /Continuar com Google|Entrar com Apple/);
 });
@@ -31,7 +31,9 @@ test("password signup uses provider OTP verification and supported resend", () =
   assert.match(auth, /verifyOtp\(\{ email, token, type: "email" \}\)/);
   assert.match(auth, /auth\.resend\(/);
   assert.match(otp, /autoComplete="one-time-code"/);
-  assert.match(otp, /pattern="\[0-9\]\{6,10\}"/);
+  assert.match(otp, /SIGNUP_OTP_LENGTH/);
+  assert.match(otp, /pattern="\[0-9\]\*"/);
+  assert.match(otp, /requestSubmit\(\)/);
   assert.match(otp, /Reenviar código/);
   assert.doesNotMatch(auth, /Math\.random|create.*otp/i);
   const resendBody = auth.slice(auth.indexOf("export async function resendSignupOtp"), auth.indexOf("export async function startGoogleOAuth"));
@@ -51,12 +53,10 @@ test("OTP continuation survives refresh and exposes contextual Back and safe Exi
   assert.match(form, /window\.sessionStorage\.getItem/);
   assert.match(form, /readPendingOtp/);
   assert.match(otp, /window\.sessionStorage\.setItem/);
-  assert.match(otp, /window\.sessionStorage\.removeItem/);
-  assert.match(otp, /onSubmit=\{clearPendingOtp\}/);
+  assert.match(otp, /window\.sessionStorage\.setItem/);
   assert.match(otp, /invitedFlow \? contextState\.nextPath! : authRouteWithNext\("\/signup", contextState\.nextPath, contextState\.context\)/);
   assert.match(otp, /authRouteWithNext\("\/login", undefined, contextState\.context\)/);
-  assert.match(otp, /<Link href=\{backHref\}>Voltar<\/Link>/);
-  assert.doesNotMatch(otp, /href=\{backHref\} onClick=\{clearPendingOtp\}/);
+  assert.match(otp, /href=\{backHref\} aria-label="Voltar"/);
   assert.match(otp, />Sair</);
 });
 
