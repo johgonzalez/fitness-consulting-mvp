@@ -162,15 +162,60 @@
   text-align: center;
 }
 
-.cheipi-welcome__hero h1 {
+.pperfil-wordmark {
+  width: min(59.5vw, 232px);
+  aspect-ratio: 2236 / 380;
+  position: relative;
+  display: block;
   margin: 0;
-  padding-left: .28em;
-  color: #f5f5f3;
-  font: 610 clamp(2rem, 10vw, 2.85rem)/1 var(--pp-font-display);
-  letter-spacing: .28em;
-  text-align: center;
-  text-shadow: 0 0 18px rgb(255 255 255 / 18%);
-  animation: cheipi-wordmark-breathe 8s ease-in-out infinite;
+  padding: 0;
+  font-size: 0;
+  letter-spacing: 0;
+  line-height: 0;
+  filter: drop-shadow(0 0 12px rgb(255 255 255 / 6%));
+}
+
+.pperfil-wordmark__reveal,
+.pperfil-wordmark__breath {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.pperfil-wordmark__reveal {
+  animation: pperfil-wordmark-reveal 740ms cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.pperfil-wordmark__breath {
+  animation: pperfil-wordmark-breathe 8.8s 740ms ease-in-out infinite;
+}
+
+.pperfil-wordmark__image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.pperfil-wordmark__sheen {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: url("/auth/brand/pperfil-wordmark-mask.png") center / contain no-repeat;
+  mask: url("/auth/brand/pperfil-wordmark-mask.png") center / contain no-repeat;
+}
+
+.pperfil-wordmark__sheen::after {
+  content: "";
+  position: absolute;
+  inset: -20% auto -20% -22%;
+  width: 20%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 86%), transparent);
+  opacity: 0;
+  transform: translate3d(-150%, 0, 0);
+  animation: pperfil-wordmark-sheen 10.4s 1.1s ease-in-out infinite;
 }
 
 .cheipi-welcome__hero > p {
@@ -410,9 +455,21 @@
   to { transform: translate3d(0, 6px, 0) rotate(calc(var(--tile-rotate) + .35deg)); }
 }
 
-@keyframes cheipi-wordmark-breathe {
-  0%, 100% { opacity: .92; text-shadow: 0 0 14px rgb(255 255 255 / 11%); }
-  50% { opacity: 1; text-shadow: 0 0 22px rgb(255 255 255 / 22%); }
+@keyframes pperfil-wordmark-reveal {
+  from { opacity: 0; transform: translate3d(0, 5px, 0); filter: blur(3px); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); filter: blur(0); }
+}
+
+@keyframes pperfil-wordmark-breathe {
+  0%, 100% { opacity: .96; transform: translate3d(0, .6px, 0); }
+  50% { opacity: 1; transform: translate3d(0, -.6px, 0); }
+}
+
+@keyframes pperfil-wordmark-sheen {
+  0%, 12% { opacity: 0; transform: translate3d(-150%, 0, 0); }
+  13% { opacity: .13; }
+  28% { opacity: .13; transform: translate3d(720%, 0, 0); }
+  29%, 100% { opacity: 0; transform: translate3d(720%, 0, 0); }
 }
 
 @media (min-width: 900px) {
@@ -431,9 +488,7 @@
     padding-bottom: 44px;
   }
 
-  .cheipi-welcome__hero h1 {
-    font-size: 3rem;
-  }
+  .pperfil-wordmark { width: 232px; }
 }
 
 @media (max-width: 760px) {
@@ -451,7 +506,6 @@
 
 @media (max-width: 360px) {
   .cheipi-welcome__content { padding-inline: 16px; }
-  .cheipi-welcome__hero h1 { font-size: clamp(1.75rem, 9.8vw, 2.1rem); letter-spacing: .23em; padding-left: .23em; }
   .cheipi-welcome__actions { width: min(100%, 326px); gap: 16px; }
   .cheipi-welcome__legal { font-size: .68rem; }
   .pc-auth-page .pc-auth-header .cheipi-brand { width: auto; }
@@ -472,7 +526,12 @@
   .cheipi-splash__brand,
   .cheipi-welcome,
   .cheipi-welcome__tile,
-  .cheipi-welcome__hero h1 { animation: none; }
+  .pperfil-wordmark__reveal,
+  .pperfil-wordmark__breath,
+  .pperfil-wordmark__sheen::after { animation: none; }
+  .pperfil-wordmark__reveal,
+  .pperfil-wordmark__breath { opacity: 1; transform: none; filter: none; }
+  .pperfil-wordmark__sheen { display: none; }
   .cheipi-splash__brand { opacity: 1; transform: none; filter: none; }
   .cheipi-provider-control,
   .cheipi-welcome__email { transition: none; }

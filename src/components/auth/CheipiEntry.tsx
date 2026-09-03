@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { AppFullscreenController } from "@/components/app-shell/AppFullscreenController";
 import { AuthProviderControls } from "./AuthProviderControls";
 import { CheipiSplash } from "./CheipiSplash";
+import { PperfilAnimatedWordmark } from "./PperfilAnimatedWordmark";
 
 const SPLASH_DURATION_MS = 900;
 const SPLASH_SESSION_KEY = "pperfil:entry-splash:v1";
@@ -59,7 +60,7 @@ export function CheipiEntry({ googleEnabled, nextPath }: { googleEnabled: boolea
     <div className="cheipi-welcome__shade" aria-hidden="true" />
     <div className="cheipi-welcome__content">
       <section className="cheipi-welcome__hero" aria-labelledby="cheipi-welcome-title">
-        <h1 id="cheipi-welcome-title" aria-label="PPerfil">PPERFIL</h1>
+        <PperfilAnimatedWordmark id="cheipi-welcome-title" />
         <p>A plataforma que conecta.</p>
       </section>
       <div className="cheipi-welcome__actions">
