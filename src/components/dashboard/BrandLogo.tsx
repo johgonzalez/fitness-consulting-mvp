@@ -5,5 +5,5 @@ export function PPerfilMark({ monochrome = false, className }: { monochrome?: bo
 }
 
 export function BrandLogo({ inverse = false, monochrome = false, href = "/dashboard" }: { inverse?: boolean; monochrome?: boolean; href?: string }) {
-  return <Link href={href} className={`brand-logo${inverse ? " inverse" : ""}${monochrome ? " brand-logo--monochrome" : ""}`} aria-label="PPerfil — início"><PPerfilMark monochrome={monochrome} /><strong>PPerfil</strong></Link>;
+  return <Link href={href} className={`brand-logo${inverse ? " inverse" : ""}${monochrome ? " brand-logo--monochrome" : ""}`} aria-label="Cheipi — início"><PPerfilMark monochrome={monochrome} /><strong>Cheipi</strong></Link>;
 }

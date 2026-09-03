@@ -26,7 +26,7 @@ export function StudentAppShell({ children, demoMode, identity }: { children: Re
         <Avatar name={identity.trainer.name} imageUrl={identity.trainer.imageUrl} size="small" loading="eager" />
         <span><strong>{identity.trainer.name}</strong><small>{trainerLabel}</small></span>
       </Link>
-      <span className="pp-student-brand" aria-label="PPerfil">PPerfil</span>
+      <span className="pp-student-brand" aria-label="Cheipi">Cheipi</span>
       <div className="pp-student-app__tools">
         {demoMode ? <Link href="/demo?next=/dashboard" className="pp-student-demo-indicator" title="Voltar ao portal demo do Personal"><i aria-hidden="true" />Demo aluno · Ver como Personal</Link> : null}
         <ThemeToggle />

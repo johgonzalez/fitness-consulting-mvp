@@ -11,6 +11,18 @@ const login = read("../../src/app/login/page.tsx");
 const today = read("../../src/app/student/today/page.tsx");
 const studentScreen = read("../../src/components/student/StudentTodayScreen.tsx");
 const dashboard = read("../../src/app/dashboard/page.tsx");
+const launchBrandSources = [
+  read("../../src/app/page.tsx"),
+  read("../../src/app/login/page.tsx"),
+  read("../../src/app/signup/page.tsx"),
+  read("../../src/components/auth/CheipiBrand.tsx"),
+  read("../../src/components/auth/CheipiSplash.tsx"),
+  read("../../src/components/auth/AuthShell.tsx"),
+  read("../../src/components/auth/AuthContextPicker.tsx"),
+  read("../../src/components/auth/SecureLogoutForm.tsx"),
+  read("../../src/components/dashboard/BrandLogo.tsx"),
+  read("../../src/components/student/StudentAppShell.tsx"),
+];
 
 test("hosted OTP authority is centralized and drives the accessible segmented UI", () => {
   assert.match(config, /SIGNUP_OTP_LENGTH = 8/);
@@ -45,4 +57,14 @@ test("Student Today keeps its original data contract and Dashboard keeps real lo
   assert.match(dashboard, /getLeadsWorkspace\(\)/);
   assert.match(dashboard, /getTrainerAssessmentIndex\(\)/);
   assert.match(dashboard, /getWorkoutIndex\(\)/);
+});
+
+test("launch surfaces expose Cheipi while preserving internal PPerfil identifiers", () => {
+  const visibleBrandContract = launchBrandSources.join("\n");
+  assert.match(visibleBrandContract, />Cheipi</);
+  assert.match(visibleBrandContract, /Entrar — Cheipi/);
+  assert.match(visibleBrandContract, /Criar acesso — Cheipi/);
+  assert.doesNotMatch(visibleBrandContract, /[\"']PPerfil(?: — início)?[\"']/);
+  assert.doesNotMatch(visibleBrandContract, />PPerfil</);
+  assert.doesNotMatch(visibleBrandContract, /(?:pelo|no|o) PPerfil/);
 });
