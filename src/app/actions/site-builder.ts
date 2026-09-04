@@ -19,6 +19,7 @@ import {
 import { isDemoWorkspaceRequest, rejectDemoMutation } from "@/lib/demo/workspace";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeProfileImage, profileImageMessage } from "@/lib/images/profile-image";
 
 export type SiteActionState = { ok?: boolean; message?: string };
 const maxMethodologyItems = 5;
@@ -308,12 +309,11 @@ export async function uploadIdentityImage(kind: "profile" | "hero" | "logo", _st
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
   const file = formData.get("image");
-  if (!(file instanceof File) || file.size === 0 || file.size > 5 * 1024 * 1024) return { message: "Envie uma imagem JPG, PNG ou WebP de ate 5 MB." };
-  const buffer = new Uint8Array(await file.arrayBuffer());
-  const detected = imageExtension(buffer);
-  if (!detected) return { message: "O conteudo do arquivo nao e uma imagem permitida." };
-  const path = `${context.user.id}/${context.profile.id}/${kind}/${crypto.randomUUID()}.${detected.ext}`;
-  const { error: uploadError } = await context.supabase.storage.from("trainer-public-media").upload(path, buffer, { contentType: detected.type, upsert: false, cacheControl: "31536000" });
+  if (!(file instanceof File) || file.size === 0) return { message: "Escolha uma imagem para continuar." };
+  let image;
+  try { image = await normalizeProfileImage(file); } catch (error) { return { message: profileImageMessage(error) }; }
+  const path = `${context.user.id}/${context.profile.id}/${kind}/${crypto.randomUUID()}.${image.extension}`;
+  const { error: uploadError } = await context.supabase.storage.from("trainer-public-media").upload(path, image.data, { contentType: image.contentType, upsert: false, cacheControl: "31536000" });
   if (uploadError) return { message: "Nao foi possivel enviar a imagem." };
   const { data } = context.supabase.storage.from("trainer-public-media").getPublicUrl(path);
   const column = kind === "profile" ? "profile_image_url" : kind === "hero" ? "hero_image_url" : "logo_url";

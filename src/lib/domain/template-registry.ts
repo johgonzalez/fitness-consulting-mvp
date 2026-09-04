@@ -83,7 +83,7 @@ function approvedFixedSections(defaultOrder: SiteSectionId[]): TemplateSectionDe
 export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition>> = {
   template_01: {
     id: "template_01",
-    name: "Perfil Essencial",
+    name: "Template 01",
     description: "Perfil profissional direto, leve e confiável, com avatar, serviços e acompanhamento no app.",
     renderer: "Template01",
     entitlement: "can_use_template_01",
@@ -93,7 +93,7 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
   },
   template_02: {
     id: "template_02",
-    name: "Conversão Cinemática",
+    name: "Template 02",
     description: "Landing page de alto impacto para vender acompanhamento, app, desafios e comunidade.",
     renderer: "Template02",
     entitlement: "can_use_template_02",
@@ -103,7 +103,7 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
   },
   template_03: {
     id: "template_03",
-    name: "Conversion",
+    name: "Template 03",
     description: "Serviços, preço real quando público e uma jornada clara de interesse.",
     renderer: "Template03",
     entitlement: "can_use_template_03",
@@ -113,7 +113,7 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
   },
   template_04: {
     id: "template_04",
-    name: "Atelier",
+    name: "Template 04",
     description: "Composição premium e precisa para apresentar acompanhamento, método e experiência digital.",
     renderer: "AtelierTemplate",
     entitlement: "can_use_template_04",

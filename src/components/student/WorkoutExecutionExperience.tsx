@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
@@ -74,6 +73,7 @@ type SequenceItem = {
 
 type SyncState = "ONLINE" | "OFFLINE" | "SYNCING" | "SYNC_FAILED" | "RECOVERED" | "SYNCED";
 type TransitionAction = { setExecutionId: string; kind: "next_set" | "next_exercise" } | null;
+const WORKOUT_INITIALIZATION_TIMEOUT_MS = 15_000;
 
 const feedbackOptions: Array<{ value: WorkoutDifficulty; label: string }> = [
   { value: "EASY", label: "Fácil" },
@@ -303,8 +303,8 @@ export function WorkoutExecutionExperience({
   autoStart: boolean;
   initialView: DemoView;
 }) {
-  const router = useRouter();
   const startAttempted = useRef(false);
+  const startRequestId = useRef(0);
   const recoveryLoadedFor = useRef<string | null>(null);
   const recoveryRef = useRef<WorkoutRecoveryRecord | null>(null);
   const syncInFlight = useRef(false);
@@ -484,16 +484,34 @@ export function WorkoutExecutionExperience({
     return () => window.clearTimeout(timeout);
   }, [syncState]);
 
-  useEffect(() => {
-    if (!autoStart || snapshot || startAttempted.current) return;
+  const initializeWorkout = useCallback(async () => {
+    if (snapshot || startAttempted.current) return;
     startAttempted.current = true;
-    startTransition(async () => {
-      const result = await startStudentWorkoutAction(sessionId);
+    const requestId = ++startRequestId.current;
+    setStarting(true);
+    setMessage(null);
+    const timeout = new Promise<never>((_, reject) => {
+      window.setTimeout(() => reject(new Error("workout_initialization_timeout")), WORKOUT_INITIALIZATION_TIMEOUT_MS);
+    });
+    try {
+      const result = await Promise.race([startStudentWorkoutAction(sessionId), timeout]);
+      if (requestId !== startRequestId.current) return;
       if (result.ok) setSnapshot(demoMode ? prepareDemoView(result.snapshot, initialView) : result.snapshot);
       else setMessage(result.message);
-      setStarting(false);
-    });
-  }, [autoStart, demoMode, initialView, sessionId, snapshot]);
+    } catch {
+      if (requestId === startRequestId.current) setMessage("Não conseguimos preparar seu treino. Verifique sua conexão e tente novamente.");
+    } finally {
+      if (requestId === startRequestId.current) {
+        startAttempted.current = false;
+        setStarting(false);
+      }
+    }
+  }, [demoMode, initialView, sessionId, snapshot]);
+
+  useEffect(() => {
+    if (!autoStart || snapshot || startAttempted.current) return;
+    startTransition(() => { void initializeWorkout(); });
+  }, [autoStart, initializeWorkout, snapshot]);
 
   const executionId = snapshot?.execution.id ?? null;
   const currentExerciseId = current?.exercise.exercise.id ?? null;
@@ -788,7 +806,7 @@ export function WorkoutExecutionExperience({
 
   if (starting) return <div className="pp-execution-launch" aria-live="polite"><span className="pp-execution-loader" /><strong>Preparando seu treino…</strong><p>Carregando a versão publicada pelo seu Personal.</p></div>;
 
-  if (!snapshot) return <div className="pp-execution-launch"><Dumbbell aria-hidden="true" /><strong>Pronta para começar?</strong><p>Vamos abrir a versão publicada deste treino.</p><button type="button" className="pp-workout-primary" onClick={() => { setStarting(true); startAttempted.current = false; router.replace(`/student/workouts/${sessionId}/execute?start=1`); }}>Começar treino</button>{message ? <p className="pp-execution-error">{message}</p> : null}</div>;
+  if (!snapshot) return <div className="pp-execution-launch"><Dumbbell aria-hidden="true" /><strong>{message ? "Não conseguimos preparar seu treino." : "Pronta para começar?"}</strong><p>{message ?? "Vamos abrir uma nova execução da versão publicada deste treino."}</p><button type="button" className="pp-workout-primary" onClick={() => { startTransition(() => { void initializeWorkout(); }); }}>{message ? "Tentar novamente" : "Começar treino"}</button>{message ? <Link href={`/student/workouts/${sessionId}`}>Voltar ao resumo</Link> : null}</div>;
 
   if (snapshot.execution.status === "PAUSED") {
     return <section className="pp-paused-screen">

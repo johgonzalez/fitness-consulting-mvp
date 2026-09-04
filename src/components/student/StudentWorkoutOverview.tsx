@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Clock3, Dumbbell, Layers3, Play } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock3, Dumbbell, Layers3, Play, RotateCcw } from "lucide-react";
 import { StudentWorkoutMedia } from "@/components/student/StudentWorkoutMedia";
 import { TrainerPresence } from "@/components/student/TrainerPresence";
 import type { StudentWorkoutRecord } from "@/lib/workouts/student-workspace";
@@ -9,7 +9,8 @@ export function StudentWorkoutOverview({ record }: { record: StudentWorkoutRecor
   const exercises = record.session.sections.flatMap((section) => section.exercises);
   const heroExercise = exercises.find((exercise) => exercise.exercise.media.length > 0) ?? exercises[0] ?? null;
   const active = record.overview.activeExecution;
-  const actionLabel = active?.status === "PAUSED" ? "Retomar treino" : active ? "Continuar treino" : "Começar treino";
+  const completed = !active && record.overview.hasTerminalHistory;
+  const actionLabel = active?.status === "PAUSED" ? "Retomar treino" : active ? "Continuar treino" : completed ? "Fazer novamente" : "Começar treino";
   const actionHref = active
     ? `/student/workouts/${record.session.id}/execute`
     : `/student/workouts/${record.session.id}/execute?start=1`;
@@ -30,6 +31,8 @@ export function StudentWorkoutOverview({ record }: { record: StudentWorkoutRecor
       </dl>
     </section>
 
+    {completed ? <aside className="pp-trainer-note" role="status"><CheckCircle2 aria-hidden="true" /><div><strong>Você já concluiu este treino</strong><p>O resultado anterior continua no seu histórico. Ao fazer novamente, uma nova execução será criada.</p></div></aside> : null}
+
     <section className="pp-workout-overview__blocks" aria-labelledby="workout-structure">
       <header><span>Estrutura</span><h2 id="workout-structure">O que você vai fazer</h2></header>
       {record.session.sections.map((section) => <div className="pp-overview-block" key={section.id}>
@@ -47,6 +50,6 @@ export function StudentWorkoutOverview({ record }: { record: StudentWorkoutRecor
 
     {record.session.description ? <aside className="pp-trainer-note"><TrainerPresence {...record.identity.trainer} compact /><p>{record.session.description}</p></aside> : null}
 
-    <div className="pp-workout-sticky-action"><Link className="pp-workout-primary" href={actionHref}><Play aria-hidden="true" /><span>{actionLabel}</span></Link></div>
+    <div className="pp-workout-sticky-action"><Link className="pp-workout-primary" href={actionHref}>{completed ? <RotateCcw aria-hidden="true" /> : <Play aria-hidden="true" />}<span>{actionLabel}</span></Link></div>
   </div>;
 }

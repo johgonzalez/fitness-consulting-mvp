@@ -238,3 +238,30 @@
 .community-page :is(.community-workout dd,.community-workout>a,.community-comments strong,.community-comments small,.community-composer nav button,.community-composer>section>label:not(.community-file),.community-composer>section>small,.community-file,.community-workout-preview p,.community-inline-action,.community-local-feed-header button,.community-discovery-row>button,.community-all-comments,.community-sheet li p,.community-sheet li small,.community-composer-field,.community-composer-destination,.community-upload p,.community-upload button,.community-inline-error button,.community-inline-error p,.community-page-back a,.community-group-facts strong,.community-group-facts>span,.community-group-primary-actions a,.community-group-primary-actions button,.community-leave,.community-podium strong,.community-podium p,.community-ranking-list p,.community-directory span,.community-group-editor form>label,.community-group-editor fieldset small,.community-switch small,.community-management>header a,.community-management article strong,.community-management article span,.community-management section>p,.community-management article button,.community-danger-zone button,.community-post-actions button,.community-post-actions a,.community-post-menu button) { font-size:.72rem!important; }
 .community-group-card p,.community-group-identity p { font-size:.76rem; }
 .community-switcher a,.community-filters a,.community-post-menu button,.community-workout>a,.community-composer nav button,.community-feedback button,.community-all-comments,.community-upload button,.community-inline-error button,.community-group-primary-actions a,.community-group-primary-actions button,.community-leave,.community-management article button,.community-danger-zone button { min-height:44px!important; }
+
+/* Product Owner QA: challenges and explicit destructive confirmation. */
+.community-dialog-layer .community-danger-action { border-color:var(--pp-danger);background:var(--pp-danger);color:#fff; }
+.community-challenges { display:grid;gap:14px;margin:18px 0;padding:18px;border:1px solid var(--pp-border);border-radius:var(--pp-radius-lg);background:var(--pp-surface); }
+.community-challenges>header { display:flex;align-items:center;justify-content:space-between;gap:12px; }
+.community-challenges>header>div { display:grid;gap:3px; }
+.community-challenges header span,.community-challenges article small { color:var(--pp-text-muted);font-size:.7rem;font-weight:750;letter-spacing:.05em;text-transform:uppercase; }
+.community-challenges h2 { margin:0;font:740 1rem/1.2 var(--pp-font-display); }
+.community-challenges button,.community-challenges a { min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 13px;border:1px solid var(--pp-border);border-radius:10px;background:var(--pp-surface);color:var(--pp-text-primary);font-size:.72rem;font-weight:720; }
+.community-challenges header button,.community-challenges form button:last-child,.community-challenges article>button { border-color:var(--pp-shell-solid);background:var(--pp-shell-solid);color:var(--pp-shell-on-solid); }
+.community-challenges form { display:grid;gap:12px;padding:14px;border-radius:12px;background:var(--pp-surface-subtle); }
+.community-challenges form label { display:grid;gap:6px;color:var(--pp-text-secondary);font-size:.72rem;font-weight:700; }
+.community-challenges input,.community-challenges textarea,.community-challenges select { width:100%;min-height:46px;padding:11px;border:1px solid var(--pp-border);border-radius:9px;background:var(--pp-surface);color:var(--pp-text-primary);font-size:16px; }
+.community-challenges form>div { display:flex;justify-content:flex-end;gap:8px; }
+.community-challenges>div { display:grid;border-top:1px solid var(--pp-divider); }
+.community-challenges article { display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:11px;padding:14px 0;border-bottom:1px solid var(--pp-divider); }
+.community-challenges article>span:first-child { width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:var(--pp-surface-subtle); }
+.community-challenges article svg { width:17px; }
+.community-challenges article>div { display:grid;gap:4px; }
+.community-challenges article strong { font:720 .75rem/1.2 var(--pp-font-display); }
+.community-challenges article p { margin:0;color:var(--pp-text-secondary);font-size:.72rem;line-height:1.45; }
+.community-challenges article>div>span,.community-challenges article>span:last-child { display:flex;align-items:center;gap:5px;color:var(--pp-text-muted);font-size:.7rem; }
+.community-empty-note { margin:0;color:var(--pp-text-muted);font-size:.72rem; }
+.pc-today-challenges { display:grid;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--pp-divider); }
+.pc-today-challenges header { display:grid;gap:3px; }.pc-today-challenges header>span { color:var(--pp-text-muted);font-size:.62rem;font-weight:750;text-transform:uppercase; }.pc-today-challenges h2 { margin:0;font:740 .95rem/1.2 var(--pp-font-display); }
+.pc-today-challenges article { min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--pp-divider); }.pc-today-challenges article>div { display:grid;gap:3px; }.pc-today-challenges article strong { font-size:.72rem; }.pc-today-challenges article span { color:var(--pp-text-muted);font-size:.62rem; }.pc-today-challenges article>a { min-height:44px;display:flex;align-items:center;gap:5px;color:var(--pp-text-primary);font-size:.68rem;font-weight:720; }.pc-today-challenges article svg { width:14px; }
+@media(max-width:520px){.community-challenges{margin-inline:0;padding:15px}.community-challenges article{grid-template-columns:34px minmax(0,1fr)}.community-challenges article>button,.community-challenges article>a,.community-challenges article>span:last-child{grid-column:2;justify-self:start}.community-challenges>header{align-items:flex-start;flex-direction:column}}

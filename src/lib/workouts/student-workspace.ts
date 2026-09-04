@@ -16,6 +16,8 @@ import type {
   WorkoutExecutionSnapshot,
 } from "@/lib/domain/workout-executions";
 import type { WorkoutSession, WorkoutVersionProjection } from "@/lib/domain/workouts";
+import type { CommunityChallenge } from "@/lib/domain/community";
+import { listMyAcceptedCommunityChallenges } from "@/lib/supabase/community";
 import { SupabaseWorkoutExecutionRepository } from "@/lib/supabase/workout-executions";
 import { createClient } from "@/lib/supabase/server";
 import { SupabaseWorkoutRepository } from "@/lib/supabase/workouts";
@@ -36,6 +38,7 @@ export type StudentTodayWorkspace = {
   identity: StudentWorkoutIdentity;
   workouts: StudentWorkoutCard[];
   history: StudentWorkoutHistoryItem[];
+  challenges: CommunityChallenge[];
   demoMode: boolean;
 };
 
@@ -172,13 +175,14 @@ export async function getStudentTodayWorkspace(): Promise<StudentTodayWorkspace>
         sessionName: index % 2 === 0 ? "Inferiores" : "Superiores",
         activeDurationSeconds: 2_700 + index * 180,
       })),
+      challenges: [{ id: "c0390000-0000-4000-8000-000000000001", groupId: "c0300000-0000-4000-8000-000000000001", groupName: "Movimento com Thiago", title: "15 minutos de cardio", instructions: "Mantenha um ritmo confortável e constante.", durationMinutes: 15, workoutSessionId: null, accepted: true, acceptanceStatus: "ACCEPTED" }],
       demoMode,
     };
   }
 
   const service = executionService();
   const workoutRepository = new SupabaseWorkoutRepository();
-  const [overviews, history] = await Promise.all([service.getStudentToday(), service.listStudentHistory(20)]);
+  const [overviews, history, challenges] = await Promise.all([service.getStudentToday(), service.listStudentHistory(20), listMyAcceptedCommunityChallenges().catch(() => [])]);
   const versions = new Map<string, WorkoutVersionProjection>();
   await Promise.all([...new Set(overviews.map((item) => item.version.id))].map(async (versionId) => {
     versions.set(versionId, await workoutRepository.getStudentVersion(versionId));
@@ -189,7 +193,7 @@ export async function getStudentTodayWorkspace(): Promise<StudentTodayWorkspace>
     return version && session ? [{ overview, session, version }] : [];
   });
   const relationshipId = workouts[0]?.version.plan.trainerStudentRelationshipId;
-  return { identity: await liveIdentity(relationshipId), workouts, history, demoMode };
+  return { identity: await liveIdentity(relationshipId), workouts, history, challenges, demoMode };
 }
 
 export async function getStudentShellIdentity(): Promise<StudentWorkoutIdentity> {

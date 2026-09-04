@@ -29,6 +29,7 @@ export type CommunityGroup = {
   canManage: boolean;
   memberCount: number;
   owner: CommunityPerson;
+  ownerProductRole: CommunityProductRole;
 };
 
 export type CommunityMedia = {
@@ -90,7 +91,7 @@ export type CommunityInviteCandidate = CommunityPerson;
 export type CommunityRankingEntry = CommunityPerson & { position: number; activeDays: number; reachedAt: string; isCurrentUser: boolean };
 export type CommunityNotification = {
   id: string;
-  type: "GROUP_INVITE" | "JOIN_REQUEST_APPROVED" | "JOIN_REQUEST_REJECTED" | "COMMENT_ON_MY_POST" | "REACTION_ON_MY_POST" | "PINNED_ANNOUNCEMENT";
+  type: "GROUP_INVITE" | "JOIN_REQUEST" | "JOIN_REQUEST_APPROVED" | "JOIN_REQUEST_REJECTED" | "COMMENT_ON_MY_POST" | "REACTION_ON_MY_POST" | "PINNED_ANNOUNCEMENT" | "CHALLENGE_CREATED" | "CHALLENGE_ACCEPTED";
   groupId: string;
   groupName: string;
   postId: string | null;
@@ -99,6 +100,20 @@ export type CommunityNotification = {
   createdAt: string;
 };
 export type CommunityReport = { id: string; postId: string | null; commentId: string | null; reasonCode: string; details: string | null; status: string; createdAt: string };
+export type CommunityChallenge = {
+  id: string;
+  groupId: string;
+  groupName?: string;
+  title: string;
+  instructions: string | null;
+  durationMinutes: number | null;
+  workoutSessionId: string | null;
+  startsAt?: string;
+  expiresAt?: string | null;
+  status?: string;
+  accepted: boolean;
+  acceptanceStatus: "ACCEPTED" | "COMPLETED" | null;
+};
 export type CommunityCursor = { publishedAt: string; id: string };
 export type CommunityWorkspace = {
   groups: CommunityGroup[];
@@ -117,6 +132,8 @@ export type CommunityGroupWorkspace = {
   ranking: CommunityRankingEntry[];
   reports: CommunityReport[];
   inviteCandidates: CommunityInviteCandidate[];
+  challenges: CommunityChallenge[];
+  challengeWorkoutOptions: Array<{ id: string; label: string }>;
   nextCursor: CommunityCursor | null;
   demoMode: boolean;
 };

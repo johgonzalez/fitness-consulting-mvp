@@ -9,6 +9,7 @@ import { getStudentsWorkspace } from "@/lib/supabase/students";
 import { findDashboardMetrics, findOwnerProfile } from "@/lib/supabase/trainers";
 import { SupabaseWorkoutExecutionRepository } from "@/lib/supabase/workout-executions";
 import { WorkoutExecutionService } from "@/lib/workouts/execution-service";
+import { listCommunityNotifications } from "@/lib/supabase/community";
 
 const dayFormatter = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "numeric", month: "long" });
 
@@ -18,8 +19,8 @@ function countLabel(count: number, singular: string, plural: string) {
 
 export default async function DashboardPage() {
   const executionService = new WorkoutExecutionService(new SupabaseWorkoutExecutionRepository());
-  const [profile, metrics, studentData, leadData, assessmentData, workoutData, workoutNotifications] = await Promise.all([
-    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null), executionService.listTrainerNotifications(3).catch(() => []),
+  const [profile, metrics, studentData, leadData, assessmentData, workoutData, workoutNotifications, communityNotifications] = await Promise.all([
+    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null), executionService.listTrainerNotifications(3).catch(() => []), listCommunityNotifications().catch(() => []),
   ]);
   if (!profile) redirect("/onboarding");
 
@@ -31,6 +32,8 @@ export default async function DashboardPage() {
   const draftWorkouts = (workoutData?.items ?? []).filter(({ currentVersion }) => currentVersion.status === "DRAFT");
   const siteHref = `/p/${profile.slug}`;
   const siteUrl = `/p/${profile.slug}`;
+  const communityRequests = communityNotifications.filter((notification) => notification.type === "JOIN_REQUEST" && !notification.readAt);
+  const communityRequestGroup = communityRequests[0]?.groupId;
   const priorities = [
     ...workoutNotifications.map((notification) => ({
       label: `${notification.studentName} concluiu ${notification.sessionName}`,
@@ -39,6 +42,7 @@ export default async function DashboardPage() {
       icon: Bell,
       tone: "success",
     })),
+    communityRequests.length ? { label: `${countLabel(communityRequests.length, "solicitação", "solicitações")} de entrada em grupos`, href: communityRequestGroup ? `/dashboard/community/groups/${communityRequestGroup}/manage` : "/dashboard/community", action: "Revisar", icon: UsersRound, tone: "warning" } : null,
     reviewAssessments.length ? { label: `${countLabel(reviewAssessments.length, "avaliação", "avaliações")} para revisar`, href: "/dashboard/assessments", action: "Revisar", icon: ClipboardCheck, tone: "warning" } : null,
     draftWorkouts.length ? { label: `${countLabel(draftWorkouts.length, "treino", "treinos")} em rascunho`, href: "/dashboard/workouts", action: "Continuar", icon: Dumbbell, tone: "accent" } : null,
     attentionLeads.length ? { label: `${countLabel(attentionLeads.length, "lead", "leads")} aguardando ação`, href: "/dashboard/leads", action: "Ver leads", icon: UsersRound, tone: "info" } : null,

@@ -22,6 +22,9 @@ function refreshCommunity(groupId?: string) {
 function friendly(error: unknown, fallback: string) {
   const message = error instanceof Error ? error.message : "";
   if (message.includes("rate_limited")) return "Muitas ações em pouco tempo. Aguarde um instante.";
+  if (message.includes("student_owned_group_limit_reached")) return "Você já possui um grupo. É possível participar de outros grupos sem limite.";
+  if (message.includes("community_group_capacity_reached")) return "Este grupo já atingiu o limite de 50 membros.";
+  if (message.includes("posting_not_allowed")) return "As regras deste grupo não permitem que você publique agora.";
   if (message.includes("entitlement")) return "A Comunidade não está disponível no seu acesso atual.";
   if (message.includes("access_denied") || message.includes("denied") || message.includes("_only")) return "Você não tem permissão para esta ação.";
   if (message.includes("invalid_") || message.includes("too_long") || message.includes("required")) return "Revise as informações e tente novamente.";
@@ -215,4 +218,16 @@ export async function markCommunityNotificationsReadAction(ids?: string[]): Prom
 export async function getCommunityRankingAction(groupId: string, period: CommunityRankingPeriod) {
   if (!validUuid(groupId)) return { ok: false, message: "Grupo inválido." };
   return { ok: true, message: "Use a rota de ranking do grupo.", data: { groupId, period } };
+}
+
+export async function createCommunityChallengeAction(input:{groupId:string;title:string;instructions:string;durationMinutes:number|null;workoutSessionId?:string;expiresAt?:string;clientMutationId:string}):Promise<CommunityActionResult<{id:string}>>{
+  if(!validUuid(input.groupId)||!validUuid(input.clientMutationId)||input.title.trim().length<2||input.title.trim().length>160||(input.workoutSessionId&&!validUuid(input.workoutSessionId)))return{ok:false,message:"Revise os dados do desafio."};
+  const local=await demo<{id:string}>("Desafio criado.",{id:input.clientMutationId});if(local)return local;
+  try{const id=String(await communityMutation("create_community_challenge",{p_group_id:input.groupId,p_title:input.title,p_instructions:input.instructions||null,p_duration_minutes:input.durationMinutes,p_workout_session_id:input.workoutSessionId||null,p_expires_at:input.expiresAt||null,p_client_mutation_id:input.clientMutationId}));refreshCommunity(input.groupId);return{ok:true,message:"Desafio publicado no grupo.",data:{id}}}catch(error){return{ok:false,message:friendly(error,"Não foi possível criar o desafio.")}}
+}
+
+export async function acceptCommunityChallengeAction(challengeId:string):Promise<CommunityActionResult<{workoutSessionId:string|null}>>{
+  if(!validUuid(challengeId))return{ok:false,message:"Desafio inválido."};
+  const local=await demo<{workoutSessionId:string|null}>("Desafio aceito.",{workoutSessionId:null});if(local)return local;
+  try{const value=await communityMutation("accept_community_challenge",{p_challenge_id:challengeId}) as {workout_session_id?:unknown};revalidatePath("/student/today");refreshCommunity();return{ok:true,message:"Desafio aceito.",data:{workoutSessionId:typeof value?.workout_session_id==="string"?value.workout_session_id:null}}}catch(error){return{ok:false,message:friendly(error,"Não foi possível aceitar o desafio.")}}
 }

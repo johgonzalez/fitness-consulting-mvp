@@ -2,7 +2,7 @@ import "server-only";
 import { demoCommunityPosts, demoCommunityWorkspace, demoGroupWorkspace } from "@/lib/community/demo";
 import type { CommunityGroupWorkspace, CommunityRankingPeriod, CommunityWorkspace } from "@/lib/domain/community";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
-import { ensureTrainerCommunity, getCommunityGroup, listCommunityFeed, listCommunityGroupPosts, listCommunityInviteCandidates, listCommunityMembers, listCommunityNotifications, listCommunityRanking, listCommunityReports, listCommunityRules, listMyCommunityGroups, searchCommunityGroups } from "@/lib/supabase/community";
+import { ensureTrainerCommunity, getCommunityGroup, listCommunityChallenges, listCommunityFeed, listCommunityGroupPosts, listCommunityInviteCandidates, listCommunityMembers, listCommunityNotifications, listCommunityRanking, listCommunityReports, listCommunityRules, listMyCommunityChallengeWorkouts, listMyCommunityGroups, searchCommunityGroups } from "@/lib/supabase/community";
 
 export async function getCommunityWorkspace(audience: "trainer" | "student"): Promise<CommunityWorkspace> {
   if (await isDemoWorkspaceRequest()) return demoCommunityWorkspace(audience);
@@ -22,11 +22,11 @@ export async function getCommunityGroupWorkspace(groupId: string, period: Commun
   try {
     const group = await getCommunityGroup(groupId);
     const member = group.membershipStatus === "ACTIVE";
-    const [posts, members, rules, ranking, reports, inviteCandidates] = member ? await Promise.all([
-      listCommunityGroupPosts(groupId), listCommunityMembers(groupId), listCommunityRules(groupId), group.rankingEnabled ? listCommunityRanking(groupId, period) : Promise.resolve([]), group.canManage ? listCommunityReports(groupId) : Promise.resolve([]), group.canManage ? listCommunityInviteCandidates(groupId) : Promise.resolve([]),
-    ]) : [[], [], [], [], [], []];
+    const [posts, members, rules, ranking, reports, inviteCandidates, challenges, challengeWorkoutOptions] = member ? await Promise.all([
+      listCommunityGroupPosts(groupId), listCommunityMembers(groupId), listCommunityRules(groupId), group.rankingEnabled ? listCommunityRanking(groupId, period) : Promise.resolve([]), group.canManage ? listCommunityReports(groupId) : Promise.resolve([]), group.canManage ? listCommunityInviteCandidates(groupId) : Promise.resolve([]), listCommunityChallenges(groupId), group.canManage && group.ownerProductRole === "TRAINER" ? listMyCommunityChallengeWorkouts() : Promise.resolve([]),
+    ]) : [[], [], [], [], [], [], [], []];
     const last = posts.at(-1);
-    return { group, posts, members, rules, ranking, reports, inviteCandidates, nextCursor: posts.length === 15 && last ? { publishedAt: last.publishedAt, id: last.id } : null, demoMode: false };
+    return { group, posts, members, rules, ranking, reports, inviteCandidates, challenges, challengeWorkoutOptions, nextCursor: posts.length === 15 && last ? { publishedAt: last.publishedAt, id: last.id } : null, demoMode: false };
   } catch { return null; }
 }
 

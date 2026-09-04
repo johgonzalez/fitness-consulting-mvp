@@ -6,6 +6,7 @@ export const demoTrainerGroup: CommunityGroup = {
   visibility: "DISCOVERABLE", joinPolicy: "APPROVAL", postingPolicy: "ALL_MEMBERS", timezone: "America/Sao_Paulo", rankingEnabled: true, isDefault: true,
   membershipRole: "OWNER", membershipStatus: "ACTIVE", canPost: true, canManage: true, memberCount: 18,
   owner: { userId: "70000000-0000-4000-8000-000000000001", name: "Thiago Costa", imageUrl: "/images/motion/thiago-lateral-bound.png" },
+  ownerProductRole: "TRAINER",
 };
 
 export const demoCommunityPosts: CommunityPost[] = [
@@ -52,6 +53,8 @@ export function demoGroupWorkspace(period: CommunityRankingPeriod, audience: "tr
     ranking: [
       { userId: "75000000-0000-4000-8000-000000000001", name: "Juliana Mendes", imageUrl: null, position: 1, activeDays: period === "MONTHLY" ? 9 : 24, reachedAt: "2026-09-03T09:40:00.000Z", isCurrentUser: true },
       { userId: "75000000-0000-4000-8000-000000000002", name: "Bruno Almeida", imageUrl: null, position: 2, activeDays: period === "MONTHLY" ? 7 : 19, reachedAt: "2026-09-02T19:20:00.000Z", isCurrentUser: false },
-    ], reports: [], inviteCandidates: [], nextCursor: null, demoMode: true,
+    ], reports: [], inviteCandidates: [], challenges: [
+      { id: "c0390000-0000-4000-8000-000000000001", groupId: group.id, groupName: group.name, title: "15 minutos de cardio", instructions: "Mantenha um ritmo confortável e constante.", durationMinutes: 15, workoutSessionId: null, status: "ACTIVE", accepted: audience === "student", acceptanceStatus: audience === "student" ? "ACCEPTED" : null },
+    ], challengeWorkoutOptions: audience === "trainer" ? [{ id: "f4101000-0000-4000-8000-000000000002", label: "Inferiores · Juliana Mendes" }] : [], nextCursor: null, demoMode: true,
   };
 }

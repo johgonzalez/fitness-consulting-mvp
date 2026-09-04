@@ -8,11 +8,12 @@ import { COMMUNITY_PHOTO_POSTING_ENABLED } from "@/lib/community/features";
 
 type ComposerKind = "TEXT" | "PHOTO" | "WORKOUT_COMPLETION" | "TRAINER_ANNOUNCEMENT";
 type UploadResult = { ok: boolean; message: string; post?: CommunityPost };
+type PhotoPhase = "IDLE" | "PREPARING" | "UPLOADING" | "PROCESSING" | "PUBLISHED";
 
 async function prepareImage(file: File) {
   if (file.size > 12 * 1024 * 1024) throw new Error("Cada imagem deve ter até 12 MB antes da otimização.");
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const ratio = Math.min(1, 2048 / Math.max(bitmap.width, bitmap.height));
+  const ratio = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * ratio));
   const height = Math.max(1, Math.round(bitmap.height * ratio));
   const canvas = document.createElement("canvas");
@@ -20,7 +21,7 @@ async function prepareImage(file: File) {
   const context = canvas.getContext("2d", { alpha: false });
   if (!context) throw new Error("Não foi possível preparar a imagem.");
   context.drawImage(bitmap, 0, 0, width, height); bitmap.close();
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.84));
   if (!blob) throw new Error("Não foi possível preparar a imagem.");
   return new File([blob], `${crypto.randomUUID()}.webp`, { type: "image/webp" });
 }
@@ -42,6 +43,8 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [progress, setProgress] = useState(0);
+  const [photoPhase, setPhotoPhase] = useState<PhotoPhase>("IDLE");
+  const photoBusy = photoPhase !== "IDLE" && photoPhase !== "PUBLISHED";
   const [error, setError] = useState<string | null>(null);
   const [confirmClose, setConfirmClose] = useState(false);
   const effectiveGroupId = availableGroups.some((group) => group.id === groupId) ? groupId : availableGroups[0]?.id ?? "";
@@ -55,34 +58,39 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
 
   function resetAndClose() {
     xhrRef.current?.abort(); xhrRef.current = null;
-    setBody(""); setFiles([]); setProgress(0); setError(null); setConfirmClose(false); onClose();
+    setBody(""); setFiles([]); setProgress(0); setPhotoPhase("IDLE"); setError(null); setConfirmClose(false); onClose();
   }
 
   function requestClose() {
-    if (pending || progress > 0) return;
+    if (pending || photoBusy) return;
     if (body.trim() || files.length) setConfirmClose(true); else resetAndClose();
   }
 
   async function uploadPhotos() {
-    setError(null); setProgress(1);
+    setError(null); setProgress(0); setPhotoPhase("PREPARING");
     try {
-      const prepared = await Promise.all(files.map(prepareImage));
+      const prepared: File[] = [];
+      for (const file of files) prepared.push(await prepareImage(file));
       const form = new FormData();
       form.set("groupId", effectiveGroupId); form.set("body", body.trim()); form.set("clientMutationId", crypto.randomUUID());
       prepared.forEach((file) => form.append("images", file));
       const result = await new Promise<UploadResult>((resolve, reject) => {
         const xhr = new XMLHttpRequest(); xhrRef.current = xhr;
-        xhr.open("POST", "/api/community/photos"); xhr.responseType = "json";
-        xhr.upload.onprogress = (event) => event.lengthComputable && setProgress(Math.max(2, Math.round((event.loaded / event.total) * 100)));
+        xhr.open("POST", "/api/community/photos"); xhr.responseType = "json"; xhr.timeout = 45_000;
+        setPhotoPhase("UPLOADING");
+        xhr.upload.onprogress = (event) => event.lengthComputable && setProgress(Math.min(99, Math.max(1, Math.round((event.loaded / event.total) * 100))));
+        xhr.upload.onload = () => { setProgress(100); setPhotoPhase("PROCESSING"); };
         xhr.onload = () => resolve((xhr.response ?? { ok: false, message: "Não foi possível enviar as imagens." }) as UploadResult);
         xhr.onerror = () => reject(new Error("Falha de rede durante o envio."));
+        xhr.ontimeout = () => reject(new Error("O processamento demorou mais que o esperado. Tente novamente."));
         xhr.onabort = () => reject(new Error("Envio cancelado.")); xhr.send(form);
       });
       xhrRef.current = null;
       if (!result.ok) throw new Error(result.message);
+      setPhotoPhase("PUBLISHED");
       onCreated(result.post, result.message); resetAndClose();
     } catch (cause) {
-      xhrRef.current = null; setProgress(0); setError(cause instanceof Error ? cause.message : "Não foi possível enviar as imagens.");
+      xhrRef.current = null; setProgress(0); setPhotoPhase("IDLE"); setError(cause instanceof Error ? cause.message : "Não foi possível enviar as imagens.");
     }
   }
 
@@ -109,7 +117,7 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
       <header>
         <button type="button" onClick={requestClose} aria-label="Fechar publicação"><X aria-hidden="true" /></button>
         <div><span>Nova publicação</span><strong id="community-composer-title">Compartilhar no grupo</strong></div>
-        <button type="button" onClick={publish} disabled={!canPublish || pending || progress > 0}>{pending || progress > 0 ? <><LoaderCircle className="community-spin" aria-hidden="true" />Publicando</> : "Publicar"}</button>
+        <button type="button" onClick={publish} disabled={!canPublish || pending || photoBusy}>{pending || photoBusy ? <><LoaderCircle className="community-spin" aria-hidden="true" />Publicando</> : "Publicar"}</button>
       </header>
       {availableGroups.length > 1 ? <label className="community-composer-field">Grupo<select value={effectiveGroupId} onChange={(event) => setGroupId(event.target.value)}>{availableGroups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}</select></label> : <p className="community-composer-destination">{availableGroups[0]?.name}</p>}
       <nav aria-label="Tipo de publicação">
@@ -122,7 +130,7 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
       <label className="community-composer-field" htmlFor="community-post-body">{kind === "TRAINER_ANNOUNCEMENT" ? "Aviso" : kind === "WORKOUT_COMPLETION" ? "Legenda opcional" : "Publicação"}<textarea id="community-post-body" value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={6} placeholder={kind === "WORKOUT_COMPLETION" ? "Como foi o treino?" : "O que você quer compartilhar?"} /></label>
       <small className="community-character-count">{body.length}/2000</small>
       {kind === "PHOTO" ? <label className="community-file"><Camera aria-hidden="true" /><span>{files.length ? `${files.length} de 4 imagens selecionadas` : "Escolher até 4 imagens"}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { setError(null); setFiles(Array.from(event.target.files ?? []).slice(0, 4)); }} /></label> : null}
-      {progress > 0 ? <div className="community-upload" aria-live="polite"><div><span style={{ width: `${progress}%` }} /></div><p>Otimizando e enviando · {progress}%</p><button type="button" onClick={() => xhrRef.current?.abort()}>Cancelar envio</button></div> : null}
+      {photoPhase !== "IDLE" ? <div className="community-upload" aria-live="polite"><div><span style={{ width: `${photoPhase === "PREPARING" ? 8 : progress}%` }} /></div><p>{photoPhase === "PREPARING" ? "Preparando imagens…" : photoPhase === "UPLOADING" ? `Enviando · ${progress}%` : photoPhase === "PROCESSING" ? "Processando com segurança…" : "Publicado"}</p>{photoPhase !== "PUBLISHED" ? <button type="button" onClick={() => { xhrRef.current?.abort(); setPhotoPhase("IDLE"); setProgress(0); }}>Cancelar envio</button> : null}</div> : null}
       {error ? <div className="community-inline-error" role="alert"><p>{error}</p>{kind === "PHOTO" && files.length ? <button type="button" onClick={() => void uploadPhotos()}>Tentar novamente</button> : null}</div> : null}
       {confirmClose ? <div className="community-discard-confirm" role="alertdialog" aria-label="Descartar publicação"><strong>Descartar esta publicação?</strong><p>O conteúdo ainda não foi publicado.</p><div><button type="button" onClick={() => setConfirmClose(false)}>Continuar editando</button><button type="button" onClick={resetAndClose}>Descartar</button></div></div> : null}
     </section>

@@ -1,5 +1,5 @@
 import "server-only";
-import type { CommunityComment, CommunityGroup, CommunityInviteCandidate, CommunityMember, CommunityNotification, CommunityPost, CommunityRankingEntry, CommunityRankingPeriod, CommunityReport } from "@/lib/domain/community";
+import type { CommunityChallenge, CommunityComment, CommunityGroup, CommunityInviteCandidate, CommunityMember, CommunityNotification, CommunityPost, CommunityRankingEntry, CommunityRankingPeriod, CommunityReport } from "@/lib/domain/community";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = Record<string, unknown>;
@@ -41,7 +41,7 @@ function parseGroup(value: unknown): CommunityGroup {
     timezone: text(item.timezone, "America/Sao_Paulo"), rankingEnabled: boolean(item.ranking_enabled), isDefault: boolean(item.is_default),
     membershipRole: ["OWNER", "MODERATOR", "MEMBER"].includes(text(item.membership_role)) ? text(item.membership_role) as CommunityGroup["membershipRole"] : null,
     membershipStatus: ["PENDING", "INVITED", "ACTIVE", "REMOVED", "REVOKED", "LEFT"].includes(text(item.membership_status)) ? text(item.membership_status) as CommunityGroup["membershipStatus"] : null,
-    canPost: boolean(item.can_post), canManage: boolean(item.can_manage), memberCount: number(item.member_count), owner: parsePerson(item.owner),
+    canPost: boolean(item.can_post), canManage: boolean(item.can_manage), memberCount: number(item.member_count), owner: parsePerson(item.owner), ownerProductRole: text(item.owner_product_role) === "STUDENT" ? "STUDENT" : "TRAINER",
   };
 }
 
@@ -92,6 +92,10 @@ export async function listCommunityInviteCandidates(groupId: string): Promise<Co
 export async function listCommunityRanking(groupId: string, period: CommunityRankingPeriod): Promise<CommunityRankingEntry[]> { return asList(await rpc("list_community_group_ranking", { p_group_id: groupId, p_period: period, p_limit: 100 })).map((value) => { const item = asRow(value); return { ...parsePerson(item), position: number(item.position), activeDays: number(item.active_days), reachedAt: text(item.reached_at), isCurrentUser: boolean(item.is_current_user) }; }); }
 export async function listCommunityNotifications(): Promise<CommunityNotification[]> { return asList(await rpc("list_my_community_notifications", { p_limit: 30 })).map((value) => { const item = asRow(value); return { id: text(item.id), type: text(item.type) as CommunityNotification["type"], groupId: text(item.group_id), groupName: text(item.group_name), postId: nullableText(item.post_id), actorName: nullableText(item.actor_name), readAt: nullableText(item.read_at), createdAt: text(item.created_at) }; }); }
 export async function listCommunityReports(groupId: string): Promise<CommunityReport[]> { return asList(await rpc("list_community_reports", { p_group_id: groupId })).map((value) => { const item = asRow(value); return { id: text(item.id), postId: nullableText(item.post_id), commentId: nullableText(item.comment_id), reasonCode: text(item.reason_code), details: nullableText(item.details), status: text(item.status), createdAt: text(item.created_at) }; }); }
+function parseChallenge(value: unknown): CommunityChallenge { const item=asRow(value); const acceptance=text(item.acceptance_status); return { id:text(item.id),groupId:text(item.group_id),groupName:nullableText(item.group_name)??undefined,title:text(item.title),instructions:nullableText(item.instructions),durationMinutes:item.duration_minutes==null?null:number(item.duration_minutes),workoutSessionId:nullableText(item.workout_session_id),startsAt:nullableText(item.starts_at)??undefined,expiresAt:nullableText(item.expires_at),status:nullableText(item.status)??undefined,accepted:boolean(item.accepted)||acceptance==="ACCEPTED"||acceptance==="COMPLETED",acceptanceStatus:acceptance==="COMPLETED"?"COMPLETED":acceptance==="ACCEPTED"?"ACCEPTED":null }; }
+export async function listCommunityChallenges(groupId: string): Promise<CommunityChallenge[]> { return asList(await rpc("list_community_group_challenges",{p_group_id:groupId})).map(parseChallenge); }
+export async function listMyAcceptedCommunityChallenges(): Promise<CommunityChallenge[]> { return asList(await rpc("list_my_accepted_community_challenges")).map(parseChallenge); }
+export async function listMyCommunityChallengeWorkouts(): Promise<Array<{ id: string; label: string }>> { return asList(await rpc("list_my_community_challenge_workouts")).map((value) => { const item=asRow(value); return { id:text(item.id), label:text(item.label,"Treino publicado") }; }); }
 export async function listCommunityRules(groupId: string) {
   const supabase = await authenticatedClient();
   const { data, error } = await supabase.from("community_group_rules").select("body").eq("group_id", groupId).order("sort_order");
