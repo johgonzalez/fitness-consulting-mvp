@@ -142,6 +142,7 @@ export function normalizeTrainerSiteData(data: TrainerPageData, options?: { temp
     methodology: (data.methodology.length > 0
       ? data.methodology.toSorted((left, right) => left.position - right.position || left.id.localeCompare(right.id))
       : demoContent?.methodology ?? [])
+      .slice(0, 5)
       .map((item) => ({ id: item.id, title: item.title, description: item.description })),
     methodologyDescription: profile.methodology_description?.trim() || "",
     services: data.services

@@ -43,6 +43,7 @@ function moveItem(items: SiteSectionPreference[], id: SiteSectionId, direction: 
 
 export function SiteSectionOrganizer({ profile }: { profile: TrainerProfile }) {
   const templateId = profile.template_id;
+  const canReorder = getTemplateDefinition(templateId).sections.some(({ reorderable }) => reorderable);
   const [layouts, setLayouts] = useState<SiteTemplateLayouts>(() => normalizeSiteTemplateLayouts(profile.site_layouts));
   const [dragged, setDragged] = useState<SiteSectionId | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
@@ -79,7 +80,7 @@ export function SiteSectionOrganizer({ profile }: { profile: TrainerProfile }) {
     <div className="pp-section-organizer-layout">
       <section className="pp-section-organizer" aria-labelledby="section-organizer-title">
         <header>
-          <div><span>Organizador</span><h2 id="section-organizer-title">{getTemplateDefinition(templateId).name}</h2><p>Arraste as seções ou use as setas. A apresentação e a chamada final permanecem protegidas.</p></div>
+          <div><span>Organizador</span><h2 id="section-organizer-title">{getTemplateDefinition(templateId).name}</h2><p>{canReorder ? "Arraste as seções ou use as setas. A apresentação e a chamada final permanecem protegidas." : "Ative ou oculte seções. A ordem aprovada do template permanece protegida."}</p></div>
         </header>
 
         <div className="pp-section-organizer__list">
