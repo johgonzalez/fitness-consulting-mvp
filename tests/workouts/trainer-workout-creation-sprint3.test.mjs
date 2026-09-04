@@ -36,7 +36,7 @@ test("Production AI is server-only, configurable, structured and fully validated
   assert.match(aiProvider, /Preencha targetLoad e loadUnit juntos/);
   assert.match(aiProvider, /targetRpe entre 0 e 10/);
   assert.match(aiProvider, /response_format: \{ type: "json_schema"/);
-  assert.match(aiProvider, /validateWorkoutAiDraftOutput\(JSON\.parse\(content\), visibleIds\)/);
+  assert.match(aiProvider, /validateWorkoutAiDraftOutput\((?:JSON\.parse\(content\)|parsed), visibleIds\)/);
   assert.match(aiProvider, /AbortController/);
   assert.match(aiContract, /exerciseId: string \| null/);
   assert.match(aiContract, /unresolvedExerciseName: string \| null/);

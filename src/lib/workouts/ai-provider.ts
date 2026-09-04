@@ -122,8 +122,31 @@ class OpenAiWorkoutProvider implements WorkoutAiProvider {
       }
       const payload = await response.json() as { choices?: Array<{ message?: { content?: string; refusal?: string } }> };
       const content = payload.choices?.[0]?.message?.content;
-      if (!content || payload.choices?.[0]?.message?.refusal) throw new Error("workout_ai_provider_invalid_response");
-      return validateWorkoutAiDraftOutput(JSON.parse(content), visibleIds);
+      if (payload.choices?.[0]?.message?.refusal) {
+        console.error("Workout AI provider response rejected", { stage: "refusal" });
+        throw new Error("workout_ai_provider_invalid_response");
+      }
+      if (!content) {
+        console.error("Workout AI provider response rejected", { stage: "missing_content" });
+        throw new Error("workout_ai_provider_invalid_response");
+      }
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(content);
+      } catch {
+        console.error("Workout AI provider response rejected", { stage: "json_parse" });
+        throw new Error("workout_ai_provider_invalid_response");
+      }
+      try {
+        return validateWorkoutAiDraftOutput(parsed, visibleIds);
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "unknown";
+        console.error("Workout AI provider response rejected", {
+          stage: "contract",
+          reason,
+        });
+        throw new Error(`workout_ai_provider_contract:${reason}`);
+      }
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         console.error("Workout AI provider request failed", { stage: "timeout" });

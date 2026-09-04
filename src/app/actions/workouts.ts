@@ -70,6 +70,9 @@ function friendlyWorkoutError(error: unknown, fallback: string) {
   if (message.includes("exercise_not_available")) return "O exercício não está mais disponível para este Personal.";
   if (message.includes("workout_ai_provider_unavailable")) return "A geração com IA não está configurada neste ambiente.";
   if (message.includes("workout_ai_provider_timeout")) return "A geração demorou mais que o esperado. Tente novamente.";
+  if (process.env.VERCEL_ENV === "preview" && message.includes("workout_ai_provider_contract:")) {
+    return `QA IA: ${message.split("workout_ai_provider_contract:")[1]}`;
+  }
   if (message.includes("workout_ai_provider_")) return "A geração não pôde ser concluída. Tente novamente.";
   if (message.includes("invalid_youtube_url")) return "Use uma URL HTTPS válida do YouTube.";
   if (message.includes("fetch") || message.includes("timeout") || message.includes("network")) return "A conexão falhou. Revise sua internet e tente novamente.";
