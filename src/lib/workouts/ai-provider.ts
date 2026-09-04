@@ -108,13 +108,27 @@ class OpenAiWorkoutProvider implements WorkoutAiProvider {
           ],
         }),
       });
-      if (!response.ok) throw new Error("workout_ai_provider_request_failed");
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null) as {
+          error?: { code?: string | null; param?: string | null; type?: string | null };
+        } | null;
+        console.error("Workout AI provider request failed", {
+          status: response.status,
+          code: errorPayload?.error?.code ?? null,
+          param: errorPayload?.error?.param ?? null,
+          type: errorPayload?.error?.type ?? null,
+        });
+        throw new Error("workout_ai_provider_request_failed");
+      }
       const payload = await response.json() as { choices?: Array<{ message?: { content?: string; refusal?: string } }> };
       const content = payload.choices?.[0]?.message?.content;
       if (!content || payload.choices?.[0]?.message?.refusal) throw new Error("workout_ai_provider_invalid_response");
       return validateWorkoutAiDraftOutput(JSON.parse(content), visibleIds);
     } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") throw new Error("workout_ai_provider_timeout");
+      if (error instanceof Error && error.name === "AbortError") {
+        console.error("Workout AI provider request failed", { stage: "timeout" });
+        throw new Error("workout_ai_provider_timeout");
+      }
       if (error instanceof Error && error.message.startsWith("workout_ai_provider_")) throw error;
       throw new Error("workout_ai_provider_invalid_response");
     } finally { clearTimeout(timeout); }
