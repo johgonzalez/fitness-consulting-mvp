@@ -11,7 +11,7 @@ type CheipiBrandProps = {
 export function CheipiBrand({ href, symbolOnly = false, className = "" }: CheipiBrandProps) {
   const content = <>
     <span className="cheipi-brand__mark" aria-hidden="true">
-      <Image className="cheipi-brand__mark-image" src="/auth/provisional-app-mark.png" alt="" width={256} height={256} priority />
+      <Image className="cheipi-brand__mark-image" src="/auth/provisional-app-mark.png" alt="" width={256} height={256} />
     </span>
     {symbolOnly ? null : <strong>Cheipi</strong>}
   </>;

@@ -692,7 +692,7 @@ footer {
 }
 
 footer p, footer > a:last-child { margin: 0; color: #949990; font-size: 0.72rem; }
-footer > a:last-child { width: max-content; border-bottom: 1px solid #70756d; }
+footer > a:last-child { width: max-content; min-height: 44px; display: flex; align-items: center; border-bottom: 1px solid #70756d; }
 footer .brand-mark { border-color: var(--paper); color: var(--paper); }
 
 .mobile-contact {

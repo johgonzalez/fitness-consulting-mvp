@@ -159,7 +159,7 @@
 .community-group-skeletons { display:grid;gap:1px; }.community-group-skeletons i { height:86px;background:linear-gradient(90deg,var(--pp-surface-subtle),var(--pp-surface),var(--pp-surface-subtle));background-size:200% 100%;animation:community-shimmer 1.2s infinite; }
 @keyframes community-shimmer { to { background-position:-200% 0; } }
 
-.community-post>header>div:nth-child(2) a { width:max-content;max-width:100%;color:var(--pp-text-secondary);font-size:.59rem;font-weight:670; }
+.community-post>header>div:nth-child(2) a { width:max-content;max-width:100%;min-height:44px;display:flex;align-items:center;color:var(--pp-text-secondary);font-size:.59rem;font-weight:670; }
 .community-post>header>div:nth-child(2) i { overflow:hidden;display:block;font-style:normal;text-overflow:ellipsis;white-space:nowrap; }
 .community-post-menu>button { width:44px;height:44px;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--pp-text-muted); }
 .community-post-menu>button svg { width:19px; }
