@@ -8,6 +8,7 @@ import {
   deleteDemoMethodologyItem,
   deleteDemoService,
   deleteDemoTestimonial,
+  readDemoSiteState,
   setDemoSiteLayout,
   setDemoSiteTemplate,
   updateDemoSiteProfile,
@@ -20,6 +21,7 @@ import { normalizeInstagramIdentity } from "@/lib/instagram";
 import { createClient } from "@/lib/supabase/server";
 
 export type SiteActionState = { ok?: boolean; message?: string };
+const maxMethodologyItems = 5;
 const modes = new Set<ServiceMode>(["online", "presencial", "both"]);
 const billingTypes = new Set<BillingType>(["monthly", "per_session", "package", "starting_at"]);
 const priceVisibilities = new Set<PriceVisibility>(["public", "match_only", "hidden"]);
@@ -214,6 +216,8 @@ export async function saveMethodologyItem(_state: SiteActionState, formData: For
     return { message: "Revise os dados da etapa." };
   }
   if (await isDemoWorkspaceRequest()) {
+    const state = await readDemoSiteState();
+    if (!id && (state?.methodology.length ?? 0) >= maxMethodologyItems) return { message: "A metodologia aceita no maximo 5 etapas." };
     const item: TrainerMethodologyItem = { id: id || crypto.randomUUID(), trainer_id: demoWorkspaceFixture.profile.id, title, description, position };
     if (!(await upsertDemoMethodologyItem(item))) return { message: "Nao foi possivel salvar a etapa neste demo." };
     refreshSite(demoWorkspaceFixture.profile.slug);
@@ -222,6 +226,14 @@ export async function saveMethodologyItem(_state: SiteActionState, formData: For
   const demo = await rejectDemoMutation(); if (demo) return demo;
   const context = await ownerContext();
   if (!context) return { message: "Sua sessao expirou. Entre novamente." };
+  if (!id) {
+    const { count, error: countError } = await context.supabase
+      .from("trainer_methodology_items")
+      .select("id", { count: "exact", head: true })
+      .eq("trainer_id", context.profile.id);
+    if (countError) return { message: "Nao foi possivel validar o limite de etapas." };
+    if ((count ?? 0) >= maxMethodologyItems) return { message: "A metodologia aceita no maximo 5 etapas." };
+  }
   const payload = { trainer_id: context.profile.id, title, description, position, updated_at: new Date().toISOString() };
   const query = id
     ? context.supabase.from("trainer_methodology_items").update(payload).eq("id", id).eq("trainer_id", context.profile.id)

@@ -1,196 +1,390 @@
 import Image from "next/image";
-import { ArrowDown, ArrowRight, Check, MapPin, Menu, MoveRight } from "lucide-react";
-import type { CSSProperties } from "react";
-import { EditorialMediaLabel } from "@/components/templates/EditorialMediaLabel";
-import { MotionEnhancer } from "@/components/templates/MotionEnhancer";
-import { MotionExperience } from "@/components/templates/MotionExperience";
-import { MotionTestimonialCard } from "@/components/templates/MotionTestimonialCard";
-import { OrderedSiteSections } from "@/components/templates/OrderedSiteSections";
-import { TemplateAction } from "@/components/templates/TemplateAction";
-import { TrainerInstagramSection } from "@/components/templates/TrainerInstagramSection";
-import type { TrainerSiteContactMode, TrainerSiteData, TrainerSiteService } from "@/lib/domain/trainer-site";
-import { getSectionMeta, type SiteSectionId } from "@/lib/domain/site-sections";
-import styles from "./performance.module.css";
+import {
+  ArrowDown,
+  ArrowUpRight,
+  Check,
+  MessageCircle,
+} from "lucide-react";
+import type { TrainerSiteData } from "@/lib/domain/trainer-site";
+import "./approved-conversion.css";
 
-const motionRootId = "pperfil-motion-root";
+type ConversionData = {
+  trainer: {
+    name: string;
+    shortName: string;
+    initials: string;
+    credential: string;
+    location: string;
+    experience: string;
+    bio: string;
+    photo: string;
+  };
+  hero: { headline: string; supportingText: string; availability: string };
+  appBenefits: Array<{ title: string; description: string }>;
+  services: Array<{ id: string; name: string; description: string; price: string; cadence: string; featured: boolean; bullets: string[] }>;
+  community: { title: string; description: string; features: string[] };
+  testimonials: Array<{ id: string; quote: string; name: string; context: string }>;
+  theme: { accent: string; accentInk: string };
+};
 
-function Brand({ site }: { site: TrainerSiteData }) {
-  return (
-    <a className={styles.brand} href="#inicio" aria-label={`${site.trainer.name} — início`}>
-      <span>{site.trainer.name}</span>
-      <small>Motion</small>
-    </a>
-  );
+function getInitials(name: string) {
+  return name.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("");
 }
 
-function splitHeadline(headline: string) {
-  if (headline.length <= 52 || !headline.includes(" para ")) return { title: headline, continuation: null };
-  const [title, ...continuation] = headline.split(" para ");
-  return { title, continuation: `Para ${continuation.join(" para ")}` };
+function accentInk(hex: string) {
+  const value = hex.replace("#", "");
+  if (!/^[\da-f]{6}$/i.test(value)) return "#0b0d0a";
+  const [red, green, blue] = [0, 2, 4].map((index) => Number.parseInt(value.slice(index, index + 2), 16));
+  return red * 0.299 + green * 0.587 + blue * 0.114 > 165 ? "#0b0d0a" : "#ffffff";
 }
 
-function serviceContact(site: TrainerSiteData, service: TrainerSiteService): TrainerSiteData["contact"] {
-  if (service.conversionMode === "WHATSAPP") return site.contact;
-  const mode: TrainerSiteContactMode = "INTEREST";
+function benefitDescription(title: string) {
+  const normalized = title.toLocaleLowerCase("pt-BR");
+  if (normalized.includes("avalia")) return "Avaliações e histórico deixam claro o que está funcionando.";
+  if (normalized.includes("progres")) return "Registros organizados ajudam a enxergar cada etapa da evolução.";
+  if (normalized.includes("comunica")) return "Feedback e orientação do Personal continuam perto, mesmo à distância.";
+  return "Séries, cargas, vídeos e observações organizados em um só lugar.";
+}
+
+function toConversionData(site: TrainerSiteData): ConversionData {
+  const location = site.trainer.location ?? (site.trainer.serviceMode === "online" ? "Online para todo o Brasil" : "Atendimento personalizado");
   return {
-    ...site.contact,
-    mode,
-    enabled: false,
-    external: false,
-    href: "#contato",
-    primaryLabel: "Quero este serviço",
-    serviceLabel: "Quero este serviço",
+    trainer: {
+      name: site.trainer.name,
+      shortName: site.trainer.firstName,
+      initials: getInitials(site.trainer.name),
+      credential: site.trainer.registration ? `CREF ${site.trainer.registration}` : site.trainer.professionalTitle,
+      location,
+      experience: site.trainer.specialty,
+      bio: site.about.content,
+      photo: site.media.profile?.url ?? site.media.hero?.url ?? "/templates/conversion/trainer-fallback.webp",
+    },
+    hero: {
+      headline: site.hero.headline,
+      supportingText: site.hero.description,
+      availability: site.profileStatus.enabled && site.profileStatus.text ? site.profileStatus.text : "Novas turmas em formação",
+    },
+    appBenefits: site.studentExperience.capabilities.slice(0, 4).map((title) => ({ title, description: benefitDescription(title) })),
+    services: site.services.map((service, index) => ({
+      id: service.id,
+      name: service.name,
+      description: service.description,
+      price: service.priceLabel ?? "Sob consulta",
+      cadence: service.billingLabel ?? "",
+      featured: index === 0,
+      bullets: service.benefits.slice(0, 3),
+    })),
+    community: {
+      title: "Treinar junto muda tudo.",
+      description: "Um espaço para transformar alunos em parceiros de jornada — com desafios, check-ins e incentivo sem comparação tóxica.",
+      features: ["Check-in semanal", "Desafios mensais", "Grupo reservado"],
+    },
+    testimonials: site.testimonials.slice(0, 4).map((testimonial) => ({
+      id: testimonial.id,
+      quote: testimonial.content,
+      name: testimonial.studentName,
+      context: testimonial.context ?? "aluno do acompanhamento",
+    })),
+    theme: { accent: site.site.accent, accentInk: accentInk(site.site.accent) },
   };
 }
 
 export function Template02({ site }: { site: TrainerSiteData }) {
-  const headline = splitHeadline(site.hero.headline);
-  const heroMedia = site.media.hero;
-  const specialtyMedia = site.media.coaching ?? site.media.about;
-  const resultImage = site.results[0]?.image ?? null;
-  const proofMedia = resultImage ? null : site.media.movement_primary;
-  const proofImage = resultImage ?? proofMedia?.url ?? null;
-  const finalMedia = site.media.movement_secondary ?? heroMedia;
+  const data = toConversionData(site);
+  const whatsappUrl = site.contact.href;
   const visible = new Set(site.sections.map(({ id }) => id));
-  const sectionOrder = (id: SiteSectionId) => site.sections.findIndex((section) => section.id === id) + 1;
-  const firstSection = site.sections.find(({ id }) => id !== "hero" && id !== "final_cta");
-  const navigation = site.sections.filter(({ id }) => id !== "hero" && id !== "final_cta").slice(0, 4);
 
   return (
+    <div className="approved-template-conversion">
     <main
-      className={styles.root}
-      id={motionRootId}
-      style={{ "--motion-brand": site.site.accent } as CSSProperties}
+      className="site-shell"
+      style={
+        {
+          "--brand-accent": data.theme.accent,
+          "--brand-accent-ink": data.theme.accentInk,
+        } as React.CSSProperties
+      }
     >
-      <MotionEnhancer rootId={motionRootId} />
+      <header className="site-header">
+        <a className="brand-lockup" href="#inicio" aria-label="Voltar ao início">
+          <span className="brand-mark" aria-hidden="true">
+            {data.trainer.initials}
+          </span>
+          <span>
+            {data.trainer.name}
+            <small>Personal trainer</small>
+          </span>
+        </a>
 
-      <header className={styles.header} style={{ order: -2 }}>
-        <Brand site={site} />
-        <nav aria-label="Navegação principal">{navigation.map(({ id }) => { const meta = getSectionMeta(id); return <a key={id} href={`#${meta.anchor}`}>{meta.shortLabel}</a>; })}</nav>
-        <TemplateAction contact={site.contact} event="click_whatsapp_hero" className={styles.headerAction}>
-          Começar agora
-        </TemplateAction>
-        <a className={styles.menu} href={`#${firstSection ? getSectionMeta(firstSection.id).anchor : "contato"}`} aria-label="Explorar página"><Menu aria-hidden="true" /></a>
+        <nav aria-label="Navegação principal">
+          {visible.has("about") ? <a href="#metodo">Método</a> : null}
+          {visible.has("digital_experience") ? <a href="#app">App</a> : null}
+          {visible.has("services") ? <a href="#planos">Planos</a> : null}
+        </nav>
+
+        <a
+          className="header-cta"
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Conversar <ArrowUpRight aria-hidden="true" />
+        </a>
       </header>
 
-      <section className={styles.hero} id="inicio" style={{ order: -1 }}>
-        <div className={styles.heroShape} aria-hidden="true"><span>MOVE</span></div>
-        <div className={styles.heroCopy} data-motion="text">
-          <p className={styles.eyebrow}><i />{site.trainer.name}</p>
-          <h1>{headline.title}<span>.</span></h1>
-          {headline.continuation ? <strong className={styles.heroContinuation}>{headline.continuation}</strong> : null}
-          <p className={styles.heroDescription}>{site.hero.description}</p>
-          <div className={styles.heroActions}>
-            <TemplateAction contact={site.contact} event="click_whatsapp_hero" className={styles.primaryAction}>Começar agora</TemplateAction>
-            <a className={styles.secondaryAction} href={`#${firstSection ? getSectionMeta(firstSection.id).anchor : "contato"}`}>Conhecer o método <ArrowDown aria-hidden="true" /></a>
+      <section className="hero" id="inicio">
+        <div className="hero-copy">
+          <p className="availability">
+            <span aria-hidden="true" /> {data.hero.availability}
+          </p>
+          <h1>{data.hero.headline}</h1>
+          <p className="hero-supporting">{data.hero.supportingText}</p>
+
+          <div className="hero-actions">
+            <a
+              className="button button-primary"
+              href={whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Quero começar <ArrowUpRight aria-hidden="true" />
+            </a>
+            <a className="text-link" href="#app">
+              Ver como funciona <ArrowDown aria-hidden="true" />
+            </a>
+          </div>
+
+          <p className="hero-note">Conversa inicial sem compromisso.</p>
+        </div>
+
+        <div className="hero-visual" aria-label={`Foto de ${data.trainer.name}`}>
+          <div className="hero-orbit" aria-hidden="true" />
+          <Image
+            src={data.trainer.photo}
+            alt={`${data.trainer.name}, personal trainer`}
+            fill
+            priority
+            unoptimized
+            sizes="(max-width: 760px) 100vw, 48vw"
+          />
+          <div className="hero-caption">
+            <strong>{data.trainer.name}</strong>
+            <span>{data.trainer.credential}</span>
           </div>
         </div>
-        <figure className={styles.heroMedia} data-motion="image">
-          {heroMedia ? <Image src={heroMedia.url} alt={heroMedia.alt} fill priority loading="eager" sizes="(max-width: 760px) 92vw, 62vw" /> : <div className={styles.mediaFallback}>{site.trainer.firstName}</div>}
-          <EditorialMediaLabel media={heroMedia} className={styles.editorialMediaLabel} />
-        </figure>
-        <div className={styles.heroMeta}>
-          {site.trainer.location ? <span><MapPin aria-hidden="true" />{site.trainer.location}</span> : null}
-          <span>{site.trainer.serviceMode === "both" ? "Online + presencial" : site.trainer.serviceMode}</span>
-        </div>
-        <a className={styles.heroScroll} href={`#${firstSection ? getSectionMeta(firstSection.id).anchor : "contato"}`} aria-label="Continuar para a próxima seção"><ArrowDown aria-hidden="true" /></a>
+
+        <a className="hero-scroll" href="#metodo" aria-label="Conhecer o método">
+          <ArrowDown aria-hidden="true" />
+        </a>
       </section>
 
-      <OrderedSiteSections order={site.sections}>
-      {visible.has("positioning") ? <section key="positioning" className={styles.statement} id="proposta" style={{ order: sectionOrder("positioning") }}>
-        <p className={styles.sectionLabel} data-motion="text">Movimento com propósito</p>
-        <div className={styles.statementGrid}>
-          <h2 data-motion="text">Movimento que<br />evolui com <em>você.</em></h2>
-          <div data-motion="text"><p>{site.about.content}</p><a href="#especialidades">Descobrir possibilidades <MoveRight aria-hidden="true" /></a></div>
+      <div className="kinetic-band" aria-label="Treino, acompanhamento, evolução e comunidade">
+        <div>
+          <span>Treino</span><i>◆</i><span>Acompanhamento</span><i>◆</i>
+          <span>Evolução</span><i>◆</i><span>Comunidade</span><i>◆</i>
+          <span aria-hidden="true">Treino</span><i aria-hidden="true">◆</i>
+          <span aria-hidden="true">Acompanhamento</span>
         </div>
-        <div className={styles.motionLine} aria-hidden="true"><i /><span>FORÇA</span><i /><span>CONSISTÊNCIA</span><i /><span>ENERGIA</span></div>
+      </div>
+
+      {visible.has("about") ? <section className="authority section" id="metodo">
+        <div className="section-number" aria-hidden="true">01</div>
+        <div className="authority-heading">
+          <h2>Não precisa de mais motivação.</h2>
+          <h2 className="outline-heading">Precisa de um plano possível.</h2>
+        </div>
+
+        <div className="authority-grid">
+          <p className="authority-lead">{data.trainer.experience}</p>
+          <div className="authority-story">
+            <p>{data.trainer.bio}</p>
+            <dl>
+              <div>
+                <dt>Formação</dt>
+                <dd>Educação Física</dd>
+              </div>
+              <div>
+                <dt>Atendimento</dt>
+                <dd>{data.trainer.location}</dd>
+              </div>
+              <div>
+                <dt>Registro</dt>
+                <dd>{data.trainer.credential}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
       </section> : null}
 
-      {visible.has("about") ? <section key="about" className={styles.statement} id="sobre" style={{ order: sectionOrder("about") }}><p className={styles.sectionLabel} data-motion="text">Sobre</p><div className={styles.statementGrid}><h2 data-motion="text">Estratégia que respeita<br /><em>a sua rotina.</em></h2><div data-motion="text"><p>{site.about.content}</p></div></div></section> : null}
+      {visible.has("digital_experience") ? <section className="app-story" id="app">
+        <div className="app-sticky">
+          <div className="app-copy">
+            <div className="section-number" aria-hidden="true">02</div>
+            <h2>Seu treino inteiro, no bolso.</h2>
+            <p>
+              Nada de PDF perdido ou planilha abandonada. Você treina, registra
+              e recebe ajustes dentro do mesmo app.
+            </p>
 
-      {visible.has("specialties") ? <section key="specialties" className={styles.specialties} id="especialidades" style={{ order: sectionOrder("specialties") }}>
-        <header data-motion="text"><p className={styles.sectionLabel}>Especialidades</p><h2>Treino para o seu<br /><em>próximo nível.</em></h2></header>
-        <div className={styles.specialtyRail}>
-          {site.specialties.map((specialty, index) => (
-            <article key={specialty.id} data-motion="text">
-              <span>0{index + 1}</span>
-              <h3>{specialty.label}</h3>
-              <p>Estratégia individual, execução consciente e evolução sustentável.</p>
-              <ArrowRight aria-hidden="true" />
-            </article>
-          ))}
-        </div>
-        {specialtyMedia ? <figure className={styles.specialtyMedia} data-motion="image"><Image src={specialtyMedia.url} alt={specialtyMedia.alt} fill sizes="(max-width: 760px) 100vw, 58vw" /><EditorialMediaLabel media={specialtyMedia} className={styles.editorialMediaLabel} /></figure> : null}
-      </section> : null}
-
-      {visible.has("methodology") ? <section key="methodology" className={styles.method} id="metodo" style={{ order: sectionOrder("methodology") }}>
-        <header data-motion="text"><p className={styles.sectionLabel}>Método</p><h2>Clareza para começar.<br /><em>Presença para evoluir.</em></h2><p className={styles.methodIntro}>{site.methodologyDescription}</p></header>
-        <div className={styles.methodFlow} aria-label={site.methodologyDescription}>
-          {site.methodology.map((item, index) => (
-            <article key={item.id} data-motion="text">
-              <span>0{index + 1}</span>
-              <div><h3>{item.title}</h3><p>{item.description}</p></div>
-            </article>
-          ))}
-        </div>
-      </section> : null}
-
-      {visible.has("digital_experience") ? <section key="digital_experience" className={styles.experience} id="experiencia" style={{ order: sectionOrder("digital_experience") }}>
-        <div className={styles.experienceCopy} data-motion="text">
-          <p className={styles.sectionLabel}>Digital coaching</p>
-          <h2>Seu treino.<br />Seu progresso.<br /><em>Seu Personal.</em></h2>
-          <p>{site.studentExperience.description}</p>
-          <ul>{site.studentExperience.capabilities.map((item) => <li key={item}><Check aria-hidden="true" />{item}</li>)}</ul>
-        </div>
-        <MotionExperience site={site} />
-      </section> : null}
-
-      {visible.has("testimonials") ? (
-        <section key="testimonials" className={styles.proof} id="depoimentos" style={{ order: sectionOrder("testimonials") }}>
-          <header data-motion="text"><p className={styles.sectionLabel}>Experiências reais</p><h2>Progresso que<br /><em>faz parte da vida.</em></h2></header>
-          <div className={styles.proofComposition}>
-            {proofImage ? <figure data-motion="image"><Image src={proofImage} alt={proofMedia?.alt ?? "Registro de evolução enviado pelo aluno"} fill sizes="(max-width: 760px) 100vw, 48vw" /><EditorialMediaLabel media={proofMedia} className={styles.editorialMediaLabel} proof /></figure> : null}
-            <div className={styles.proofStories}>
-              {site.testimonials.slice(0, 3).map((testimonial) => (
-                <MotionTestimonialCard key={testimonial.id} testimonial={testimonial} />
+            <ol className="benefit-list">
+              {data.appBenefits.map((benefit, index) => (
+                <li key={benefit.title}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <div>
+                    <h3>{benefit.title}</h3>
+                    <p>{benefit.description}</p>
+                  </div>
+                </li>
               ))}
+            </ol>
+          </div>
+
+          <div className="phone-stage">
+            <div className="phone-glow" aria-hidden="true" />
+            <Image
+              className="phone-render"
+              src="/templates/conversion/fit-app-phone.webp"
+              alt="Aplicativo de treino mostrando rotina, progresso e feedback do personal"
+              width={900}
+              height={1200}
+              unoptimized
+              sizes="(max-width: 760px) 82vw, 42vw"
+            />
+            <div className="floating-signal signal-progress">
+              <span>EVOLUÇÃO</span>
+              <strong>+ constância</strong>
+            </div>
+            <div className="floating-signal signal-coach">
+              <span>{data.trainer.shortName.toLocaleUpperCase("pt-BR")} ACOMPANHA</span>
+              <strong>Treino ajustado ✓</strong>
             </div>
           </div>
-        </section>
-      ) : null}
+        </div>
+      </section> : null}
 
-      {visible.has("results") ? <section key="results" className={styles.proof} id="resultados" style={{ order: sectionOrder("results") }}><header data-motion="text"><p className={styles.sectionLabel}>Resultados</p><h2>Evolução construída<br /><em>com consistência.</em></h2></header><div className={styles.resultRail}>{site.results.slice(0, 2).map((result, index) => <article key={result.id} data-motion="text"><span>Resultado 0{index + 1}</span><h3>{result.title}</h3><p>{result.description}</p></article>)}</div></section> : null}
+      {visible.has("services") && data.services.length > 0 ? <section className="services section" id="planos">
+        <div className="services-heading">
+          <div className="section-number" aria-hidden="true">03</div>
+          <h2>Escolha como quer avançar.</h2>
+          <p>Você traz o objetivo. Eu organizo o caminho.</p>
+        </div>
 
-      {visible.has("services") ? (
-        <section key="services" className={styles.services} id="servicos" style={{ order: sectionOrder("services") }}>
-          <header data-motion="text"><p className={styles.sectionLabel}>Serviços</p><h2>Escolha seu<br /><em>próximo movimento.</em></h2><p>Formatos publicados por {site.trainer.firstName}, apresentados com clareza.</p></header>
-          <div className={styles.serviceList}>
-            {site.services.map((service, index) => (
-              <article key={service.id} data-motion="text">
-                <span className={styles.serviceNumber}>0{index + 1}</span>
-                <div className={styles.serviceCopy}><h3>{service.name}</h3><p>{service.description}</p><small>{service.deliveryLabel}</small></div>
-                <div className={styles.servicePrice}>{service.priceLabel ? <strong>{service.priceLabel}<small>{service.billingLabel}</small></strong> : <span>Consulte condições</span>}</div>
-                <TemplateAction contact={serviceContact(site, service)} event="click_whatsapp_offer" className={styles.serviceAction}>{service.conversionMode === "WHATSAPP" ? "Falar no WhatsApp" : "Quero este"}</TemplateAction>
-              </article>
+        <div className="service-list">
+          {data.services.map((service, index) => (
+            <article
+              className={`service-row${service.featured ? " is-featured" : ""}`}
+              key={service.id}
+            >
+              <span className="service-index">0{index + 1}</span>
+              <div className="service-main">
+                <h3>{service.name}</h3>
+                <p>{service.description}</p>
+              </div>
+              <ul>
+                {service.bullets.map((bullet) => (
+                  <li key={bullet}><Check aria-hidden="true" /> {bullet}</li>
+                ))}
+              </ul>
+              <div className="service-price">
+                <strong>{service.price}</strong>
+                <span>{service.cadence}</span>
+              </div>
+              <a
+                aria-label={`Tenho interesse em ${service.name}`}
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>Tenho interesse</span>
+                <ArrowUpRight aria-hidden="true" />
+              </a>
+            </article>
+          ))}
+        </div>
+      </section> : null}
+
+      {visible.has("testimonials") ? <section className="community" id="comunidade">
+        <div className="community-intro">
+          <div className="section-number" aria-hidden="true">04</div>
+          <h2>{data.community.title}</h2>
+          <p>{data.community.description}</p>
+        </div>
+
+        <div className="challenge-track">
+          <div className="challenge-copy">
+            <span>DESAFIO ATUAL</span>
+            <strong>21 dias em movimento</strong>
+          </div>
+          <div className="week-line" aria-label="Progresso ilustrativo de quatro semanas">
+            {["01", "02", "03", "04"].map((week, index) => (
+              <span className={index === 0 ? "is-current" : ""} key={week}>
+                {week}
+              </span>
             ))}
           </div>
-        </section>
-      ) : null}
-
-      {visible.has("instagram") ? <TrainerInstagramSection key="instagram" site={site} variant="motion" order={sectionOrder("instagram")} /> : null}
-      </OrderedSiteSections>
-
-      <section className={styles.final} id="contato" style={{ order: 1000 }}>
-        {finalMedia ? <figure><Image src={finalMedia.url} alt="" fill sizes="100vw" /><EditorialMediaLabel media={finalMedia} className={styles.editorialMediaLabel} /></figure> : null}
-        <div className={styles.finalField} aria-hidden="true" />
-        <div className={styles.finalCopy} data-motion="text">
-          <p>{site.trainer.name}</p>
-          <h2>Seu próximo movimento<br />começa <em>agora.</em></h2>
-          <TemplateAction contact={site.contact} event="click_whatsapp_final" className={styles.finalAction}>{site.contact.primaryLabel}</TemplateAction>
+          <div className="community-features">
+            {data.community.features.map((feature) => (
+              <span key={feature}>{feature}</span>
+            ))}
+          </div>
         </div>
+
+        <div className="testimonial-rail">
+          {data.testimonials.map((testimonial, index) => (
+            <figure key={testimonial.id}>
+              <span className="quote-mark" aria-hidden="true">“</span>
+              <blockquote>{testimonial.quote}</blockquote>
+              <figcaption>
+                <span className="testimonial-avatar" aria-hidden="true">
+                  {testimonial.name.slice(0, 1)}
+                </span>
+                <div>
+                  <strong>{testimonial.name}</strong>
+                  <span>{testimonial.context}</span>
+                </div>
+                <small>0{index + 1}</small>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section> : null}
+
+      <section className="final-cta" id="contato">
+        <div className="final-orbit" aria-hidden="true">COMECE AGORA · COMECE AGORA · </div>
+        <p>Sem fórmula mágica. Com presença, plano e ajuste.</p>
+        <h2>Seu próximo treino pode ser diferente.</h2>
+        <a
+          className="button button-dark"
+          href={whatsappUrl}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Falar com {data.trainer.shortName} <ArrowUpRight aria-hidden="true" />
+        </a>
       </section>
 
-      <footer className={styles.footer} style={{ order: 1001 }}><Brand site={site} /><span>{site.trainer.professionalTitle}{site.trainer.registration ? ` · CREF ${site.trainer.registration}` : ""}</span><small>powered by PPerfil</small></footer>
+      <footer>
+        <a className="brand-lockup" href="#inicio">
+          <span className="brand-mark" aria-hidden="true">{data.trainer.initials}</span>
+          <span>{data.trainer.name}<small>{data.trainer.credential}</small></span>
+        </a>
+        <p>{data.trainer.location}</p>
+        <a href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
+      </footer>
+
+      <a
+        className="mobile-contact"
+        href={whatsappUrl}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <span className="mobile-avatar">
+          <Image src={data.trainer.photo} alt="" fill unoptimized sizes="42px" />
+        </span>
+        <span><small>Fale direto com</small>{data.trainer.shortName}</span>
+        <MessageCircle aria-hidden="true" />
+      </a>
     </main>
+    </div>
   );
 }

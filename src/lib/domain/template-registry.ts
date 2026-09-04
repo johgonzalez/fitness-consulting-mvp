@@ -66,24 +66,38 @@ function supportedSections(defaultOrder: SiteSectionId[]): TemplateSectionDefini
   });
 }
 
+function approvedFixedSections(defaultOrder: SiteSectionId[]): TemplateSectionDefinition[] {
+  return defaultOrder.map((id) => {
+    const locked = id === "hero" ? "FIRST" : id === "final_cta" ? "LAST" : undefined;
+    return {
+      id,
+      required: Boolean(locked),
+      reorderable: false,
+      visibilityEditable: !locked,
+      ...(locked ? { locked } : {}),
+      defaultEnabled: true,
+    };
+  });
+}
+
 export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition>> = {
   template_01: {
     id: "template_01",
-    name: "Essential Editorial",
-    description: "Presença sofisticada, editorial e centrada na marca do Personal.",
+    name: "Perfil Essencial",
+    description: "Perfil profissional direto, leve e confiável, com avatar, serviços e acompanhamento no app.",
     renderer: "Template01",
     entitlement: "can_use_template_01",
-    sections: sections(["hero", "about", "specialties", "services", "instagram", "digital_experience", "methodology", "testimonials", "final_cta"]),
+    sections: approvedFixedSections(["hero", "about", "services", "digital_experience", "methodology", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
   },
   template_02: {
     id: "template_02",
-    name: "Motion",
-    description: "Direção atlética, luminosa e cinética para movimento e acompanhamento.",
+    name: "Conversão Cinemática",
+    description: "Landing page de alto impacto para vender acompanhamento, app, desafios e comunidade.",
     renderer: "Template02",
     entitlement: "can_use_template_02",
-    sections: sections(["hero", "positioning", "specialties", "methodology", "digital_experience", "results", "services", "instagram", "testimonials", "final_cta"]),
+    sections: approvedFixedSections(["hero", "about", "digital_experience", "services", "testimonials", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "coaching", "movement_primary", "movement_secondary", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
   },
