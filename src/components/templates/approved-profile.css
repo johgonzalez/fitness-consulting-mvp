@@ -625,7 +625,7 @@
   display: block;
   max-width: 18rem;
   margin-top: 1rem;
-  color: #707883;
+  color: #626b76;
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -695,7 +695,7 @@
 }
 
 .service-price span {
-  color: #737b86;
+  color: #626b76;
   font-size: 0.8rem;
 }
 
@@ -1226,7 +1226,7 @@
   display: grid;
   padding-block: 0 2rem;
   gap: 1.2rem;
-  color: #757d87;
+  color: #656e78;
   font-size: 0.75rem;
   line-height: 1.5;
 }

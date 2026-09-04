@@ -248,6 +248,7 @@ export function Template02({ site }: { site: TrainerSiteData }) {
               width={900}
               height={1200}
               unoptimized
+              loading="eager"
               sizes="(max-width: 760px) 82vw, 42vw"
             />
             <div className="floating-signal signal-progress">

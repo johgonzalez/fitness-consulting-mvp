@@ -583,7 +583,7 @@
 
 .week-line span:nth-child(2), .week-line span:nth-child(3) { justify-self: center; }
 .week-line span:last-child { justify-self: end; }
-.week-line span.is-current { border-color: var(--brand-accent-ink); background: var(--brand-accent); font-weight: 900; }
+.week-line span.is-current { border-color: var(--ink); background: var(--ink); color: var(--paper); font-weight: 900; }
 
 .community-features { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
 .community-features span { padding: 7px 10px; border: 1px solid #b1b5aa; border-radius: 999px; font-size: 0.67rem; font-weight: 700; }
@@ -620,7 +620,7 @@
 
 .testimonial-rail figcaption div { display: flex; flex-direction: column; }
 .testimonial-rail figcaption strong { font-size: 0.78rem; }
-.testimonial-rail figcaption span, .testimonial-rail figcaption small { color: #72776d; font-size: 0.65rem; }
+.testimonial-rail figcaption span, .testimonial-rail figcaption small { color: #62675e; font-size: 0.65rem; }
 .testimonial-rail figcaption small { font-family: var(--font-mono); }
 
 .final-cta {
@@ -693,6 +693,7 @@ footer {
 
 footer p, footer > a:last-child { margin: 0; color: #949990; font-size: 0.72rem; }
 footer > a:last-child { width: max-content; border-bottom: 1px solid #70756d; }
+footer .brand-mark { border-color: var(--paper); color: var(--paper); }
 
 .mobile-contact {
   position: fixed;
