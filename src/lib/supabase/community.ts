@@ -1,6 +1,7 @@
 import "server-only";
-import type { CommunityChallenge, CommunityComment, CommunityGroup, CommunityInviteCandidate, CommunityMember, CommunityNotification, CommunityPost, CommunityRankingEntry, CommunityRankingPeriod, CommunityReport } from "@/lib/domain/community";
+import type { CommunityChallenge, CommunityComment, CommunityGroup, CommunityInviteCandidate, CommunityMember, CommunityNotification, CommunityPerson, CommunityPost, CommunityRankingEntry, CommunityRankingPeriod, CommunityReport } from "@/lib/domain/community";
 import { createClient } from "@/lib/supabase/server";
+import { isStudentProfileImagePath, signStudentProfileImagePaths } from "@/lib/supabase/student-profile-media";
 
 type Row = Record<string, unknown>;
 const asRow = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
@@ -28,6 +29,14 @@ async function signPaths(paths: string[]) {
 function parsePerson(value: unknown) {
   const item = asRow(value);
   return { userId: text(item.user_id), name: text(item.name, "Membro"), imageUrl: nullableText(item.image_url) };
+}
+
+async function hydratePeople<T extends CommunityPerson>(people: T[]): Promise<T[]> {
+  const signed = await signStudentProfileImagePaths(people.map((person) => person.imageUrl));
+  return people.map((person) => ({
+    ...person,
+    imageUrl: isStudentProfileImagePath(person.imageUrl) ? signed.get(person.imageUrl) ?? null : person.imageUrl,
+  }));
 }
 
 function parseGroup(value: unknown): CommunityGroup {
@@ -64,13 +73,25 @@ function parsePost(value: unknown): CommunityPost {
 }
 
 async function hydrateGroups(groups: CommunityGroup[]) {
-  const signed = await signPaths(groups.flatMap((group) => [group.avatarPath, group.coverPath].filter((path): path is string => Boolean(path))));
-  return groups.map((group) => ({ ...group, avatarUrl: group.avatarPath ? signed.get(group.avatarPath) ?? null : null, coverUrl: group.coverPath ? signed.get(group.coverPath) ?? null : null }));
+  const [signed, owners] = await Promise.all([
+    signPaths(groups.flatMap((group) => [group.avatarPath, group.coverPath].filter((path): path is string => Boolean(path)))),
+    hydratePeople(groups.map((group) => group.owner)),
+  ]);
+  return groups.map((group, index) => ({ ...group, owner: owners[index] ?? group.owner, avatarUrl: group.avatarPath ? signed.get(group.avatarPath) ?? null : null, coverUrl: group.coverPath ? signed.get(group.coverPath) ?? null : null }));
 }
 
 async function hydratePosts(posts: CommunityPost[]) {
-  const signed = await signPaths(posts.flatMap((post) => [post.group.avatarPath, ...post.media.map((media) => media.storagePath)].filter((path): path is string => Boolean(path))));
-  return posts.map((post) => ({ ...post, group: { ...post.group, avatarUrl: post.group.avatarPath ? signed.get(post.group.avatarPath) ?? null : null }, media: post.media.map((media) => ({ ...media, signedUrl: signed.get(media.storagePath) ?? null })) }));
+  const people = posts.flatMap((post) => [post.author, ...post.comments.map((comment) => ({ userId: comment.authorUserId, name: comment.authorName, imageUrl: comment.authorImageUrl }))]);
+  const [signed, hydratedPeople] = await Promise.all([
+    signPaths(posts.flatMap((post) => [post.group.avatarPath, ...post.media.map((media) => media.storagePath)].filter((path): path is string => Boolean(path)))),
+    hydratePeople(people),
+  ]);
+  let personIndex = 0;
+  return posts.map((post) => {
+    const author = hydratedPeople[personIndex++];
+    const comments = post.comments.map((comment) => ({ ...comment, authorImageUrl: hydratedPeople[personIndex++]?.imageUrl ?? null }));
+    return { ...post, author: { ...post.author, imageUrl: author?.imageUrl ?? null }, comments, group: { ...post.group, avatarUrl: post.group.avatarPath ? signed.get(post.group.avatarPath) ?? null : null }, media: post.media.map((media) => ({ ...media, signedUrl: signed.get(media.storagePath) ?? null })) };
+  });
 }
 
 async function rpc(name: string, args?: Record<string, unknown>) {
@@ -86,10 +107,10 @@ export async function searchCommunityGroups(query = "") { return hydrateGroups(a
 export async function getCommunityGroup(groupId: string) { return (await hydrateGroups([parseGroup(await rpc("get_community_group", { p_group_id: groupId }))]))[0]; }
 export async function listCommunityFeed(beforePublishedAt?: string, beforeId?: string) { return hydratePosts(asList(await rpc("list_my_community_feed", { p_limit: 15, p_before_published_at: beforePublishedAt ?? null, p_before_id: beforeId ?? null })).map(parsePost)); }
 export async function listCommunityGroupPosts(groupId: string, beforePublishedAt?: string, beforeId?: string, onlyPostId?: string) { return hydratePosts(asList(await rpc("list_community_group_posts", { p_group_id: groupId, p_limit: onlyPostId ? 1 : 15, p_before_published_at: beforePublishedAt ?? null, p_before_id: beforeId ?? null, p_only_post_id: onlyPostId ?? null })).map(parsePost)); }
-export async function listCommunityPostComments(postId: string, beforeCreatedAt?: string, beforeId?: string) { return asList(await rpc("list_community_post_comments", { p_post_id: postId, p_limit: 30, p_before_created_at: beforeCreatedAt ?? null, p_before_id: beforeId ?? null })).map(parseComment); }
-export async function listCommunityMembers(groupId: string): Promise<CommunityMember[]> { return asList(await rpc("list_community_group_members", { p_group_id: groupId, p_limit: 100 })).map((value) => { const item = asRow(value); return { ...parsePerson(item), role: text(item.role) as CommunityMember["role"], status: text(item.status) as CommunityMember["status"], origin: text(item.origin) as CommunityMember["origin"], joinedAt: nullableText(item.joined_at) }; }); }
-export async function listCommunityInviteCandidates(groupId: string): Promise<CommunityInviteCandidate[]> { return asList(await rpc("list_community_invitable_members", { p_group_id: groupId })).map((value) => parsePerson(asRow(value))); }
-export async function listCommunityRanking(groupId: string, period: CommunityRankingPeriod): Promise<CommunityRankingEntry[]> { return asList(await rpc("list_community_group_ranking", { p_group_id: groupId, p_period: period, p_limit: 100 })).map((value) => { const item = asRow(value); return { ...parsePerson(item), position: number(item.position), activeDays: number(item.active_days), reachedAt: text(item.reached_at), isCurrentUser: boolean(item.is_current_user) }; }); }
+export async function listCommunityPostComments(postId: string, beforeCreatedAt?: string, beforeId?: string) { const comments = asList(await rpc("list_community_post_comments", { p_post_id: postId, p_limit: 30, p_before_created_at: beforeCreatedAt ?? null, p_before_id: beforeId ?? null })).map(parseComment); const people = await hydratePeople(comments.map((comment) => ({ userId: comment.authorUserId, name: comment.authorName, imageUrl: comment.authorImageUrl }))); return comments.map((comment, index) => ({ ...comment, authorImageUrl: people[index]?.imageUrl ?? null })); }
+export async function listCommunityMembers(groupId: string): Promise<CommunityMember[]> { const members = asList(await rpc("list_community_group_members", { p_group_id: groupId, p_limit: 100 })).map((value) => { const item = asRow(value); return { ...parsePerson(item), role: text(item.role) as CommunityMember["role"], status: text(item.status) as CommunityMember["status"], origin: text(item.origin) as CommunityMember["origin"], joinedAt: nullableText(item.joined_at) }; }); return hydratePeople(members); }
+export async function listCommunityInviteCandidates(groupId: string): Promise<CommunityInviteCandidate[]> { return hydratePeople(asList(await rpc("list_community_invitable_members", { p_group_id: groupId })).map((value) => parsePerson(asRow(value)))); }
+export async function listCommunityRanking(groupId: string, period: CommunityRankingPeriod): Promise<CommunityRankingEntry[]> { const entries = asList(await rpc("list_community_group_ranking", { p_group_id: groupId, p_period: period, p_limit: 100 })).map((value) => { const item = asRow(value); return { ...parsePerson(item), position: number(item.position), activeDays: number(item.active_days), reachedAt: text(item.reached_at), isCurrentUser: boolean(item.is_current_user) }; }); return hydratePeople(entries); }
 export async function listCommunityNotifications(): Promise<CommunityNotification[]> { return asList(await rpc("list_my_community_notifications", { p_limit: 30 })).map((value) => { const item = asRow(value); return { id: text(item.id), type: text(item.type) as CommunityNotification["type"], groupId: text(item.group_id), groupName: text(item.group_name), postId: nullableText(item.post_id), actorName: nullableText(item.actor_name), readAt: nullableText(item.read_at), createdAt: text(item.created_at) }; }); }
 export async function listCommunityReports(groupId: string): Promise<CommunityReport[]> { return asList(await rpc("list_community_reports", { p_group_id: groupId })).map((value) => { const item = asRow(value); return { id: text(item.id), postId: nullableText(item.post_id), commentId: nullableText(item.comment_id), reasonCode: text(item.reason_code), details: nullableText(item.details), status: text(item.status), createdAt: text(item.created_at) }; }); }
 function parseChallenge(value: unknown): CommunityChallenge { const item=asRow(value); const acceptance=text(item.acceptance_status); return { id:text(item.id),groupId:text(item.group_id),groupName:nullableText(item.group_name)??undefined,title:text(item.title),instructions:nullableText(item.instructions),durationMinutes:item.duration_minutes==null?null:number(item.duration_minutes),workoutSessionId:nullableText(item.workout_session_id),startsAt:nullableText(item.starts_at)??undefined,expiresAt:nullableText(item.expires_at),status:nullableText(item.status)??undefined,accepted:boolean(item.accepted)||acceptance==="ACCEPTED"||acceptance==="COMPLETED",acceptanceStatus:acceptance==="COMPLETED"?"COMPLETED":acceptance==="ACCEPTED"?"ACCEPTED":null }; }

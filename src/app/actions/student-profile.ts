@@ -31,5 +31,8 @@ export async function updateStudentProfileAction(_state: StudentProfileState, fo
   if (current?.profile_image_path && imagePath !== current.profile_image_path) await supabase.storage.from("student-private-media").remove([current.profile_image_path]);
   revalidatePath("/student/profile");
   revalidatePath("/student/today");
+  revalidatePath("/student", "layout");
+  revalidatePath("/student/community");
+  revalidatePath("/dashboard/community");
   return { ok: true, message: "Perfil atualizado." };
 }

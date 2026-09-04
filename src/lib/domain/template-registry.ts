@@ -6,7 +6,7 @@ import {
   type SiteSectionPreference,
 } from "@/lib/domain/site-sections";
 
-export type TemplateRendererId = "Template01" | "Template02" | "Template03" | "AtelierTemplate";
+export type TemplateRendererId = "LegacyTemplate01" | "LegacyTemplate02" | "Template01" | "Template02" | "Template03" | "AtelierTemplate";
 export type TemplateEntitlementKey = Extract<keyof TrainerEntitlements, `can_use_template_${string}`>;
 
 export interface TemplateSectionDefinition {
@@ -84,20 +84,20 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
   template_01: {
     id: "template_01",
     name: "Template 01",
-    description: "Perfil profissional direto, leve e confiável, com avatar, serviços e acompanhamento no app.",
-    renderer: "Template01",
+    description: "Presença profissional direta, editorial e centrada na marca do Personal.",
+    renderer: "LegacyTemplate01",
     entitlement: "can_use_template_01",
-    sections: approvedFixedSections(["hero", "about", "services", "digital_experience", "methodology", "final_cta"]),
+    sections: sections(["hero", "about", "specialties", "services", "instagram", "digital_experience", "methodology", "testimonials", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
   },
   template_02: {
     id: "template_02",
     name: "Template 02",
-    description: "Landing page de alto impacto para vender acompanhamento, app, desafios e comunidade.",
-    renderer: "Template02",
+    description: "Direção atlética e cinética para apresentar movimento, método e acompanhamento.",
+    renderer: "LegacyTemplate02",
     entitlement: "can_use_template_02",
-    sections: approvedFixedSections(["hero", "about", "digital_experience", "services", "testimonials", "final_cta"]),
+    sections: sections(["hero", "positioning", "specialties", "methodology", "digital_experience", "results", "services", "instagram", "testimonials", "final_cta"]),
     semanticMediaSlots: ["profile", "hero", "about", "coaching", "movement_primary", "movement_secondary", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
   },
@@ -119,6 +119,26 @@ export const templateDefinitions: Readonly<Record<TemplateId, TemplateDefinition
     entitlement: "can_use_template_04",
     sections: supportedSections(["hero", "specialties", "digital_experience", "methodology", "services", "final_cta"]),
     semanticMediaSlots: ["hero", "student_experience", "movement_secondary"],
+    availability: { enabled: true, lab: true, production: true },
+  },
+  template_05: {
+    id: "template_05",
+    name: "Template 05",
+    description: "Perfil profissional direto, leve e confiável, com avatar, serviços e acompanhamento no app.",
+    renderer: "Template01",
+    entitlement: "can_use_template_05",
+    sections: approvedFixedSections(["hero", "about", "services", "digital_experience", "methodology", "final_cta"]),
+    semanticMediaSlots: ["profile", "hero", "about", "services", "student_experience"],
+    availability: { enabled: true, lab: true, production: true },
+  },
+  template_06: {
+    id: "template_06",
+    name: "Template 06",
+    description: "Landing page de alto impacto para apresentar acompanhamento, app, desafios e comunidade.",
+    renderer: "Template02",
+    entitlement: "can_use_template_06",
+    sections: approvedFixedSections(["hero", "about", "digital_experience", "services", "testimonials", "final_cta"]),
+    semanticMediaSlots: ["profile", "hero", "about", "coaching", "movement_primary", "movement_secondary", "services", "student_experience"],
     availability: { enabled: true, lab: true, production: true },
   },
 };

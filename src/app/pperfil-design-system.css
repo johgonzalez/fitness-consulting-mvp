@@ -1399,13 +1399,21 @@
 .template-preview-v2.is-template_04 { background:#0d0e12;color:#fff; }
 .template-preview-v2.is-template_04>img { opacity:.72;filter:saturate(.72) contrast(1.08); }
 .template-preview-v2.is-template_04:after { content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#0b0c10f5 0 46%,#0b0c1099 66%,transparent 100%); }
-.template-preview-v2__essential,.template-preview-v2__performance,.template-preview-v2__conversion,.template-preview-v2__atelier { position:absolute;z-index:2;left:7%;top:50%;width:43%;display:grid;gap:7px;transform:translateY(-50%); }
-.template-preview-v2__essential small,.template-preview-v2__performance small,.template-preview-v2__conversion small,.template-preview-v2__atelier small { overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.43rem;font-weight:750;text-transform:uppercase; }
-.template-preview-v2__essential strong,.template-preview-v2__performance strong,.template-preview-v2__conversion strong,.template-preview-v2__atelier strong { display:-webkit-box;overflow:hidden;-webkit-line-clamp:3;-webkit-box-orient:vertical;font:750 clamp(.68rem,1.4vw,1.2rem)/1.05 var(--pp-font-display);letter-spacing:-.05em; }
-.template-preview-v2__essential>span,.template-preview-v2__performance>span { width:max-content;max-width:100%;min-height:23px;display:flex;align-items:center;padding:0 8px;background:var(--template-accent,var(--pp-purple-700));color:#fff;font-size:.38rem;font-weight:700; }
+.template-preview-v2.is-template_05 { background:#eef0ea;color:#10110f; }
+.template-preview-v2.is-template_05>img { left:54%!important;width:46%!important;filter:saturate(.82) contrast(1.04); }
+.template-preview-v2.is-template_05:after { content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#eef0ea 0 50%,#eef0eae6 61%,transparent 82%); }
+.template-preview-v2.is-template_06 { background:#090909;color:#fff; }
+.template-preview-v2.is-template_06>img { opacity:.68;filter:saturate(.7) contrast(1.14); }
+.template-preview-v2.is-template_06:after { content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#090909 0 48%,#090909d9 62%,transparent 88%); }
+.template-preview-v2__essential,.template-preview-v2__performance,.template-preview-v2__conversion,.template-preview-v2__atelier,.template-preview-v2__profile,.template-preview-v2__cinematic { position:absolute;z-index:2;left:7%;top:50%;width:43%;display:grid;gap:7px;transform:translateY(-50%); }
+.template-preview-v2__essential small,.template-preview-v2__performance small,.template-preview-v2__conversion small,.template-preview-v2__atelier small,.template-preview-v2__profile small,.template-preview-v2__cinematic small { overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.43rem;font-weight:750;text-transform:uppercase; }
+.template-preview-v2__essential strong,.template-preview-v2__performance strong,.template-preview-v2__conversion strong,.template-preview-v2__atelier strong,.template-preview-v2__profile strong,.template-preview-v2__cinematic strong { display:-webkit-box;overflow:hidden;-webkit-line-clamp:3;-webkit-box-orient:vertical;font:750 clamp(.68rem,1.4vw,1.2rem)/1.05 var(--pp-font-display);letter-spacing:-.05em; }
+.template-preview-v2__essential>span,.template-preview-v2__performance>span,.template-preview-v2__profile>span,.template-preview-v2__cinematic>span { width:max-content;max-width:100%;min-height:23px;display:flex;align-items:center;padding:0 8px;background:var(--template-accent,var(--pp-purple-700));color:#fff;font-size:.38rem;font-weight:700; }
 .template-preview-v2__performance { color:#111318; }
 .template-preview-v2__performance small { color:var(--template-accent,#6e42f5); }
 .template-preview-v2__performance>span { background:#111318;color:#fff; }
+.template-preview-v2__profile>span { background:#10110f;color:#fff; }
+.template-preview-v2__cinematic>span { background:#fff;color:#090909; }
 .template-preview-v2__conversion>div { display:flex;flex-wrap:wrap;gap:4px;color:#555b65;font-size:.38rem; }
 .template-preview-v2__conversion b { color:var(--template-accent,var(--pp-purple-700));font-weight:700; }
 .template-preview-v2__atelier small { color:#a998ff;letter-spacing:.08em; }

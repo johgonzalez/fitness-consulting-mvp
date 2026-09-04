@@ -1,6 +1,7 @@
 "use client";
 
 import { Bell, Camera, Dumbbell, LoaderCircle, MessageCircle, X } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createCommunityPostAction } from "@/app/actions/community";
 import type { CommunityGroup, CommunityPost } from "@/lib/domain/community";
@@ -36,12 +37,15 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const xhrRef = useRef<XMLHttpRequest | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlsRef = useRef<string[]>([]);
   const [pending, startTransition] = useTransition();
   const availableGroups = groups.filter((group) => group.membershipStatus === "ACTIVE" && group.canPost);
   const [groupId, setGroupId] = useState(availableGroups[0]?.id ?? "");
   const [kind, setKind] = useState<ComposerKind>(shareWorkoutExecutionId ? "WORKOUT_COMPLETION" : "TEXT");
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<Array<{ name: string; url: string }>>([]);
   const [progress, setProgress] = useState(0);
   const [photoPhase, setPhotoPhase] = useState<PhotoPhase>("IDLE");
   const photoBusy = photoPhase !== "IDLE" && photoPhase !== "PUBLISHED";
@@ -56,14 +60,40 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
+  useEffect(() => () => previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url)), []);
+
+  function replacePhotos(selectedFiles: File[]) {
+    previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    const next = selectedFiles.slice(0, 4).map((file) => ({ name: file.name, url: URL.createObjectURL(file) }));
+    previewUrlsRef.current = next.map((item) => item.url);
+    setFiles(selectedFiles.slice(0, 4));
+    setPreviews(next);
+  }
+
+  function clearPhotos() {
+    previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+    previewUrlsRef.current = [];
+    setFiles([]);
+    setPreviews([]);
+  }
+
   function resetAndClose() {
     xhrRef.current?.abort(); xhrRef.current = null;
-    setBody(""); setFiles([]); setProgress(0); setPhotoPhase("IDLE"); setError(null); setConfirmClose(false); onClose();
+    setBody(""); clearPhotos(); setProgress(0); setPhotoPhase("IDLE"); setError(null); setConfirmClose(false); onClose();
   }
 
   function requestClose() {
     if (pending || photoBusy) return;
     if (body.trim() || files.length) setConfirmClose(true); else resetAndClose();
+  }
+
+  function removePhoto(index: number) {
+    setError(null);
+    const removed = previewUrlsRef.current[index];
+    if (removed) URL.revokeObjectURL(removed);
+    previewUrlsRef.current = previewUrlsRef.current.filter((_, itemIndex) => itemIndex !== index);
+    setFiles((current) => current.filter((_, itemIndex) => itemIndex !== index));
+    setPreviews((current) => current.filter((_, itemIndex) => itemIndex !== index));
   }
 
   async function uploadPhotos() {
@@ -129,7 +159,10 @@ export function CommunityComposer({ open, groups, audience, shareWorkoutExecutio
       {kind === "WORKOUT_COMPLETION" ? <div className="community-workout-preview"><Dumbbell aria-hidden="true" /><div><small>Treino concluído</small><strong>Resumo factual do treino</strong><p>Somente duração, exercícios e séries concluídas serão compartilhados.</p></div></div> : null}
       <label className="community-composer-field" htmlFor="community-post-body">{kind === "TRAINER_ANNOUNCEMENT" ? "Aviso" : kind === "WORKOUT_COMPLETION" ? "Legenda opcional" : "Publicação"}<textarea id="community-post-body" value={body} onChange={(event) => setBody(event.target.value)} maxLength={2000} rows={6} placeholder={kind === "WORKOUT_COMPLETION" ? "Como foi o treino?" : "O que você quer compartilhar?"} /></label>
       <small className="community-character-count">{body.length}/2000</small>
-      {kind === "PHOTO" ? <label className="community-file"><Camera aria-hidden="true" /><span>{files.length ? `${files.length} de 4 imagens selecionadas` : "Escolher até 4 imagens"}</span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { setError(null); setFiles(Array.from(event.target.files ?? []).slice(0, 4)); }} /></label> : null}
+      {kind === "PHOTO" ? <div className="community-photo-picker">
+        {previews.length ? <div className={`community-photo-previews community-photo-previews--${previews.length}`} aria-label={`${previews.length} ${previews.length === 1 ? "imagem selecionada" : "imagens selecionadas"}`}>{previews.map((preview, index) => <figure key={preview.url}><Image src={preview.url} alt={`Prévia da imagem ${index + 1}: ${preview.name}`} fill sizes="(max-width: 480px) 44vw, 180px" unoptimized /><button type="button" onClick={() => removePhoto(index)} aria-label={`Remover imagem ${index + 1}`}><X aria-hidden="true" /></button></figure>)}</div> : null}
+        <label className="community-file"><Camera aria-hidden="true" /><span>{files.length ? `Substituir fotos · ${files.length} de 4` : "Escolher até 4 imagens"}</span><input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => { setError(null); replacePhotos(Array.from(event.target.files ?? [])); event.currentTarget.value = ""; }} /></label>
+      </div> : null}
       {photoPhase !== "IDLE" ? <div className="community-upload" aria-live="polite"><div><span style={{ width: `${photoPhase === "PREPARING" ? 8 : progress}%` }} /></div><p>{photoPhase === "PREPARING" ? "Preparando imagens…" : photoPhase === "UPLOADING" ? `Enviando · ${progress}%` : photoPhase === "PROCESSING" ? "Processando com segurança…" : "Publicado"}</p>{photoPhase !== "PUBLISHED" ? <button type="button" onClick={() => { xhrRef.current?.abort(); setPhotoPhase("IDLE"); setProgress(0); }}>Cancelar envio</button> : null}</div> : null}
       {error ? <div className="community-inline-error" role="alert"><p>{error}</p>{kind === "PHOTO" && files.length ? <button type="button" onClick={() => void uploadPhotos()}>Tentar novamente</button> : null}</div> : null}
       {confirmClose ? <div className="community-discard-confirm" role="alertdialog" aria-label="Descartar publicação"><strong>Descartar esta publicação?</strong><p>O conteúdo ainda não foi publicado.</p><div><button type="button" onClick={() => setConfirmClose(false)}>Continuar editando</button><button type="button" onClick={resetAndClose}>Descartar</button></div></div> : null}

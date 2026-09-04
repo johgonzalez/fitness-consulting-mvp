@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const approvedPreviewTemplates = new Set<TemplateId>(["template_01", "template_02"]);
+const approvedPreviewTemplates = new Set<TemplateId>(["template_01", "template_02", "template_03", "template_04", "template_05", "template_06"]);
 
 export default async function TemplatePreviewPage({
   params,

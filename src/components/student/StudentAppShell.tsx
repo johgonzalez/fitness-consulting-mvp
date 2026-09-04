@@ -1,6 +1,6 @@
 "use client";
 
-import { BarChart3, Dumbbell, House, UsersRound, UserRound } from "lucide-react";
+import { BarChart3, Dumbbell, House, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
@@ -13,7 +13,6 @@ const navigation = [
   { label: "Treinos", href: "/student/workouts", icon: Dumbbell },
   { label: "Comunidade", href: "/student/community", icon: UsersRound },
   { label: "Progresso", href: "/student/progress", icon: BarChart3 },
-  { label: "Perfil", href: "/student/profile", icon: UserRound },
 ] as const;
 
 export function StudentAppShell({ children, demoMode, identity }: { children: React.ReactNode; demoMode: boolean; identity: StudentWorkoutIdentity }) {
@@ -39,6 +38,10 @@ export function StudentAppShell({ children, demoMode, identity }: { children: Re
         const active = pathname === href || ((href === "/student/workouts" || href === "/student/community") && pathname.startsWith(`${href}/`));
         return <Link key={href} href={href} aria-current={active ? "page" : undefined}><Icon aria-hidden="true" /><span>{label}</span></Link>;
       })}
+      <Link href="/student/profile" aria-current={pathname === "/student/profile" ? "page" : undefined}>
+        <Avatar name={identity.studentName} imageUrl={identity.studentImageUrl} size="small" loading="eager" className="pp-student-nav__avatar" />
+        <span>Perfil</span>
+      </Link>
     </nav>
   </div>;
 }

@@ -1,5 +1,5 @@
 export type ServiceMode = "online" | "presencial" | "both";
-export type TemplateId = "template_01" | "template_02" | "template_03" | "template_04";
+export type TemplateId = "template_01" | "template_02" | "template_03" | "template_04" | "template_05" | "template_06";
 export type BillingType = "monthly" | "per_session" | "package" | "starting_at";
 export type PriceVisibility = "public" | "match_only" | "hidden";
 export type ServiceConversionMode = "WHATSAPP" | "INTEREST";
@@ -78,6 +78,8 @@ export interface TrainerEntitlements {
   can_use_template_02: boolean;
   can_use_template_03: boolean;
   can_use_template_04: boolean;
+  can_use_template_05: boolean;
+  can_use_template_06: boolean;
   can_use_free_template: boolean;
   can_use_premium_templates: boolean;
   can_publish_site: boolean;

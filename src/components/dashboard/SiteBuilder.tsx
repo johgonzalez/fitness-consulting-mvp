@@ -58,10 +58,12 @@ import { getTemplateDefinition, templateCatalog, type TemplateDefinition } from 
 const initialState: SiteActionState = {};
 
 const templatePositioning: Record<TrainerProfile["template_id"], { traits: string; fit: string }> = {
-  template_01: { traits: "Perfil · Direto", fit: "Para começar com autoridade, avatar, serviços e app." },
-  template_02: { traits: "Cinemático · Conversão", fit: "Para vender acompanhamento, desafios e comunidade." },
+  template_01: { traits: "Limpo · Direto", fit: "Para uma presença profissional sem excesso." },
+  template_02: { traits: "Visual · Dinâmico", fit: "Para quem vende energia e transformação." },
   template_03: { traits: "Comercial · Objetivo", fit: "Para destacar serviços e chamadas para ação." },
   template_04: { traits: "Editorial · Premium", fit: "Para construir uma marca pessoal sofisticada." },
+  template_05: { traits: "Perfil · Direto", fit: "Para começar com autoridade, avatar, serviços e app." },
+  template_06: { traits: "Cinemático · Conversão", fit: "Para vender acompanhamento, desafios e comunidade." },
 };
 
 type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance";

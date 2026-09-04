@@ -82,6 +82,14 @@
 .community-composer nav { display:flex;gap:5px;overflow-x:auto; }.community-composer nav button { min-height:42px;display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid var(--pp-border);border-radius:999px;background:transparent;color:var(--pp-text-muted);font-size:.64rem;font-weight:680;white-space:nowrap; }.community-composer nav button.active { background:var(--pp-surface-subtle);color:var(--pp-text-primary); }.community-composer nav svg { width:14px; }
 .community-composer>section>label:not(.community-file) { margin-top:8px;font-size:.68rem;font-weight:700; }.community-composer textarea { width:100%;min-height:160px;resize:vertical;padding:14px;border:1px solid transparent;border-radius:11px;background:var(--pp-surface-subtle);color:var(--pp-text-primary);font:500 16px/1.5 var(--pp-font-body); }.community-composer>section>small { justify-self:end;color:var(--pp-text-muted);font-size:.57rem; }
 .community-file { min-height:72px;display:flex;align-items:center;gap:11px;padding:12px;border:1px dashed var(--pp-border-strong);border-radius:11px;color:var(--pp-text-secondary);font-size:.68rem;cursor:pointer; }.community-file svg { width:21px; }.community-file input { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+.community-photo-picker { display:grid;gap:10px; }
+.community-photo-previews { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;overflow:hidden;border-radius:12px; }
+.community-photo-previews--1 { grid-template-columns:1fr; }
+.community-photo-previews figure { position:relative;min-height:128px;margin:0;overflow:hidden;background:var(--pp-surface-subtle); }
+.community-photo-previews--1 figure { min-height:220px; }
+.community-photo-previews figure>img { object-fit:cover; }
+.community-photo-previews figure>button { position:absolute;z-index:2;top:8px;right:8px;width:44px;height:44px;display:grid;place-items:center;border:1px solid #ffffff38;border-radius:50%;background:#111c;color:#fff; }
+.community-photo-previews figure>button svg { width:18px;height:18px; }
 .community-workout-preview { margin-top:8px; }.community-workout-preview p { margin:3px 0 0;color:var(--pp-text-muted);font-size:.65rem;line-height:1.4; }
 
 @media (max-width:767px) {

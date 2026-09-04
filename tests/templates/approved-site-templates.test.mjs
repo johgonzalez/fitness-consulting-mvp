@@ -19,11 +19,11 @@ test("approved profile and conversion renderers stay connected to TrainerSiteDat
   assert.match(dispatcher, /Template02,/);
 });
 
-test("both approved templates expose exactly six fixed sections", async () => {
+test("both approved templates are additive catalog entries with exactly six fixed sections", async () => {
   const registry = await read("src/lib/domain/template-registry.ts");
 
-  assert.match(registry, /template_01:[\s\S]*approvedFixedSections\(\["hero", "about", "services", "digital_experience", "methodology", "final_cta"\]\)/);
-  assert.match(registry, /template_02:[\s\S]*approvedFixedSections\(\["hero", "about", "digital_experience", "services", "testimonials", "final_cta"\]\)/);
+  assert.match(registry, /template_05:[\s\S]*approvedFixedSections\(\["hero", "about", "services", "digital_experience", "methodology", "final_cta"\]\)/);
+  assert.match(registry, /template_06:[\s\S]*approvedFixedSections\(\["hero", "about", "digital_experience", "services", "testimonials", "final_cta"\]\)/);
   assert.match(registry, /reorderable: false/);
 });
 

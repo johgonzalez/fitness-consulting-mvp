@@ -71,6 +71,8 @@ const entitlements: TrainerEntitlements = {
   can_use_template_02: true,
   can_use_template_03: true,
   can_use_template_04: true,
+  can_use_template_05: true,
+  can_use_template_06: true,
   can_use_free_template: true,
   can_use_premium_templates: true,
   can_publish_site: true,

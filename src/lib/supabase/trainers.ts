@@ -14,12 +14,13 @@ const publicProfileColumns = `${legacyPublicProfileColumns},profile_status_enabl
 const testimonialColumns = "id,trainer_id,student_name,content,image_url,before_image_url,after_image_url,result_context,instagram_handle,instagram_url,published";
 const legacyEntitlementColumns = "trainer_id,can_build_site,can_preview_site,can_use_template_01,can_use_template_02,can_use_free_template,can_use_premium_templates,can_publish_site,can_receive_leads,can_use_matching";
 const templateFoundationEntitlementColumns = `${legacyEntitlementColumns},can_use_template_03`;
-const entitlementColumns = `${templateFoundationEntitlementColumns},can_use_template_04,can_manage_students,can_use_assessments,can_use_workouts,can_manage_progress,can_use_community_feed`;
+const templateCatalogV1EntitlementColumns = `${templateFoundationEntitlementColumns},can_use_template_04,can_manage_students,can_use_assessments,can_use_workouts,can_manage_progress,can_use_community_feed`;
+const entitlementColumns = `${templateCatalogV1EntitlementColumns},can_use_template_05,can_use_template_06`;
 
 function isMissingTemplateFoundation(error: { code?: string; message?: string } | null) {
   if (!error) return false;
   return ["42703", "42P01", "PGRST202", "PGRST204", "PGRST205"].includes(error.code ?? "")
-    || /profile_status_|can_use_template_0[34]|can_manage_students|can_use_assessments|can_use_workouts|can_manage_progress|can_use_community_feed|get_my_effective_entitlements|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
+    || /profile_status_|can_use_template_0[3-6]|can_manage_students|can_use_assessments|can_use_workouts|can_manage_progress|can_use_community_feed|get_my_effective_entitlements|get_public_site_services|get_public_methodology_items|trainer_methodology_items/i.test(error.message ?? "");
 }
 
 async function selectTrainerEntitlements(supabase: Awaited<ReturnType<typeof createClient>>, trainerId: string) {
@@ -27,10 +28,12 @@ async function selectTrainerEntitlements(supabase: Awaited<ReturnType<typeof cre
   if (!effective.error && effective.data) return effective;
   const result = await supabase.from("trainer_entitlements").select(entitlementColumns).eq("trainer_id", trainerId).single();
   if (result.error && isMissingTemplateFoundation(result.error)) {
+    const catalogV1 = await supabase.from("trainer_entitlements").select(templateCatalogV1EntitlementColumns).eq("trainer_id", trainerId).single();
+    if (!catalogV1.error) return { ...catalogV1, data: { ...catalogV1.data, can_use_template_05: false, can_use_template_06: false } };
     const foundation = await supabase.from("trainer_entitlements").select(templateFoundationEntitlementColumns).eq("trainer_id", trainerId).single();
-    if (!foundation.error) return { ...foundation, data: { ...foundation.data, can_use_template_04: false } };
+    if (!foundation.error) return { ...foundation, data: { ...foundation.data, can_use_template_04: false, can_use_template_05: false, can_use_template_06: false } };
     const legacy = await supabase.from("trainer_entitlements").select(legacyEntitlementColumns).eq("trainer_id", trainerId).single();
-    return legacy.data ? { ...legacy, data: { ...legacy.data, can_use_template_03: false, can_use_template_04: false } } : legacy;
+    return legacy.data ? { ...legacy, data: { ...legacy.data, can_use_template_03: false, can_use_template_04: false, can_use_template_05: false, can_use_template_06: false } } : legacy;
   }
   return result;
 }

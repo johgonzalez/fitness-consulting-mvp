@@ -20,11 +20,13 @@ import type { CommunityChallenge } from "@/lib/domain/community";
 import { listMyAcceptedCommunityChallenges } from "@/lib/supabase/community";
 import { SupabaseWorkoutExecutionRepository } from "@/lib/supabase/workout-executions";
 import { createClient } from "@/lib/supabase/server";
+import { resolveStudentProfileImageUrl } from "@/lib/supabase/student-profile-media";
 import { SupabaseWorkoutRepository } from "@/lib/supabase/workouts";
 import { WorkoutExecutionService } from "@/lib/workouts/execution-service";
 
 export type StudentWorkoutIdentity = {
   studentName: string;
+  studentImageUrl: string | null;
   trainer: { name: string; imageUrl: string | null; credential: string | null };
 };
 
@@ -98,6 +100,7 @@ function overviewFromSnapshot(snapshot: WorkoutExecutionSnapshot): StudentWorkou
 function demoIdentity(): StudentWorkoutIdentity {
   return {
     studentName: "Juliana Mendes",
+    studentImageUrl: null,
     trainer: {
       name: demoWorkspaceFixture.identity.name,
       imageUrl: demoWorkspaceFixture.profile.profile_image_url ?? "/images/motion/thiago-lateral-bound.png",
@@ -111,7 +114,7 @@ async function liveIdentity(relationshipId?: string): Promise<StudentWorkoutIden
     const supabase = await createClient();
     const [{ data: user }, { data: student }] = await Promise.all([
       supabase.from("app_users").select("display_name").maybeSingle(),
-      supabase.from("student_profiles").select("id,preferred_name").maybeSingle(),
+      supabase.from("student_profiles").select("id,preferred_name,profile_image_path").maybeSingle(),
     ]);
     let relationshipQuery = supabase
       .from("trainer_student_relationships")
@@ -129,6 +132,7 @@ async function liveIdentity(relationshipId?: string): Promise<StudentWorkoutIden
       : { data: null };
     return {
       studentName: (student?.preferred_name as string | null) || (user?.display_name as string | null) || "Aluno",
+      studentImageUrl: await resolveStudentProfileImageUrl(student?.profile_image_path as string | null),
       trainer: {
         name: (trainer?.display_name as string | null) || "Seu Personal",
         imageUrl: (trainer?.profile_image_url as string | null) || null,
@@ -136,7 +140,7 @@ async function liveIdentity(relationshipId?: string): Promise<StudentWorkoutIden
       },
     };
   } catch {
-    return { studentName: "Aluno", trainer: { name: "Seu Personal", imageUrl: null, credential: null } };
+    return { studentName: "Aluno", studentImageUrl: null, trainer: { name: "Seu Personal", imageUrl: null, credential: null } };
   }
 }
 
