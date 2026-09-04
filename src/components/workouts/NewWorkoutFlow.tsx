@@ -184,13 +184,13 @@ export function NewWorkoutFlow({
     {!selected ? <section className={styles.studentPicker} aria-labelledby="choose-student">
       <div className={styles.sectionTitle}><span><UserRound aria-hidden="true" /></span><div><h2 id="choose-student">Escolha o aluno</h2><p>Somente relacionamentos ativos aparecem nesta etapa.</p></div></div>
       {contexts.length ? <div className={styles.studentGrid}>{contexts.map((context) => <button type="button" key={context.student.id} onClick={() => setSelectedId(context.student.id)} className={styles.studentOption}>
-        <Avatar name={context.student.name} size="large" />
+        <Avatar name={context.student.name} imageUrl={context.student.profileImageUrl} size="large" />
         <span><strong>{context.student.name}</strong><small>{context.goal ?? "Objetivo ainda não registrado"}</small><em>{context.latestCompletedAssessment ? `Avaliação concluída em ${formatWorkoutDate(context.latestCompletedAssessment.completedAt)}` : "Sem avaliação concluída"}</em></span>
         <ChevronRight aria-hidden="true" />
       </button>)}</div> : <div className={styles.noStudentState}><UserPlus aria-hidden="true" /><strong>Você precisa adicionar um aluno antes de criar um treino.</strong><Link href="/dashboard/students?add=1#add-student" className="pp-button pp-button--primary">Convidar aluno</Link></div>}
     </section> : <>
       <section className={styles.selectedStudent}>
-        <button type="button" onClick={() => { setSelectedId(null); setGenerated(null); }} aria-label="Trocar aluno"><Avatar name={selected.student.name} size="medium" /></button>
+        <button type="button" onClick={() => { setSelectedId(null); setGenerated(null); }} aria-label="Trocar aluno"><Avatar name={selected.student.name} imageUrl={selected.student.profileImageUrl} size="medium" /></button>
         <div><small>Aluno selecionado</small><strong>{selected.student.name}</strong></div>
         <dl><div><dt>Objetivo</dt><dd>{selected.goal ?? "Não informado"}</dd></div><div><dt>Experiência</dt><dd>{selected.experienceLevel ?? "Não informada"}</dd></div><div><dt>Disponibilidade</dt><dd>{selected.availableTrainingDays ? `${selected.availableTrainingDays}x por semana` : "Não informada"}</dd></div><div><dt>Última avaliação</dt><dd>{selected.latestCompletedAssessment ? formatWorkoutDate(selected.latestCompletedAssessment.completedAt) : "Sem avaliação concluída"}</dd></div></dl>
         <button type="button" className={styles.textButton} onClick={() => { setSelectedId(null); setMode(initialMode); }}>Trocar aluno</button>

@@ -86,7 +86,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         {visible.map((match) => <DataListRow href={`/dashboard/leads/${match.id}`} key={match.id}>
           <IdentityCell name={match.lead.firstName} detail={match.lead.email ?? match.lead.whatsapp} />
           <span className="pp-data-cell pp-data-cell--stacked" role="cell"><strong>{goalLabel(match.lead.goal)}</strong><small>{match.lead.serviceMode}</small></span>
-          <span className="pp-data-cell pp-data-cell--stacked pp-data-cell--origin" role="cell"><strong>Ecossistema PPerfil</strong><small><MapPin aria-hidden="true" />{leadLocation(match)}</small></span>
+          <span className="pp-data-cell pp-data-cell--stacked pp-data-cell--origin" role="cell"><strong>Ecossistema Cheipi</strong><small><MapPin aria-hidden="true" />{leadLocation(match)}</small></span>
           <span className="pp-data-cell pp-data-cell--reservation" role="cell"><Clock3 aria-hidden="true" /><span><strong>{reservationLabel(match)}</strong><small>{new Date(match.reservedUntil).toLocaleDateString("pt-BR")}</small></span></span>
           <span className="pp-data-cell pp-data-cell--status" role="cell"><Status tone={stateTones[match.state]}>{stateLabels[match.state]}</Status></span>
         </DataListRow>)}

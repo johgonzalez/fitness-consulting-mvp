@@ -32,7 +32,7 @@ export function BillingCheckoutButton() {
 
   return <div className="billing-checkout-action">
     <button className="pp-button pp-button--primary" type="button" onClick={startCheckout} disabled={pending}>
-      {pending ? "Abrindo pagamento…" : "Assinar PPerfil Pro"}
+      {pending ? "Abrindo pagamento…" : "Assinar Cheipi Pro"}
     </button>
     {message ? <p className="billing-checkout-error" role="alert">{message}</p> : null}
   </div>;

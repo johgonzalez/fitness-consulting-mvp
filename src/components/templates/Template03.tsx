@@ -12,7 +12,7 @@ import styles from "./conversion.module.css";
 function ConversionPhone({ site }: { site: TrainerSiteData }) {
   return <div className={styles.phone} aria-label={`Prévia mobile ${site.studentExperience.programName}`}>
     <div className={styles.phoneTop}><span>9:41</span><i /></div>
-    <header><div><strong>{site.studentExperience.programName}</strong><small>powered by PPerfil</small></div><span>{site.trainer.firstName.slice(0, 1)}</span></header>
+    <header><div><strong>{site.studentExperience.programName}</strong><small>powered by Cheipi</small></div><span>{site.trainer.firstName.slice(0, 1)}</span></header>
     <p>Seu treino de hoje</p>
     <article><small>Treino A</small><strong>Plano personalizado</strong><ul><li><Check />Exercícios organizados</li><li><Check />Orientações no celular</li></ul><span className={styles.phoneButton}>Abrir treino</span></article>
     <section><span>Progresso</span><div>{[40, 58, 48, 72, 82, 88].map((height, index) => <i key={index} style={{ height }} />)}</div></section>
@@ -47,7 +47,7 @@ export function Template03({ site }: { site: TrainerSiteData }) {
     {visible.has("digital_experience") ? <section key="digital_experience" className={styles.experience} id="experiencia" style={{ order: sectionOrder("digital_experience") }}><ConversionPhone site={site} /><div><span>Incluído no seu acompanhamento</span><h2>Seu treino e sua evolução sempre com você.</h2><p>{site.studentExperience.description}</p><ul>{site.studentExperience.capabilities.map((item) => <li key={item}><Check aria-hidden="true" />{item}</li>)}</ul></div></section> : null}
 
     {visible.has("about") ? <section key="about" className={styles.trust} id="sobre" style={{ order: sectionOrder("about") }}><div><MessageCircle aria-hidden="true" /><h2>Sobre {site.trainer.firstName}.</h2></div><p>{site.about.content}</p></section> : null}
-    {visible.has("positioning") ? <section key="positioning" className={styles.trust} id="proposta" style={{ order: sectionOrder("positioning") }}><div><MessageCircle aria-hidden="true" /><h2>Acompanhamento com identidade.</h2></div><p>Uma experiência digital apresentada com a marca de {site.trainer.firstName}, organizada pela infraestrutura do PPerfil.</p></section> : null}
+    {visible.has("positioning") ? <section key="positioning" className={styles.trust} id="proposta" style={{ order: sectionOrder("positioning") }}><div><MessageCircle aria-hidden="true" /><h2>Acompanhamento com identidade.</h2></div><p>Uma experiência digital apresentada com a marca de {site.trainer.firstName}, organizada pela infraestrutura da Cheipi.</p></section> : null}
 
     {visible.has("testimonials") ? <section key="testimonials" className={styles.testimonials} id="depoimentos" style={{ order: sectionOrder("testimonials") }}><header><h2>O que alunos dizem</h2><p>{site.testimonialsIntro}</p></header>{site.testimonials.map((testimonial) => <blockquote key={testimonial.id}><p>“{testimonial.content}”</p><footer><strong>{testimonial.studentName}</strong>{testimonial.context ? <span>{testimonial.context}</span> : null}{testimonial.instagramHandle ? <a className={styles.testimonialInstagram} href={testimonial.instagramUrl ?? undefined} target="_blank" rel="noreferrer"><InstagramMark />@{testimonial.instagramHandle}</a> : null}</footer></blockquote>)}</section> : null}
 
@@ -57,6 +57,6 @@ export function Template03({ site }: { site: TrainerSiteData }) {
     </OrderedSiteSections>
 
     <section className={styles.final} id="contato" style={{ order: 1000 }}><div><h2>Pronto para dar o próximo passo?</h2><p>{site.trainer.name} · Atendimento {site.trainer.serviceMode === "both" ? "online e presencial" : site.trainer.serviceMode}</p></div><TemplateAction contact={site.contact} event="click_whatsapp_final" className={styles.finalAction}>{site.contact.primaryLabel}</TemplateAction></section>
-    <footer className={styles.footer} style={{ order: 1001 }}><span>{site.trainer.name}</span><small>{site.trainer.registration ? `CREF ${site.trainer.registration}` : site.trainer.professionalTitle}</small><p>powered by <strong>PPerfil</strong></p></footer>
+    <footer className={styles.footer} style={{ order: 1001 }}><span>{site.trainer.name}</span><small>{site.trainer.registration ? `CREF ${site.trainer.registration}` : site.trainer.professionalTitle}</small><p>powered by <strong>Cheipi</strong></p></footer>
   </main>;
 }

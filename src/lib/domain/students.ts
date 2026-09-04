@@ -10,6 +10,7 @@ export interface ManagedLead {
 
 export interface ManagedStudent {
   id: string; studentProfileId: string; name: string; email: string | null;
+  profileImagePath?: string | null; profileImageUrl?: string | null;
   status: RelationshipState; origin: "invitation" | "lead_conversion";
   startedAt: string; inactiveAt: string | null; endedAt: string | null;
 }

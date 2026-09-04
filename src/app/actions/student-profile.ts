@@ -34,5 +34,6 @@ export async function updateStudentProfileAction(_state: StudentProfileState, fo
   revalidatePath("/student", "layout");
   revalidatePath("/student/community");
   revalidatePath("/dashboard/community");
+  revalidatePath("/dashboard", "layout");
   return { ok: true, message: "Perfil atualizado." };
 }

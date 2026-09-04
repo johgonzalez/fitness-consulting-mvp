@@ -116,7 +116,7 @@ const invitations: ManagedInvitation[] = [
 const dashboardMetrics: DashboardMetrics = { profile_views: 1264, whatsapp_clicks: 186, leads: leads.length };
 
 const requests: CustomSiteRequest[] = [];
-const offer: CommercialOffer = { code: "founder_offer", label: "Publicação PPerfil", price: 149, currency: "BRL", payment_label: "pagamento único", enabled: true };
+const offer: CommercialOffer = { code: "founder_offer", label: "Publicação Cheipi", price: 149, currency: "BRL", payment_label: "pagamento único", enabled: true };
 
 export const demoWorkspaceFixture = {
   identity: { name: "Thiago Costa", brand: "Thiago Training", email: "thiago.demo@pperfil.local", role: "TRAINER" as const },

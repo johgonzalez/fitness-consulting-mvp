@@ -30,7 +30,7 @@ export function AtelierFinalCTASection({ site }: { site: TrainerSiteData }) {
           <TemplateAction contact={site.contact} event="click_whatsapp_final" className={`${styles.button} ${styles.buttonPrimary}`}>Começar acompanhamento</TemplateAction>
           {site.contact.instagram.url ? <TemplateAction contact={instagramContact} event="click_instagram" className={styles.button}>Ver Instagram</TemplateAction> : null}
         </div>
-        <p className={styles.powered}>Experiência digital <b>powered by PPerfil</b></p>
+        <p className={styles.powered}>Experiência digital <b>powered by Cheipi</b></p>
       </div>
     </section>
   );

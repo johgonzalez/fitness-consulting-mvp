@@ -12,7 +12,7 @@ export function EditorialMediaLabel({
   if (!media?.requiresEditorialDisclosure) return null;
   return (
     <figcaption className={className}>
-      {proof ? "Imagem editorial PPerfil — não representa aluno ou resultado" : "Imagem editorial PPerfil"}
+      {proof ? "Imagem editorial Cheipi — não representa aluno ou resultado" : "Imagem editorial Cheipi"}
     </figcaption>
   );
 }

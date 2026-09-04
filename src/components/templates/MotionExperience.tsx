@@ -22,7 +22,7 @@ export function MotionExperience({ site }: { site: TrainerSiteData }) {
       <div className={styles.phone} aria-label={`Visualização conceitual da experiência ${site.studentExperience.programName}`}>
         <div className={styles.phoneTop}><span>9:41</span><i /></div>
         <header className={styles.phoneBrand}>
-          <div><strong>{site.studentExperience.programName}</strong><small>powered by PPerfil</small></div>
+      <div><strong>{site.studentExperience.programName}</strong><small>powered by Cheipi</small></div>
           <span>{site.trainer.firstName.slice(0, 1)}</span>
         </header>
 

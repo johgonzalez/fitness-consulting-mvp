@@ -8,8 +8,9 @@ import { rejectDemoMutation } from "@/lib/demo/workspace";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeProfileImage, profileImageMessage } from "@/lib/images/profile-image";
+import { validateTrainerSlug } from "@/lib/validation/trainer-slug";
 
-export type OnboardingActionState = { ok?: boolean; message?: string };
+export type OnboardingActionState = { ok?: boolean; message?: string; normalizedSlug?: string };
 const specialties = new Map([["hypertrophy", "Hipertrofia"], ["weight_loss", "Emagrecimento"], ["strength", "Força"], ["conditioning", "Condicionamento"], ["running", "Corrida"], ["mobility", "Mobilidade"]]);
 const modes = new Set<ServiceMode>(["online", "presencial", "both"]);
 
@@ -62,8 +63,42 @@ export async function saveOnboardingSocial(_state:OnboardingActionState,form:For
   if(whatsapp.length<10||whatsapp.length>15||(rawInstagram&&!instagram.handle)||tiktok===false||youtube===false)return{message:"Revise os canais informados."};const ctx=await context();if(!ctx)return{message:"Sua sessão expirou. Entre novamente."};const{error}=await ctx.supabase.rpc("save_my_onboarding_social",{p_whatsapp:whatsapp,p_instagram:instagram.handle,p_tiktok:tiktok,p_youtube:youtube});if(error)return{message:"Não foi possível salvar seus canais."};redirectToAuthoritativeOnboarding();
 }
 
+function slugValidationMessage(reason: "too_short" | "too_long" | "invalid" | "reserved") {
+  if (reason === "too_short") return "Use pelo menos 3 caracteres.";
+  if (reason === "too_long") return "Use no máximo 70 caracteres.";
+  if (reason === "reserved") return "Este endereço é reservado. Escolha outro.";
+  return "Use apenas letras, números e hífens.";
+}
+
+export async function checkOnboardingSlugAvailability(value: string): Promise<OnboardingActionState> {
+  const validated = validateTrainerSlug(value);
+  if (!validated.ok) return { ok: false, message: slugValidationMessage(validated.reason), normalizedSlug: validated.slug };
+  const ctx = await context();
+  if (!ctx) return { ok: false, message: "Sua sessão expirou. Entre novamente.", normalizedSlug: validated.slug };
+  const { data, error } = await ctx.supabase.rpc("check_my_trainer_slug_availability", { p_slug: validated.slug });
+  if (error) return { ok: false, message: "Não foi possível verificar agora.", normalizedSlug: validated.slug };
+  return data === true
+    ? { ok: true, message: "✓ Disponível", normalizedSlug: validated.slug }
+    : { ok: false, message: "Este endereço já está sendo usado.", normalizedSlug: validated.slug };
+}
+
+export async function saveOnboardingSlug(_state: OnboardingActionState, form: FormData): Promise<OnboardingActionState> {
+  const validated = validateTrainerSlug(String(form.get("requested_slug") ?? ""));
+  if (!validated.ok) return { message: slugValidationMessage(validated.reason), normalizedSlug: validated.slug };
+  const ctx = await context();
+  if (!ctx) return { message: "Sua sessão expirou. Entre novamente.", normalizedSlug: validated.slug };
+  const { data, error } = await ctx.supabase.rpc("save_my_onboarding_slug", { p_slug: validated.slug });
+  if (error) {
+    if (error.message.includes("slug_unavailable")) return { message: "Este endereço já está sendo usado.", normalizedSlug: validated.slug };
+    if (error.message.includes("reserved_slug")) return { message: "Este endereço é reservado. Escolha outro.", normalizedSlug: validated.slug };
+    if (error.message.includes("slug_locked_after_publication")) return { message: "O endereço não pode ser alterado depois da publicação.", normalizedSlug: validated.slug };
+    return { message: "Não foi possível salvar seu endereço agora.", normalizedSlug: validated.slug };
+  }
+  return { ok: true, message: "Endereço salvo.", normalizedSlug: typeof data === "string" ? data : validated.slug };
+}
+
 export async function saveOnboardingTemplate(_state:OnboardingActionState,form:FormData):Promise<OnboardingActionState>{
-  const template=String(form.get("template_id")??"") as TemplateId;if(!isTemplateId(template))return{message:"Escolha um template válido."};const ctx=await context();if(!ctx)return{message:"Sua sessão expirou. Entre novamente."};const saved=await ctx.supabase.rpc("save_my_onboarding_template",{p_template:template});if(saved.error)return{message:"Não foi possível salvar o template."};const finalized=await ctx.supabase.rpc("finalize_my_onboarding");if(finalized.error)return{message:"Não foi possível gerar seu site agora."};redirectToAuthoritativeOnboarding();
+  const template=String(form.get("template_id")??"") as TemplateId;if(!isTemplateId(template))return{message:"Escolha um template válido."};const ctx=await context();if(!ctx)return{message:"Sua sessão expirou. Entre novamente."};const saved=await ctx.supabase.rpc("save_my_onboarding_template",{p_template:template});if(saved.error)return{message:"Não foi possível salvar o template."};const finalized=await ctx.supabase.rpc("finalize_my_onboarding");if(finalized.error)return{message:finalized.error.message.includes("slug_unavailable")?"Esse endereço acabou de ser utilizado. Escolha outro.":finalized.error.message.includes("slug_required")?"Escolha o endereço público do seu site antes do template.":"Não foi possível gerar seu site agora."};redirectToAuthoritativeOnboarding();
 }
 
 export async function requestOnboardingPublication(_state:OnboardingActionState):Promise<OnboardingActionState>{void _state;const ctx=await context();if(!ctx)return{message:"Sua sessão expirou. Entre novamente."};const{error}=await ctx.supabase.rpc("request_my_site_publication");if(error)return{message:"Não foi possível preparar a publicação."};revalidatePath("/onboarding");redirect("/onboarding");}

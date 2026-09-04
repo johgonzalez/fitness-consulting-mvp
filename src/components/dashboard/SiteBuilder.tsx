@@ -121,7 +121,7 @@ function SitePreviewFrame({ profile, compact = false }: { profile: TrainerProfil
     <div className={`pp-site-preview-frame${compact ? " is-compact" : ""}`}>
       <div className="pp-site-preview-toolbar" aria-hidden="true">
         <span className="pp-site-preview-dots"><i /><i /><i /></span>
-        <span className="pp-site-preview-address">pperfil.pro/p/{profile.slug}</span>
+            <span className="pp-site-preview-address">cheipi.com/p/{profile.slug}</span>
       </div>
       <div className="pp-site-preview-canvas">
         <TemplatePreview profile={profile} templateId={profile.template_id} compact={compact} />
@@ -339,7 +339,7 @@ export function SiteBuilder({
             <SitePreviewFrame profile={profile} />
             <aside className="pp-site-control-panel">
               <div className="pp-site-control-heading"><PublicationStatus published={profile.published} /><span>{selectedTemplate}</span></div>
-              <div className="pp-site-public-address"><Globe2 aria-hidden="true" /><div><small>Endereço público</small><strong>pperfil.pro/p/{profile.slug}</strong></div></div>
+              <div className="pp-site-public-address"><Globe2 aria-hidden="true" /><div><small>Endereço público</small><strong>cheipi.com/p/{profile.slug}</strong></div></div>
               <button type="button" className="builder-primary" onClick={() => openEditor()}><Pencil aria-hidden="true" /> Editar site</button>
               <Link className="builder-secondary" href="/dashboard/preview">Visualizar <ExternalLink aria-hidden="true" /></Link>
               {profile.published ? <Link className="pp-site-text-action" href={publicPath} target="_blank">Abrir site publicado <ExternalLink aria-hidden="true" /></Link> : null}
@@ -354,15 +354,15 @@ export function SiteBuilder({
           {showPaywall && !entitlements.can_publish_site ? (
             <section className="pp-publication-paywall">
               <button type="button" className="pp-paywall-close" onClick={() => setShowPaywall(false)} aria-label="Fechar">×</button>
-              <p>Seu site está pronto para ir ao ar.</p><h2>Publique seu PPerfil</h2><p>Tenha uma presença profissional pronta para apresentar seus serviços e conquistar novos alunos.</p>
-              {offer ? <><span>{offer.label}</span><strong>{offerPrice}</strong><small>{offer.payment_label}</small><ul>{["Site profissional", "Personalização", "Link público", "WhatsApp integrado", "Serviços", "Depoimentos", "Acesso antecipado ao PPerfil Leads Beta"].map((item) => <li key={item}><Check aria-hidden="true" /> {item}</li>)}</ul><form action={intentAction}><button className="builder-primary" disabled={intentPending || hasPurchaseIntent}>{intentPending ? "Registrando..." : hasPurchaseIntent ? "Interesse registrado" : "Quero publicar meu site"}</button></form><ActionMessage state={intentState} /><em>Pagamento online em breve. Registrar interesse não libera a publicação.</em></> : <p>A oferta está temporariamente indisponível.</p>}
+              <p>Seu site está pronto para ir ao ar.</p><h2>Publique seu site na Cheipi</h2><p>Tenha uma presença profissional pronta para apresentar seus serviços e conquistar novos alunos.</p>
+              {offer ? <><span>{offer.label}</span><strong>{offerPrice}</strong><small>{offer.payment_label}</small><ul>{["Site profissional", "Personalização", "Link público", "WhatsApp integrado", "Serviços", "Depoimentos", "Acesso antecipado ao Cheipi Leads Beta"].map((item) => <li key={item}><Check aria-hidden="true" /> {item}</li>)}</ul><form action={intentAction}><button className="builder-primary" disabled={intentPending || hasPurchaseIntent}>{intentPending ? "Registrando..." : hasPurchaseIntent ? "Interesse registrado" : "Quero publicar meu site"}</button></form><ActionMessage state={intentState} /><em>Pagamento online em breve. Registrar interesse não libera a publicação.</em></> : <p>A oferta está temporariamente indisponível.</p>}
             </section>
           ) : null}
 
           <div className="pp-site-overview-facts">
             <article><span>Contato e conversão</span><strong>{profile.whatsapp}</strong><p>{profile.instagram ? `Instagram: ${profile.instagram}` : "Instagram não informado"}</p><button type="button" onClick={() => setSection("contact")}>Revisar contato</button></article>
             <article><span>Conteúdo do site</span><strong>{services.length} serviço{services.length === 1 ? "" : "s"}</strong><p>{testimonials.length} depoimento{testimonials.length === 1 ? "" : "s"} cadastrado{testimonials.length === 1 ? "" : "s"}</p><button type="button" onClick={() => openEditor("services")}>Gerenciar conteúdo</button></article>
-            <article><span>Aquisição</span><strong>Leads PPerfil</strong><p>O canal específico de origem ainda não é registrado; nenhuma visita ou conversão é estimada.</p><Link href="/dashboard/leads">Abrir leads</Link></article>
+          <article><span>Aquisição</span><strong>Leads Cheipi</strong><p>O canal específico de origem ainda não é registrado; nenhuma visita ou conversão é estimada.</p><Link href="/dashboard/leads">Abrir leads</Link></article>
           </div>
         </section>
       ) : null}
@@ -371,7 +371,7 @@ export function SiteBuilder({
         <section className="pp-site-view" aria-labelledby="site-templates-title">
           <SectionHeader title="Templates" description="Escolha a estrutura do seu site. Seus dados permanecem e você pode revisar a opção antes de trocar." />
           <TemplateSelector profile={profile} entitlements={entitlements} onCustomize={() => openEditor()} />
-          <aside className="pp-site-inline-note"><LockKeyhole aria-hidden="true" /><div><strong>Templates são opções visuais do seu PPerfil</strong><p>Você pode visualizar todas as opções. A seleção depende da disponibilidade no seu plano, e a liberação comercial para publicação continua separada.</p></div></aside>
+      <aside className="pp-site-inline-note"><LockKeyhole aria-hidden="true" /><div><strong>Templates são opções visuais do seu site</strong><p>Você pode visualizar todas as opções. A seleção depende da disponibilidade no seu plano, e a liberação comercial para publicação continua separada.</p></div></aside>
         </section>
       ) : null}
 
@@ -410,7 +410,7 @@ export function SiteBuilder({
           <SectionHeader title="Contato e conversão" description="Mantenha os canais usados pelos visitantes para falar com você." />
           <div className="pp-site-contact-layout">
             <form action={contactAction} className="builder-form pp-site-contact-form"><label>WhatsApp<input name="whatsapp" required inputMode="tel" defaultValue={profile.whatsapp} /></label><label>Instagram — usuário<input name="instagram_handle" maxLength={30} defaultValue={instagram.handle ?? ""} placeholder="seu.usuario" /><small>Informe sem o @.</small></label><label>Instagram — link<input name="instagram_url" type="url" maxLength={300} defaultValue={instagram.url ?? ""} placeholder="https://www.instagram.com/seu.usuario/" /></label><Submit pending={contactPending}>Salvar contato</Submit><ActionMessage state={contactState} /></form>
-            <aside><MessageCircle aria-hidden="true" /><h2>Link do seu site</h2><p>pperfil.pro/p/{profile.slug}</p><div><button type="button" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${publicPath}`)}><Copy aria-hidden="true" /> Copiar link</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div></aside>
+        <aside><MessageCircle aria-hidden="true" /><h2>Link do seu site</h2><p>cheipi.com/p/{profile.slug}</p><div><button type="button" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${publicPath}`)}><Copy aria-hidden="true" /> Copiar link</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div></aside>
           </div>
         </section>
       ) : null}

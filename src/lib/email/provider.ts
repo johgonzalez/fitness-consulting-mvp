@@ -22,7 +22,7 @@ type FetchLike = typeof fetch;
 type SendOptions = { env?: EmailEnvironment; fetchImpl?: FetchLike; timeoutMs?: number };
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const defaultSender = "PPerfil <onboarding@resend.dev>";
+const defaultSender = "Cheipi <onboarding@resend.dev>";
 
 function configuredSender(env: EmailEnvironment) {
   return env.EMAIL_FROM?.trim() || defaultSender;

@@ -189,7 +189,7 @@ export function LegacyTemplate02({ site }: { site: TrainerSiteData }) {
         </div>
       </section>
 
-      <footer className={styles.footer} style={{ order: 1001 }}><Brand site={site} /><span>{site.trainer.professionalTitle}{site.trainer.registration ? ` · CREF ${site.trainer.registration}` : ""}</span><small>powered by PPerfil</small></footer>
+      <footer className={styles.footer} style={{ order: 1001 }}><Brand site={site} /><span>{site.trainer.professionalTitle}{site.trainer.registration ? ` · CREF ${site.trainer.registration}` : ""}</span><small>powered by Cheipi</small></footer>
     </main>
   );
 }

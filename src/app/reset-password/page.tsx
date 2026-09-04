@@ -6,5 +6,5 @@ export default async function ResetPasswordPage({ searchParams }: { searchParams
   const params = await searchParams;
   const nextPath = safeInternalPath(params.next ?? null, "") || undefined;
   const context = normalizeAuthContext(params.context ?? null);
-  return <AuthShell title="Crie uma nova senha" subtitle="Use uma senha segura que você ainda não utilizou no PPerfil."><ResetPasswordForm nextPath={nextPath} context={context} /></AuthShell>;
+  return <AuthShell title="Crie uma nova senha" subtitle="Use uma senha segura que você ainda não utilizou na Cheipi."><ResetPasswordForm nextPath={nextPath} context={context} /></AuthShell>;
 }

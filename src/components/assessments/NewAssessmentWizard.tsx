@@ -72,7 +72,7 @@ export function NewAssessmentWizard({ students, templates, demoMode, initialStud
         <fieldset className="pp-choice-grid"><legend className="sr-only">Selecione um aluno ativo</legend>
           {students.map((item) => <label key={item.id} className={studentId === item.id ? "selected" : undefined}>
             <input type="radio" name="student_choice" value={item.id} checked={studentId === item.id} onChange={() => setStudentId(item.id)} />
-            <Avatar name={item.name} size="medium" /><span><strong>{item.name}</strong><small>{item.email ?? "E-mail não informado"}</small></span><i><Check aria-hidden="true" /></i>
+            <Avatar name={item.name} imageUrl={item.profileImageUrl} size="medium" /><span><strong>{item.name}</strong><small>{item.email ?? "E-mail não informado"}</small></span><i><Check aria-hidden="true" /></i>
           </label>)}
         </fieldset>
       </div> : null}

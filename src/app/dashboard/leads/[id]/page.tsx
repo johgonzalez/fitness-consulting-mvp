@@ -100,7 +100,7 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
           <div><dt><Phone aria-hidden="true" />WhatsApp</dt><dd><a href={`https://wa.me/${contactPhone}`} target="_blank" rel="noreferrer">{lead.whatsapp}</a></dd></div>
           <div><dt><Mail aria-hidden="true" />E-mail</dt><dd>{lead.email ? <a href={`mailto:${lead.email}`}>{lead.email}</a> : "Não informado"}</dd></div>
           <div><dt><CalendarDays aria-hidden="true" />Recebido em</dt><dd>{new Date(match.createdAt).toLocaleString("pt-BR")}</dd></div>
-          <div><dt>Origem</dt><dd>Ecossistema PPerfil<small>Canal específico não registrado</small></dd></div>
+          <div><dt>Origem</dt><dd>Ecossistema Cheipi<small>Canal específico não registrado</small></dd></div>
         </dl>
       </ContextPanel>
     </MasterDetail>

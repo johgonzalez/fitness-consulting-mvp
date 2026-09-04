@@ -46,7 +46,7 @@ function ExperiencePhone({ site }: { site: TrainerSiteData }) {
       <div className={styles.phone} aria-label={`Prévia conceitual da experiência digital ${site.studentExperience.programName}`}>
         <div className={styles.phoneTop}><span>9:41</span><i /></div>
         <div className={styles.phoneBrand}>
-          <span><strong>{site.studentExperience.programName}</strong><small>powered by PPerfil</small></span>
+      <span><strong>{site.studentExperience.programName}</strong><small>powered by Cheipi</small></span>
           <b aria-hidden="true">{site.trainer.firstName[0]}</b>
         </div>
         <div className={styles.phoneNav}><strong>Treino</strong><span>Progresso</span><span>Avaliações</span></div>
@@ -218,7 +218,7 @@ export function LegacyTemplate01({ site }: { site: TrainerSiteData }) {
           <strong>{site.studentExperience.title}</strong>
           <p>{site.studentExperience.description}</p>
           <ul>{site.studentExperience.capabilities.map((item) => <li key={item}><Check aria-hidden="true" />{item}</li>)}</ul>
-          <div className={styles.experienceBrand}><strong>{site.studentExperience.programName}</strong><span>· powered by PPerfil</span></div>
+        <div className={styles.experienceBrand}><strong>{site.studentExperience.programName}</strong><span>· powered by Cheipi</span></div>
         </div>
         <div className={styles.experienceVisual}>
           {experienceMedia ? (
@@ -256,7 +256,7 @@ export function LegacyTemplate01({ site }: { site: TrainerSiteData }) {
       <footer className={styles.footer} style={{ order: 1001 }}>
         <Brand site={site} />
         <span>{site.trainer.registration ? `CREF ${site.trainer.registration}` : site.trainer.specialty}</span>
-        <small>powered by <strong>PPerfil</strong></small>
+      <small>powered by <strong>Cheipi</strong></small>
       </footer>
     </main>
   );

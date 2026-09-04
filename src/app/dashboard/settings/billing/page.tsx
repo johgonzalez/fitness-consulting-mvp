@@ -13,7 +13,7 @@ type BillingSummary = {
 
 const billingStateCopy: Record<string, { label: string; description: string }> = {
   FREE: { label: "Plano gratuito", description: "Seu espaço e seus dados continuam disponíveis. Ative o Pro quando quiser publicar e usar os recursos incluídos no plano." },
-  ACTIVE: { label: "Assinatura ativa", description: "Seu acesso ao PPerfil Pro está ativo." },
+  ACTIVE: { label: "Assinatura ativa", description: "Seu acesso ao Cheipi Pro está ativo." },
   GRACE: { label: "Pagamento em regularização", description: "Seu acesso continua disponível durante o período de regularização." },
   SUSPENDED: { label: "Acesso Pro suspenso", description: "Seus dados foram preservados. Regularize o plano para reativar os recursos Pro." },
 };
@@ -48,7 +48,7 @@ export default async function BillingSettingsPage({
       <div>
         <p className="pp-page-context">Conta</p>
         <h1>Plano e cobrança</h1>
-        <p>Gerencie a assinatura do seu espaço profissional no PPerfil.</p>
+        <p>Gerencie a assinatura do seu espaço profissional na Cheipi.</p>
       </div>
     </header>
 
@@ -63,7 +63,7 @@ export default async function BillingSettingsPage({
 
     <section className="billing-plan-card">
       <div>
-        <p className="pp-page-context">PPerfil Pro</p>
+        <p className="pp-page-context">Cheipi Pro</p>
         <h2>Seu negócio fitness, organizado em um só lugar.</h2>
         <p>Site profissional, gestão de alunos, avaliações, treinos e progresso.</p>
       </div>
@@ -73,7 +73,7 @@ export default async function BillingSettingsPage({
         <strong>Plano e cobrança sem alterações reais</strong>
         <p>A cobrança fica disponível somente em uma conta real.</p>
       </div> : <div className="billing-status-summary" role="status">
-        <span>{summary.product_code === "PRO" ? "PPerfil Pro" : "PPerfil Free"}</span>
+        <span>{summary.product_code === "PRO" ? "Cheipi Pro" : "Cheipi Free"}</span>
         <strong>{summary.cancel_at_period_end ? "Cancelamento programado" : state.label}</strong>
         <p>{summary.cancel_at_period_end && periodEnd ? `O acesso Pro permanece ativo até ${periodEnd}. Seus dados serão preservados.` : state.description}</p>
         {summary.billing_state === "ACTIVE" && periodEnd && !summary.cancel_at_period_end ? <small>Próximo ciclo em {periodEnd}</small> : null}

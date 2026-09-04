@@ -9,7 +9,7 @@ export function StudentRecordChrome({ student, active }: { student: ManagedStude
   return <>
     <Link href="/dashboard/students" className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para alunos</Link>
     <header className="pp-record-header">
-      <Avatar name={student.name} size="large" />
+      <Avatar name={student.name} imageUrl={student.profileImageUrl} size="large" />
       <div>
         <div className="pp-record-header__title"><h1>{student.name}</h1><Status tone={student.status === "active" ? "success" : "neutral"}>{statusLabels[student.status]}</Status></div>
         <p>{student.email ?? "Contato oculto para relacionamento inativo"}</p>

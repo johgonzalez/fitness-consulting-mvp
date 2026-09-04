@@ -51,7 +51,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     </ContextPanel></div> : null}
 
     {invitations.length ? <section className="pp-invitations" aria-labelledby="pending-invitations">
-      <header><div><h2 id="pending-invitations">Convites pendentes</h2><p>Pessoas que ainda não concluíram o acesso ao PPerfil.</p></div><Status tone="warning">{invitations.length} aguardando</Status></header>
+      <header><div><h2 id="pending-invitations">Convites pendentes</h2><p>Pessoas que ainda não concluíram o acesso à Cheipi.</p></div><Status tone="warning">{invitations.length} aguardando</Status></header>
       <div>{invitations.map((invitation) => <article className="pp-invitation-row" key={invitation.id}>
         <Avatar name={invitation.name ?? invitation.email} size="small" />
         <span><strong>{invitation.name ?? invitation.email}</strong><small>{invitation.email}</small></span>
@@ -64,7 +64,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
 
     {visible.length ? <DataList label="Alunos" columns={["Aluno", "Acompanhamento", "Origem", "Desde", "Status", ""]} className="pp-student-list pp-student-list--v1d">
       {visible.map((student) => <DataListRow href={`/dashboard/students/${student.id}`} key={student.id}>
-        <IdentityCell name={student.name} detail={student.email ?? "E-mail não informado"} />
+        <IdentityCell name={student.name} detail={student.email ?? "E-mail não informado"} imageUrl={student.profileImageUrl} />
         <span className="pp-data-cell pp-data-cell--stacked" role="cell"><strong>{student.status === "active" ? "Acompanhamento ativo" : student.status === "inactive" ? "Relacionamento inativo" : "Relacionamento encerrado"}</strong><small>{statusLabels[student.status]}</small></span>
         <span className="pp-data-cell" role="cell">{student.origin === "lead_conversion" ? "Lead convertido" : "Convite manual"}</span>
         <span className="pp-data-cell pp-data-cell--date" role="cell"><CalendarDays aria-hidden="true" />{new Date(student.startedAt).toLocaleDateString("pt-BR")}</span>

@@ -36,7 +36,7 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
     <Link href={backHref} className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para avaliações</Link>
 
     <header className="pp-record-header pp-assessment-record__header">
-      <Avatar name={studentName} size="large" />
+      <Avatar name={studentName} imageUrl={student?.profileImageUrl} size="large" />
       <div><div className="pp-record-header__title"><h1>{assessment.title}</h1><AssessmentStatusBadge status={assessment.status} /></div><p>{studentName} · {template ? assessmentTypeLabels[template.assessmentType] : "Avaliação versionada"}</p></div>
     </header>
 
@@ -56,7 +56,7 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
         {assessment.status === "COMPLETED" ? <div className="pp-completed-state"><ShieldCheck aria-hidden="true" /><strong>Histórico somente leitura</strong><p>A conclusão, as respostas, medidas e a devolutiva não são editáveis nesta etapa.</p><Link href={`/student/assessments/${assessment.id}`} className="pp-button pp-button--secondary"><Eye aria-hidden="true" />Ver experiência final</Link></div> : null}
       </ActionGroup>
       <ActionGroup title="Contexto do aluno">
-        <div className="pp-assessment-student-card"><Avatar name={studentName} size="medium" /><span><strong>{studentName}</strong><small>{student?.email ?? "Contato protegido"}</small></span></div>
+        <div className="pp-assessment-student-card"><Avatar name={studentName} imageUrl={student?.profileImageUrl} size="medium" /><span><strong>{studentName}</strong><small>{student?.email ?? "Contato protegido"}</small></span></div>
         {student ? <Link className="pp-text-link" href={`/dashboard/students/${student.id}`}><UserRound aria-hidden="true" />Abrir perfil do aluno</Link> : null}
       </ActionGroup>
     </>}>

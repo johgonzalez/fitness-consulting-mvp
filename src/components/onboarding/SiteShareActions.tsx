@@ -21,7 +21,7 @@ export function SiteShareActions({ publicUrl }: { publicUrl: string }) {
   async function shareSite() {
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Meu site no PPerfil", text: "Conheça meu site", url: publicUrl });
+      await navigator.share({ title: "Meu site na Cheipi", text: "Conheça meu site", url: publicUrl });
         setFeedback("Compartilhamento aberto.");
         return;
       } catch (error) {

@@ -8,7 +8,7 @@ export function TemplatePreview({ profile, templateId, compact = false }: { prof
   const editorialMedia = profile.hero_image_url ? findDevelopmentMediaByUrl(profile.hero_image_url) : null;
   return <div className={`template-preview-v2 is-${templateId}${compact ? " is-compact" : ""}`} style={{ "--template-accent": profile.primary_color } as CSSProperties} role="img" aria-label={`Prévia do template para ${profile.display_name}`}>
     {profile.hero_image_url ? <Image src={profile.hero_image_url} alt="" fill unoptimized sizes={compact ? "460px" : "900px"} loading={compact ? "lazy" : "eager"} fetchPriority={compact ? "auto" : "high"} /> : null}
-    {editorialMedia ? <span className="template-preview-v2__media-label">Imagem editorial PPerfil</span> : null}
+      {editorialMedia ? <span className="template-preview-v2__media-label">Imagem editorial Cheipi</span> : null}
     {templateId === "template_01" ? <div className="template-preview-v2__essential"><small>{profile.display_name}</small><strong>{profile.headline}</strong><span>Quero treinar com {firstName}</span></div> : null}
     {templateId === "template_02" ? <div className="template-preview-v2__performance"><small>{profile.display_name}</small><strong>{profile.headline}</strong><span>Começar acompanhamento</span></div> : null}
     {templateId === "template_03" ? <div className="template-preview-v2__conversion"><small>{profile.display_name}</small><strong>{profile.headline}</strong><div><span>Serviços</span><b>Experiência digital</b></div></div> : null}

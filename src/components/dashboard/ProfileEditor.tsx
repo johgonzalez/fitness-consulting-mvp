@@ -19,7 +19,7 @@ const settingsNavigation = [
   { id: "profile", label: "Perfil profissional", description: "Foto e dados públicos", icon: UserRound, available: true },
   { id: "account", label: "Conta e segurança", description: "E-mail e acesso", icon: ShieldCheck, available: true },
   { id: "appearance", label: "Aparência", description: "Tema do aplicativo", icon: Palette, available: true },
-  { id: "plan", label: "Plano PPerfil", description: "Assinatura e cobrança", icon: CreditCard, available: true, href: "/dashboard/settings/billing" },
+  { id: "plan", label: "Plano Cheipi", description: "Assinatura e cobrança", icon: CreditCard, available: true, href: "/dashboard/settings/billing" },
 ] as const;
 
 function Message({ state }: { state: SiteActionState }) {
@@ -62,7 +62,7 @@ export function ProfileEditor({ profile, email }: { profile: TrainerProfile; ema
       {activeSection === "profile" ? <section className="pp-settings-section" aria-labelledby="settings-profile-title">
         <header className="pp-settings-section__header">
           <span className="pp-settings-section__icon"><UserRound aria-hidden="true" /></span>
-          <div><h2 id="settings-profile-title">Perfil profissional</h2><p>Esses dados representam você no PPerfil e no seu site público.</p></div>
+          <div><h2 id="settings-profile-title">Perfil profissional</h2><p>Esses dados representam você na Cheipi e no seu site público.</p></div>
         </header>
 
         <div className="pp-profile-photo">

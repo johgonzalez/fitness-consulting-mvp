@@ -56,9 +56,9 @@ export function DataListRow({ href, children }: { href: string; children: ReactN
   </Link>;
 }
 
-export function IdentityCell({ name, detail }: { name: string; detail?: string | null }) {
+export function IdentityCell({ name, detail, imageUrl }: { name: string; detail?: string | null; imageUrl?: string | null }) {
   return <span className="pp-identity-cell" role="cell">
-    <Avatar name={name} size="medium" />
+    <Avatar name={name} imageUrl={imageUrl} size="medium" />
     <span><strong>{name}</strong>{detail ? <small>{detail}</small> : null}</span>
   </span>;
 }

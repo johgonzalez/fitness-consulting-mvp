@@ -74,7 +74,7 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
       {visible.map((item) => <article className={styles.planRow} key={item.currentVersion.id}>
         <Link href={`/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}`} className={styles.planRowLink}>
         <span className={styles.planIdentity}>
-          <Avatar name={item.student?.name ?? "Aluno"} size="medium" />
+          <Avatar name={item.student?.name ?? "Aluno"} imageUrl={item.student?.profileImageUrl} size="medium" />
           <span><strong>{item.plan.name}</strong><small><UserRound aria-hidden="true" />{item.student?.name ?? "Relacionamento protegido"}</small><em>{item.plan.goal ?? "Objetivo não informado"}</em></span>
         </span>
         <span className={styles.planStructure}><strong><Dumbbell aria-hidden="true" />{item.sessionCount} sessões</strong><small><Clock3 aria-hidden="true" />{item.totalDurationMinutes || "—"} min planejados</small></span>

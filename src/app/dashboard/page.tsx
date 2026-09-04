@@ -66,7 +66,7 @@ export default async function DashboardPage() {
         {!hasWorkspaceContent ? <div className="pc-dashboard-zero"><div><strong>Comece pelo primeiro aluno.</strong><p>Convide alguém para liberar a rotina de treinos e acompanhamento.</p></div><Link href="/dashboard/students?add=1#add-student">Adicionar aluno<ArrowRight aria-hidden="true" /></Link></div> : null}
 
         <div className="pc-section-heading"><h2>Alunos</h2><Link href="/dashboard/students">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
-        <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} size="small" /><span><strong>{student.name}</strong><small>{student.email ?? "Contato não informado"}</small></span><Status tone="success">Ativo</Status><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <div className="pc-quiet-state"><strong>Nenhum aluno ativo.</strong><Link href="/dashboard/students?add=1#add-student">Adicionar aluno</Link></div> : null}</div>
+        <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} imageUrl={student.profileImageUrl} size="small" /><span><strong>{student.name}</strong><small>{student.email ?? "Contato não informado"}</small></span><Status tone="success">Ativo</Status><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <div className="pc-quiet-state"><strong>Nenhum aluno ativo.</strong><Link href="/dashboard/students?add=1#add-student">Adicionar aluno</Link></div> : null}</div>
       </section>
 
       <aside className="pc-dashboard__rail">

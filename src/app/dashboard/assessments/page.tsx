@@ -83,7 +83,7 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
 
     {items.length ? <DataList label="Avaliações" columns={["Aluno", "Avaliação", "Status", "Atualizada em", "Prazo", "Próxima ação", ""]} className="pp-assessment-list">
       {items.map(({ assessment, student, template }) => <DataListRow href={`/dashboard/assessments/${assessment.id}${relationshipId ? `?student=${relationshipId}` : ""}`} key={assessment.id}>
-        <IdentityCell name={student?.name ?? "Aluno"} detail={student?.email ?? "Relacionamento protegido"} />
+        <IdentityCell name={student?.name ?? "Aluno"} detail={student?.email ?? "Relacionamento protegido"} imageUrl={student?.profileImageUrl} />
         <span className="pp-data-cell pp-data-cell--stacked pp-assessment-list__title" role="cell"><strong>{assessment.title}</strong><small>{template ? assessmentTypeLabels[template.assessmentType] : "Modelo versionado"}</small></span>
         <span className="pp-data-cell pp-data-cell--status" role="cell"><AssessmentStatusBadge status={assessment.status} /></span>
         <span className="pp-data-cell pp-data-cell--date" role="cell"><CalendarDays aria-hidden="true" />{formatAssessmentDate(assessment.updatedAt)}</span>

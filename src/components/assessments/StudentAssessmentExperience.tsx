@@ -54,7 +54,7 @@ function QuestionField({ question, value, onChange, labelledBy, describedBy }: {
     return <div className="pp-measurement-field" role="group" {...aria}>
       <div><label><span>Valor</span><input type="number" inputMode="decimal" step="any" value={measurement.value || ""} onChange={(event) => onChange({ ...measurement, value: Number(event.target.value) })} /></label><label><span>Unidade</span><select value={measurement.unitCode} onChange={(event) => onChange({ ...measurement, unitCode: event.target.value })}>{question.measurement.unitCodes.map((unit) => <option key={unit}>{unit}</option>)}</select></label></div>
       <label><span>Data da medição</span><input type="date" value={measurement.measuredAt.slice(0, 10)} onChange={(event) => onChange({ ...measurement, measuredAt: `${event.target.value}T12:00:00.000Z` })} /></label>
-      <p><Ruler aria-hidden="true" /><span><strong>Origem da medida</strong>Informada por você nesta avaliação. O PPerfil não converte unidades automaticamente.</span></p>
+      <p><Ruler aria-hidden="true" /><span><strong>Origem da medida</strong>Informada por você nesta avaliação. A Cheipi não converte unidades automaticamente.</span></p>
     </div>;
   }
   return <div className="pp-photo-unavailable" role="group" {...aria}><LockKeyhole aria-hidden="true" /><div><strong>Registro de foto ainda indisponível</strong><p>O upload privado será liberado em um Sprint futuro. Nenhum arquivo público será solicitado.</p>{!question.required ? <button type="button" className="pp-button pp-button--secondary" onClick={() => onChange({ skipped: true })}>{typeof value === "object" && value !== null && "skipped" in value ? <><Check aria-hidden="true" />Sem foto neste check-in</> : "Continuar sem foto"}</button> : null}</div></div>;

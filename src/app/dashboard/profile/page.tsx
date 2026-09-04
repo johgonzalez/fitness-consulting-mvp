@@ -11,7 +11,7 @@ export default async function ProfilePage() {
       <div>
         <p className="pp-page-context">Conta</p>
         <h1>Configurações</h1>
-        <p>Gerencie seu perfil profissional, segurança e preferências do PPerfil.</p>
+        <p>Gerencie seu perfil profissional, segurança e preferências da Cheipi.</p>
       </div>
     </header>
     <ProfileEditor profile={profile} email={user.email ?? ""} />

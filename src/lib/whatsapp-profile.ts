@@ -1,6 +1,6 @@
 import type { PublicTrainerProfile } from "@/lib/domain/trainer";
 
-const defaultMessage = "Olá! Conheci seu perfil no PPerfil e gostaria de entender melhor como funciona.";
+const defaultMessage = "Olá! Conheci seu perfil na Cheipi e gostaria de entender melhor como funciona.";
 
 export function getProfileWhatsAppUrl(profile: PublicTrainerProfile) {
   if (profile.whatsapp.startsWith("https://")) return profile.whatsapp;

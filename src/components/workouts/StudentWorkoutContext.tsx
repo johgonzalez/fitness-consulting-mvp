@@ -12,7 +12,7 @@ export function StudentWorkoutContext({ context }: { context: WorkoutStudentCont
   if (!context) return <aside className={styles.studentContext}><p>O contexto do aluno não está disponível.</p></aside>;
   return <aside className={`${styles.studentContext}${open ? ` ${styles.studentContextOpen}` : ""}`}>
     <button type="button" className={styles.studentContextHeader} onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-      <Avatar name={context.student.name} size="large" status="online" />
+      <Avatar name={context.student.name} imageUrl={context.student.profileImageUrl} size="large" status="online" />
       <span><small>Contexto do aluno</small><strong>{context.student.name}</strong><em>Relacionamento ativo</em></span>
       <ChevronDown aria-hidden="true" />
     </button>
