@@ -86,7 +86,7 @@ class OpenAiWorkoutProvider implements WorkoutAiProvider {
         method: "POST", signal: controller.signal,
         headers: { Authorization: `Bearer ${this.apiKey}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: this.model, temperature: 0.2,
+          model: this.model,
           response_format: { type: "json_schema", json_schema: { name: "workout_ai_draft_v1", strict: true, schema: workoutDraftJsonSchema } },
           messages: [
             { role: "system", content: [
