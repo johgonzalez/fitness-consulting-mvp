@@ -1,0 +1,4 @@
+import { notFound } from "next/navigation";
+import { CommunityRankingView } from "@/components/community/CommunityGroupViews";
+import { getCommunityGroupWorkspace } from "@/lib/community/workspace";
+export default async function TrainerCommunityRankingPage({ params, searchParams }: { params: Promise<{ groupId: string }>; searchParams: Promise<{ period?: string }> }) { const [{ groupId }, query] = await Promise.all([params, searchParams]); const period = query.period === "ALL_TIME" ? "ALL_TIME" : "MONTHLY"; const data = await getCommunityGroupWorkspace(groupId, period, "trainer"); if (!data || data.group.membershipStatus !== "ACTIVE") notFound(); return <main className="matrix-page community-shell-page"><CommunityRankingView group={data.group} entries={data.ranking} audience="trainer" period={period}/></main>; }

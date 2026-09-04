@@ -1,34 +1,41 @@
 import "server-only";
-import { demoCommunityPosts, demoStudentCommunity, demoTrainerCommunity } from "@/lib/community/demo";
-import type { CommunityFilter, CommunityWorkspace } from "@/lib/domain/community";
+import { demoCommunityPosts, demoCommunityWorkspace, demoGroupWorkspace } from "@/lib/community/demo";
+import type { CommunityGroupWorkspace, CommunityRankingPeriod, CommunityWorkspace } from "@/lib/domain/community";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
-import { ensureTrainerCommunity, listCommunityPosts, listMyCommunities } from "@/lib/supabase/community";
+import { ensureTrainerCommunity, getCommunityGroup, listCommunityFeed, listCommunityGroupPosts, listCommunityInviteCandidates, listCommunityMembers, listCommunityNotifications, listCommunityRanking, listCommunityReports, listCommunityRules, listMyCommunityGroups, searchCommunityGroups } from "@/lib/supabase/community";
 
-export async function getCommunityWorkspace(audience: "trainer" | "student", requestedCommunityId?: string, filter: CommunityFilter = "ALL", beforeCreatedAt?: string, beforeId?: string): Promise<CommunityWorkspace> {
-  if (await isDemoWorkspaceRequest()) {
-    const community = audience === "trainer" ? demoTrainerCommunity : demoStudentCommunity;
-    const posts = demoCommunityPosts.map((post) => ({ ...post, canEdit: audience === "trainer" ? post.author.role === "TRAINER" : post.author.name === "Juliana Mendes", canModerate: audience === "trainer", comments: post.comments.map((comment) => ({ ...comment, canDelete: comment.authorName === "Juliana Mendes", canModerate: audience === "trainer" })) }));
-    return { communities: [community], activeCommunity: community, posts: filter === "WORKOUTS" ? posts.filter((post) => post.postType === "WORKOUT_COMPLETION") : filter === "ANNOUNCEMENTS" ? posts.filter((post) => post.postType === "TRAINER_ANNOUNCEMENT") : posts, filter, demoMode: true, unavailableReason: null, nextCursor: null };
-  }
+export async function getCommunityWorkspace(audience: "trainer" | "student"): Promise<CommunityWorkspace> {
+  if (await isDemoWorkspaceRequest()) return demoCommunityWorkspace(audience);
   try {
     if (audience === "trainer") await ensureTrainerCommunity();
-    const communities = await listMyCommunities();
-    const activeCommunity = communities.find((item) => item.id === requestedCommunityId) ?? communities[0] ?? null;
-    const posts = activeCommunity ? await listCommunityPosts(activeCommunity.id, filter, undefined, beforeCreatedAt, beforeId) : [];
-    const lastPost = posts.at(-1);
-    return { communities, activeCommunity, posts, filter, demoMode: false, unavailableReason: activeCommunity ? null : "NO_MEMBERSHIP", nextCursor: posts.length === 20 && lastPost ? { createdAt: lastPost.createdAt, id: lastPost.id } : null };
+    const [groups, discovery, posts, notifications] = await Promise.all([listMyCommunityGroups(), searchCommunityGroups(), listCommunityFeed(), listCommunityNotifications()]);
+    const last = posts.at(-1);
+    return { groups, discovery, posts, notifications, demoMode: false, unavailableReason: groups.length ? null : "NO_MEMBERSHIP", nextCursor: posts.length === 15 && last ? { publishedAt: last.publishedAt, id: last.id } : null };
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
-    return { communities: [], activeCommunity: null, posts: [], filter, demoMode: false, unavailableReason: message.includes("entitlement") ? "ENTITLEMENT" : "NO_MEMBERSHIP", nextCursor: null };
+    return { groups: [], discovery: [], posts: [], notifications: [], demoMode: false, unavailableReason: message.includes("entitlement") ? "ENTITLEMENT" : "ERROR", nextCursor: null };
   }
 }
 
-export async function getCommunityPostWorkspace(audience: "trainer" | "student", postId: string): Promise<CommunityWorkspace> {
+export async function getCommunityGroupWorkspace(groupId: string, period: CommunityRankingPeriod = "MONTHLY", audience: "trainer" | "student" = "student"): Promise<CommunityGroupWorkspace | null> {
+  if (await isDemoWorkspaceRequest()) return demoGroupWorkspace(period, audience);
+  try {
+    const group = await getCommunityGroup(groupId);
+    const member = group.membershipStatus === "ACTIVE";
+    const [posts, members, rules, ranking, reports, inviteCandidates] = member ? await Promise.all([
+      listCommunityGroupPosts(groupId), listCommunityMembers(groupId), listCommunityRules(groupId), group.rankingEnabled ? listCommunityRanking(groupId, period) : Promise.resolve([]), group.canManage ? listCommunityReports(groupId) : Promise.resolve([]), group.canManage ? listCommunityInviteCandidates(groupId) : Promise.resolve([]),
+    ]) : [[], [], [], [], [], []];
+    const last = posts.at(-1);
+    return { group, posts, members, rules, ranking, reports, inviteCandidates, nextCursor: posts.length === 15 && last ? { publishedAt: last.publishedAt, id: last.id } : null, demoMode: false };
+  } catch { return null; }
+}
+
+export async function getCommunityPostWorkspace(audience: "trainer" | "student", postId: string) {
   const base = await getCommunityWorkspace(audience);
-  if (base.demoMode) return { ...base, posts: base.posts.filter((post) => post.id === postId) };
-  for (const community of base.communities) {
-    const posts = await listCommunityPosts(community.id, "ALL", postId);
-    if (posts.length) return { ...base, activeCommunity: community, posts };
+  if (base.demoMode) return { workspace: base, post: demoCommunityPosts.find((post) => post.id === postId) ?? null };
+  for (const group of base.groups) {
+    const posts = await listCommunityGroupPosts(group.id, undefined, undefined, postId);
+    if (posts[0]) return { workspace: base, post: posts[0] };
   }
-  return { ...base, posts: [] };
+  return { workspace: base, post: null };
 }
