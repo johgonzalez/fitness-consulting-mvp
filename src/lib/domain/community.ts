@@ -1,13 +1,34 @@
-export type CommunityRole = "TRAINER" | "STUDENT";
+export type CommunityProductRole = "TRAINER" | "STUDENT";
+export type CommunityGroupRole = "OWNER" | "MODERATOR" | "MEMBER";
+export type CommunityMembershipStatus = "PENDING" | "INVITED" | "ACTIVE" | "REMOVED" | "REVOKED" | "LEFT";
+export type CommunityVisibility = "DISCOVERABLE" | "PRIVATE";
+export type CommunityJoinPolicy = "OPEN" | "APPROVAL" | "INVITE_ONLY";
+export type CommunityPostingPolicy = "OWNER_MODERATORS_ONLY" | "ALL_MEMBERS";
 export type CommunityPostType = "TEXT" | "PHOTO" | "WORKOUT_COMPLETION" | "TRAINER_ANNOUNCEMENT";
-export type CommunityFilter = "ALL" | "WORKOUTS" | "ANNOUNCEMENTS";
+export type CommunityRankingPeriod = "MONTHLY" | "ALL_TIME";
 
-export type CommunitySummary = {
+export type CommunityPerson = { userId: string; name: string; imageUrl: string | null };
+
+export type CommunityGroup = {
   id: string;
   name: string;
-  role: CommunityRole;
-  trainerName: string;
-  trainerImageUrl: string | null;
+  description: string | null;
+  avatarPath: string | null;
+  avatarUrl: string | null;
+  coverPath: string | null;
+  coverUrl: string | null;
+  visibility: CommunityVisibility;
+  joinPolicy: CommunityJoinPolicy;
+  postingPolicy: CommunityPostingPolicy;
+  timezone: string;
+  rankingEnabled: boolean;
+  isDefault: boolean;
+  membershipRole: CommunityGroupRole | null;
+  membershipStatus: CommunityMembershipStatus | null;
+  canPost: boolean;
+  canManage: boolean;
+  memberCount: number;
+  owner: CommunityPerson;
 };
 
 export type CommunityMedia = {
@@ -15,6 +36,8 @@ export type CommunityMedia = {
   storagePath: string;
   mimeType: string;
   sortOrder: number;
+  width: number;
+  height: number;
   signedUrl: string | null;
 };
 
@@ -27,6 +50,7 @@ export type CommunityComment = {
   authorImageUrl: string | null;
   canDelete: boolean;
   canModerate: boolean;
+  optimistic?: boolean;
 };
 
 export type CommunityWorkoutSummary = {
@@ -45,24 +69,54 @@ export type CommunityPost = {
   postType: CommunityPostType;
   body: string | null;
   pinnedAt: string | null;
+  publishedAt: string;
   createdAt: string;
   updatedAt: string;
-  author: { userId: string; name: string; imageUrl: string | null; role: CommunityRole };
+  group: Pick<CommunityGroup, "id" | "name" | "avatarPath" | "avatarUrl">;
+  author: CommunityPerson & { productRole: CommunityProductRole };
   media: CommunityMedia[];
   workout: CommunityWorkoutSummary | null;
   likeCount: number;
   likedByMe: boolean;
+  commentCount: number;
   comments: CommunityComment[];
   canEdit: boolean;
   canModerate: boolean;
+  optimistic?: boolean;
 };
 
+export type CommunityMember = CommunityPerson & { role: CommunityGroupRole; status: CommunityMembershipStatus; origin: "OWNER" | "RELATIONSHIP" | "DIRECT" | "JOIN_REQUEST" | "INVITE"; joinedAt: string | null };
+export type CommunityInviteCandidate = CommunityPerson;
+export type CommunityRankingEntry = CommunityPerson & { position: number; activeDays: number; reachedAt: string; isCurrentUser: boolean };
+export type CommunityNotification = {
+  id: string;
+  type: "GROUP_INVITE" | "JOIN_REQUEST_APPROVED" | "JOIN_REQUEST_REJECTED" | "COMMENT_ON_MY_POST" | "REACTION_ON_MY_POST" | "PINNED_ANNOUNCEMENT";
+  groupId: string;
+  groupName: string;
+  postId: string | null;
+  actorName: string | null;
+  readAt: string | null;
+  createdAt: string;
+};
+export type CommunityReport = { id: string; postId: string | null; commentId: string | null; reasonCode: string; details: string | null; status: string; createdAt: string };
+export type CommunityCursor = { publishedAt: string; id: string };
 export type CommunityWorkspace = {
-  communities: CommunitySummary[];
-  activeCommunity: CommunitySummary | null;
+  groups: CommunityGroup[];
+  discovery: CommunityGroup[];
   posts: CommunityPost[];
-  filter: CommunityFilter;
+  notifications: CommunityNotification[];
   demoMode: boolean;
-  unavailableReason: "NO_MEMBERSHIP" | "ENTITLEMENT" | null;
-  nextCursor: { createdAt: string; id: string } | null;
+  unavailableReason: "NO_MEMBERSHIP" | "ENTITLEMENT" | "ERROR" | null;
+  nextCursor: CommunityCursor | null;
+};
+export type CommunityGroupWorkspace = {
+  group: CommunityGroup;
+  posts: CommunityPost[];
+  members: CommunityMember[];
+  rules: string[];
+  ranking: CommunityRankingEntry[];
+  reports: CommunityReport[];
+  inviteCandidates: CommunityInviteCandidate[];
+  nextCursor: CommunityCursor | null;
+  demoMode: boolean;
 };
