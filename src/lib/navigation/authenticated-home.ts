@@ -1,17 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { defaultAuthenticatedHome } from "@/lib/navigation/student-invitation";
+import { defaultAuthenticatedHome } from "./student-invitation.ts";
 import type { AuthContext } from "@/lib/validation/auth";
 
 type AppIdentity = { id?: unknown; roles?: unknown };
-type TrainerProfileState = { onboarding_completed_at?: unknown; publication_requested_at?: unknown };
-type TrainerWorkspaceState = { relationships?: unknown; invitations?: unknown };
-type TrainerAccessState = { founder_access_active?: unknown; waitlist_joined?: unknown };
+type TrainerProfileState = { onboarding_completed_at?: unknown };
 type StudentEntryState = { active_relationship?: unknown; student_role_active?: unknown };
 type PendingInvitation = { invitation_id?: unknown };
-
-function hasRows(value: unknown): boolean {
-  return Array.isArray(value) && value.length > 0;
-}
 
 const invitePathPattern = /^\/invite\/[a-f0-9]{64}$/;
 
@@ -41,16 +35,7 @@ async function resolveTrainerHome(supabase: SupabaseClient, roles: unknown[], ne
   const profileState = profile as TrainerProfileState;
   if (profileState.onboarding_completed_at == null) return "/onboarding";
 
-  if (profileState.publication_requested_at == null) {
-    const { data: access } = await supabase.rpc("get_my_access_state");
-    const accessState = access as TrainerAccessState | null;
-    if (accessState?.waitlist_joined === true && accessState.founder_access_active !== true) return "/onboarding";
-  }
-
-  const { data: workspace, error: workspaceError } = await supabase.rpc("get_my_students");
-  if (workspaceError || !workspace) return "/onboarding";
-  const state = workspace as TrainerWorkspaceState;
-  if (!hasRows(state.relationships) && !hasRows(state.invitations)) return "/onboarding";
+  // Publishing and inviting the first student are optional after profile setup.
   return authorizedWorkspaceNext(nextPath, roles, "trainer") || "/dashboard";
 }
 

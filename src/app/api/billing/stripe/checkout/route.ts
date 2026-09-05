@@ -55,12 +55,18 @@ export async function POST(request: Request) {
   }
 
   try {
+    const onboarding = new URL(request.url).searchParams.get("flow") === "onboarding";
+    if (onboarding) {
+      // Store intent with the user's session. Publication still requires backend entitlement.
+      const { error } = await supabase.rpc("request_my_site_publication");
+      if (error) return response("Não foi possível preparar a publicação. Tente novamente.", 503, "PUBLICATION_UNAVAILABLE");
+    }
     const result = await startProCheckout({
       identity: { appUserId: authData.user.id, roles: safeIdentity.roles as string[] },
       repository: new SupabaseBillingCheckoutRepository(),
       provider: createStripeBillingProvider(),
       appBaseUrl: requireAppBaseUrl(),
-      returnPath: new URL(request.url).searchParams.get("flow") === "onboarding" ? "onboarding" : "billing",
+      returnPath: onboarding ? "onboarding" : "billing",
     });
     return NextResponse.json({ ok: true, checkoutUrl: result.checkoutUrl, reused: result.reused });
   } catch (error) {

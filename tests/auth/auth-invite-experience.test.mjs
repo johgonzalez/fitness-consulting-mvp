@@ -83,20 +83,14 @@ test("protected Trainer and Student routes are role-separated", () => {
   assert.match(proxy, /studentRoute && !roles\.includes\("student"\)/);
 });
 
-test("post-auth routing resumes factual V2 activation state", () => {
+test("post-auth routing requires profile setup without optional activation gates", () => {
   assert.match(authenticatedHome, /get_my_trainer_profile/);
   assert.match(authenticatedHome, /onboarding_completed_at/);
-  assert.match(authenticatedHome, /publication_requested_at/);
-  assert.match(authenticatedHome, /get_my_access_state/);
-  assert.match(authenticatedHome, /waitlist_joined/);
-  assert.match(authenticatedHome, /get_my_students/);
-  assert.match(authenticatedHome, /state\.relationships/);
-  assert.match(authenticatedHome, /state\.invitations/);
+  assert.doesNotMatch(authenticatedHome, /get_my_access_state|get_my_students|waitlist_joined/);
 });
 
-test("pre-activation Waitlist cannot open the unrestricted Trainer dashboard", () => {
-  assert.match(dashboardLayout, /publication_requested_at == null/);
-  assert.match(dashboardLayout, /get_my_access_state/);
-  assert.match(dashboardLayout, /waitlist_joined === true/);
+test("dashboard requires completed profile setup and preserves optional activation", () => {
+  assert.match(dashboardLayout, /!profile\?\.onboarding_completed_at/);
   assert.match(dashboardLayout, /redirect\("\/onboarding"\)/);
+  assert.doesNotMatch(dashboardLayout, /get_my_access_state|waitlist_joined/);
 });

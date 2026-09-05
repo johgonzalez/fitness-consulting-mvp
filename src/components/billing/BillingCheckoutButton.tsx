@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 
-export function BillingCheckoutButton() {
+export function BillingCheckoutButton({ flow = "billing", label = "Assinar Cheipi Pro", className = "pp-button pp-button--primary" }: {
+  flow?: "billing" | "onboarding";
+  label?: string;
+  className?: string;
+}) {
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -11,7 +15,8 @@ export function BillingCheckoutButton() {
     setPending(true);
     setMessage("");
     try {
-      const response = await fetch("/api/billing/stripe/checkout", {
+      const endpoint = flow === "onboarding" ? "/api/billing/stripe/checkout/?flow=onboarding" : "/api/billing/stripe/checkout/";
+      const response = await fetch(endpoint, {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -31,8 +36,8 @@ export function BillingCheckoutButton() {
   }
 
   return <div className="billing-checkout-action">
-    <button className="pp-button pp-button--primary" type="button" onClick={startCheckout} disabled={pending}>
-      {pending ? "Abrindo pagamento…" : "Assinar Cheipi Pro"}
+    <button className={className} type="button" onClick={startCheckout} disabled={pending}>
+      {pending ? "Abrindo pagamento…" : label}
     </button>
     {message ? <p className="billing-checkout-error" role="alert">{message}</p> : null}
   </div>;

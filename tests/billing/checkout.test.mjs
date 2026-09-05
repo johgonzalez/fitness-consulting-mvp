@@ -277,3 +277,16 @@ test("duplicate click reuses the open Checkout Session", async () => {
   assert.equal(result.reused, true);
   assert.equal(fixture.calls.createdSessions, 0);
 });
+
+test("onboarding Checkout returns to onboarding and preserves the seven-day trial", async () => {
+  let request;
+  const fixture = checkoutFixture({ provider: { createCheckoutSession: async input => {
+    request = input;
+    return { id: "cs_test_checkout", customerId: "cus_trainer", status: "open", url: "https://checkout.stripe.com/c/pay/test", expiresAt: "2099-01-01T00:00:00.000Z" };
+  } } });
+  await startProCheckout({ identity: trainer, repository: fixture.repository, provider: fixture.provider, appBaseUrl: "https://sandbox.example", returnPath: "onboarding" });
+  assert.equal(request.successUrl, "https://sandbox.example/onboarding?checkout=returned");
+  assert.equal(request.cancelUrl, "https://sandbox.example/onboarding?checkout=canceled");
+  assert.equal(request.trialPeriodDays, 7);
+  assert.equal("activate" in fixture.repository, false);
+});

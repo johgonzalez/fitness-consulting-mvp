@@ -51,10 +51,10 @@ test("Waitlist is private, normalized and grants no access",()=>{
   assert.doesNotMatch(accessMigration,/join_waitlist[\s\S]*insert into public\.access_grants/);
 });
 
-test("Onboarding presents factual Founder and Waitlist outcomes",()=>{
+test("Legacy access validation remains strict without blocking onboarding",()=>{
   assert.match(actions,/Código inválido\./);
   assert.match(actions,/Este código não está mais disponível\./);
   assert.match(actions,/Este código atingiu o limite de ativações\./);
-  assert.match(onboarding,/Você entrou na lista de espera\./);
+  assert.doesNotMatch(onboarding,/name="access_code"|Entrar na lista de espera/);
   assert.match(actions,/request_my_site_publication/);
 });
