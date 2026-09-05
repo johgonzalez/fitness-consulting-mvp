@@ -28,7 +28,8 @@ if (process.env.VERCEL_ENV === 'production') {
     console.log(JSON.stringify({ billingProductionPreflight: 'PASS', environment: health.environment, account: health.accountId, supabaseProject: database.hostname.split('.')[0], price: price.providerPriceId, amountMinor: price.unitAmountMinor, currency: price.currency }));
   } catch (error) {
     const code = typeof error?.code === 'string' ? error.code : /^[A-Z_]+$/.test(error?.message || '') ? error.message : 'BILLING_PRODUCTION_PREFLIGHT_FAILED';
-    console.error(`Billing production preflight failed: ${code}`);
+    const context = Object.fromEntries(Object.entries(error?.safeContext || {}).filter(([key, value]) => ['field', 'reason', 'operation'].includes(key) && typeof value === 'string' && /^[A-Za-z0-9_.]+$/.test(value)));
+    console.error(JSON.stringify({ billingProductionPreflight: 'FAILED', code, ...context }));
     process.exitCode = 1;
   }
 } else {
