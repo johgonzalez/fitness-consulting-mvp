@@ -77,6 +77,12 @@ export function resolveStripeConfiguration(
   }
 
   const environment = resolveProviderEnvironment(source);
+  if (source.VERCEL_ENV && environment !== (source.VERCEL_ENV === "production" ? "LIVE" : "TEST")) {
+    throw new StripeProviderError("STRIPE_CONFIGURATION_ERROR", {
+      field: "STRIPE_ENVIRONMENT",
+      reason: "deployment_environment_mismatch",
+    });
+  }
   const credential = parseCredential(apiKey);
   if (credential.environment !== environment) {
     throw new StripeProviderError("STRIPE_CONFIGURATION_ERROR", {

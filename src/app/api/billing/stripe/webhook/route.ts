@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { createStripeBillingProvider } from "@/lib/billing/providers/stripe/adapter";
 import { createStripeClient } from "@/lib/billing/providers/stripe/client";
 import { loadStripeConfiguration } from "@/lib/billing/providers/stripe/runtime-configuration";
+import { verifyStripeWebhookEvent } from "@/lib/billing/providers/stripe/webhook-verification";
 import { createBillingAdminClient } from "@/lib/billing/supabase-admin";
 
 export const runtime = "nodejs";
@@ -17,8 +18,7 @@ export async function POST(request:Request){
   const signature=request.headers.get("stripe-signature");if(!signature)return text("Assinatura ausente.",400);
   const raw=await request.text();const hash=createHash("sha256").update(raw).digest("hex");
   let event:Stripe.Event;
-  try{const stripe=createStripeClient(loadStripeConfiguration());event=await stripe.webhooks.constructEventAsync(raw,signature,secret);}catch{return text("Assinatura inválida.",400);}
-  if(event.livemode)return text("Evento Live recusado neste ambiente.",400);
+  try{const configuration=loadStripeConfiguration();event=await verifyStripeWebhookEvent({stripe:createStripeClient(configuration),raw,signature,secret,environment:configuration.environment});}catch{return text("Assinatura ou ambiente inválido.",400);}
   const admin=createBillingAdminClient();const object=event.data.object as unknown as Record<string,unknown>;const objectIdValue=objectId(object);
   const receipt={provider:"stripe",provider_event_id:event.id,event_type:event.type,provider_object_id:objectIdValue,provider_api_version:event.api_version,provider_livemode:event.livemode,processing_status:supported.has(event.type)?"PROCESSING":"IGNORED",attempt_count:1,payload_sha256:hash,...(!supported.has(event.type)?{processed_at:new Date().toISOString()}:{})};
   const inserted=await admin.from("billing_event_receipts").insert(receipt).select("id").maybeSingle();

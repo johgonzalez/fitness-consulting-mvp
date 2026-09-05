@@ -79,6 +79,11 @@ function matchesEnvironment(
   return value === (configuration.environment === "LIVE");
 }
 
+function matchesCheckoutSessionId(value: unknown, configuration: StripeProviderConfiguration): value is string {
+  const pattern = configuration.environment === "LIVE" ? /^cs_live_[A-Za-z0-9]+$/ : /^cs_test_[A-Za-z0-9]+$/;
+  return typeof value === "string" && pattern.test(value);
+}
+
 async function providerCall<T>(operation: string, call: () => Promise<T>): Promise<T> {
   try {
     return await call();
@@ -97,7 +102,7 @@ function checkoutSession(
   const expiresAt = typeof session.expires_at === "number"
     ? new Date(session.expires_at * 1000).toISOString()
     : null;
-  if (typeof session.id !== "string" || !session.id.startsWith("cs_test_")) {
+  if (!matchesCheckoutSessionId(session.id, configuration)) {
     throw new StripeProviderError("STRIPE_PROVIDER_UNAVAILABLE", { reason: "invalid_checkout_session_id" });
   }
   if (!matchesEnvironment(session.livemode, configuration)) {
@@ -300,7 +305,7 @@ export class StripeBillingProviderCore implements StripeBillingProvider {
   }
 
   async getCheckoutSession(sessionId: string): Promise<StripeProviderCheckoutSession> {
-    if (!/^cs_test_[A-Za-z0-9]+$/.test(sessionId)) {
+    if (!matchesCheckoutSessionId(sessionId, this.configuration)) {
       throw new StripeProviderError("STRIPE_OBJECT_NOT_FOUND", { object: "checkout_session" });
     }
     const raw = await providerCall(
