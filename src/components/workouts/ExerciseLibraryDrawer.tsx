@@ -55,6 +55,7 @@ export function ExerciseLibraryDrawer({
     ? searchResult.signature === searchSignature ? searchResult.exercises : []
     : exercises, [exercises, remoteSearch, searchResult, searchSignature]);
 
+  // Refresh an active search when a custom creation updates the local catalog.
   useEffect(() => {
     if (!remoteSearch) return;
     let ignore = false;
@@ -65,7 +66,7 @@ export function ExerciseLibraryDrawer({
       }
     });
     return () => { ignore = true; };
-  }, [equipment, muscle, normalizedQuery, remoteSearch, searchSignature, source]);
+  }, [equipment, exercises, muscle, normalizedQuery, remoteSearch, searchSignature, source]);
 
   useEffect(() => {
     if (!open) return;

@@ -125,3 +125,10 @@
   .cheipi-personal-app .pp-wizard-actions > div { min-width: 0; flex: 1; flex-wrap: wrap; justify-content: flex-end; }
   .cheipi-personal-app .pp-wizard-actions .pp-button { min-height: 48px; }
 }
+
+@media (max-width: 620px) {
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header { flex-wrap: wrap; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header > div { flex: 1 1 180px; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header .pp-button { width: auto; max-width: 100%; padding: 10px 14px; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header .pp-button svg { flex: none; }
+}

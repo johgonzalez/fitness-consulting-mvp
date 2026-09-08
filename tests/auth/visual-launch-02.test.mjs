@@ -53,7 +53,8 @@ test("Student Today keeps its original data contract and Dashboard keeps real lo
   assert.match(today, /getStudentTodayWorkspace/);
   assert.doesNotMatch(today + studentScreen, /assessment/i);
   assert.match(dashboard, /findOwnerProfile\(\)/);
-  assert.match(dashboard, /findDashboardMetrics\(\)/);
+  assert.match(dashboard, /executionService\.listTrainerNotifications\(3\)/);
+  assert.match(dashboard, /listCommunityNotifications\(\)/);
   assert.match(dashboard, /getStudentsWorkspace\(\)/);
   assert.match(dashboard, /getLeadsWorkspace\(\)/);
   assert.match(dashboard, /getTrainerAssessmentIndex\(\)/);

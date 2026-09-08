@@ -45,11 +45,13 @@ test("password recovery uses canonical Supabase Auth without product-role mutati
 });
 
 test("dashboard remains factual, attention-first and open-layout", () => {
-  assert.match(dashboard, /Veja o que precisa da sua atenção agora/);
+  assert.match(dashboard, /aria-labelledby="today-title"/);
+  assert.match(dashboard, /priorities\.slice\(0, 3\)/);
+  assert.match(dashboard, /<details[^>]*>[\s\S]*?priorities\.slice\(3\)/);
   assert.match(dashboard, /workoutNotifications/);
   assert.match(dashboard, /reviewAssessments/);
   assert.match(dashboard, /attentionLeads/);
-  assert.match(dashboard, /Meu Site/);
+  assert.match(dashboard, /href="\/dashboard\/site"/);
   assert.doesNotMatch(dashboard, /receita|retenção|rating|faturamento/i);
   assert.match(css, /pc-dashboard--v1b/);
   assert.match(css, /pc-priority-row/);

@@ -20,6 +20,25 @@ type Props={draft:OnboardingDraft|null;profile:TrainerProfile|null;billing:{bill
 type EditableStage=Extract<OnboardingStage,"identity"|"professional"|"social"|"slug"|"template">;
 const initial:OnboardingActionState={};
 
+function useOnboardingStepFocus<T extends HTMLElement>(step: string | null) {
+  const containerRef = useRef<T>(null);
+  const previousStep = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (previousStep.current === step) return;
+    previousStep.current = step;
+    if (step === null) return;
+    const heading = Array.from(containerRef.current?.querySelectorAll<HTMLElement>("h1") ?? [])
+      .find((candidate) => !candidate.closest("[hidden]"));
+    if (!heading) return;
+    heading.tabIndex = -1;
+    heading.focus({ preventScroll: true });
+    // Immediate positioning also respects reduced motion and keeps the progress visible.
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
+  return containerRef;
+}
+
+
 
 function OnboardingProgress({stage,phase="specialty"}:{stage:OnboardingStage;phase?:"specialty"|"service"}) {
   const requiredStep = stage === "identity" ? 1 : stage === "professional" ? (phase === "specialty" ? 2 : 3) : stage === "social" ? 4 : stage === "slug" ? 5 : stage === "template" ? 6 : null;
@@ -55,14 +74,14 @@ function TemplateChoices({draft,profile}:Pick<Props,"draft"|"profile">) {
 }
 
 function BackButton({onClick}:{onClick:()=>void}){return <button type="button" className="pc-onboarding-back" onClick={onClick}><ArrowLeft aria-hidden="true"/>Voltar</button>}
-function ExitButton(){return <button formAction={logout} formNoValidate className="pc-onboarding-exit">Sair</button>}
+function ExitButton(){return <button type="submit" form="onboarding-exit" formAction={logout} formNoValidate className="pc-onboarding-exit">Sair</button>}
 
-function SubmitForm({action,children,submit,onBack,multipart=false}:{action:(state:OnboardingActionState,data:FormData)=>Promise<OnboardingActionState>;children:React.ReactNode;submit:string;onBack?:()=>void;multipart?:boolean}){const[state,formAction,pending]=useActionState(action,initial);return <form action={formAction} encType={multipart?"multipart/form-data":undefined} className="pc-onboarding-step" aria-busy={pending}>{children}{state.message?<p className="form-message" role="status">{state.message}</p>:null}<div className="pc-onboarding-actions">{onBack?<BackButton onClick={onBack}/>:null}<ExitButton/><button className="pc-onboarding-primary" disabled={pending}>{pending?"Salvando…":submit}</button></div></form>}
+function SubmitForm({action,children,submit,onBack}:{action:(state:OnboardingActionState,data:FormData)=>Promise<OnboardingActionState>;children:React.ReactNode;submit:string;onBack?:()=>void}){const[state,formAction,pending]=useActionState(action,initial);return <form action={formAction} className="pc-onboarding-step" aria-busy={pending}>{children}{state.message?<p className="form-message" role="status">{state.message}</p>:null}<div className="pc-onboarding-actions">{onBack?<BackButton onClick={onBack}/>:null}<ExitButton/><button className="pc-onboarding-primary" disabled={pending}>{pending?"Salvando…":submit}</button></div></form>}
 
-function ProfessionalForm({draft,onBack,initialPhase="specialty"}:{draft:OnboardingDraft|null;onBack:()=>void;initialPhase?:"specialty"|"service"}){const[state,formAction,pending]=useActionState(saveOnboardingProfessional,initial);const[phase,setPhase]=useState<"specialty"|"service">(initialPhase);const[custom,setCustom]=useState(draft?.specialty_code==="custom");const formRef=useRef<HTMLFormElement>(null);function continueToService(){if(formRef.current?.reportValidity())setPhase("service")}return <form ref={formRef} action={formAction} className="pc-onboarding-step" aria-busy={pending}><OnboardingProgress stage="professional" phase={phase}/>
+function ProfessionalForm({draft,onBack,initialPhase="specialty"}:{draft:OnboardingDraft|null;onBack:()=>void;initialPhase?:"specialty"|"service"}){const[state,formAction,pending]=useActionState(saveOnboardingProfessional,initial);const[phase,setPhase]=useState<"specialty"|"service">(initialPhase);const[custom,setCustom]=useState(draft?.specialty_code==="custom");const stepRef=useOnboardingStepFocus<HTMLFormElement>(phase);return <form ref={stepRef} action={formAction} onSubmit={event=>{if(phase==="specialty"){event.preventDefault();setPhase("service")}}} className="pc-onboarding-step" aria-busy={pending}><OnboardingProgress stage="professional" phase={phase}/>
   <section hidden={phase!=="specialty"} className="pc-onboarding-substep"><header><span>Seu trabalho</span><h1>Qual é sua especialidade?</h1><p>Escolha a área que melhor representa seu trabalho hoje.</p></header><label>Especialidade principal<select name="specialty_code" defaultValue={draft?.specialty_code??"hypertrophy"} onChange={e=>setCustom(e.target.value==="custom")}><option value="hypertrophy">Hipertrofia</option><option value="weight_loss">Emagrecimento</option><option value="strength">Força</option><option value="conditioning">Condicionamento</option><option value="running">Corrida</option><option value="mobility">Mobilidade</option><option value="custom">Outra especialidade</option></select></label>{custom?<label>Qual especialidade? *<input name="custom_specialty" defaultValue={draft?.specialty_label??""} required minLength={2} maxLength={120}/></label>:null}</section>
   <section hidden={phase!=="service"} className="pc-onboarding-substep"><header><span>Seu atendimento</span><h1>Como você atende seus alunos?</h1></header><fieldset className="pc-mode-fieldset"><legend>Formato de atendimento</legend><div>{[["online","Online"],["presencial","Presencial"],["both","Híbrido"]].map(([value,label])=><label key={value}><input type="radio" name="service_mode" value={value} defaultChecked={(draft?.service_mode??"both")===value} required/><span>{label}</span></label>)}</div></fieldset><OptionalFields title="Cidade e registro profissional" description="Você pode completar depois" hasValues={Boolean(draft?.city||draft?.cref)}><label>Cidade <input name="city" defaultValue={draft?.city??""} maxLength={120} autoComplete="address-level2"/></label><label>CREF <input name="cref" defaultValue={draft?.cref??""} maxLength={60}/></label></OptionalFields></section>
-  {state.message?<p className="form-message" role="status">{state.message}</p>:null}<div className="pc-onboarding-actions">{phase==="specialty"?<BackButton onClick={onBack}/>:<BackButton onClick={()=>setPhase("specialty")}/>}<ExitButton/>{phase==="specialty"?<button type="button" className="pc-onboarding-primary" onClick={continueToService}>Continuar</button>:<button className="pc-onboarding-primary" disabled={pending}>{pending?"Salvando…":"Continuar"}</button>}</div>
+  {state.message?<p className="form-message" role="status">{state.message}</p>:null}<div className="pc-onboarding-actions">{phase==="specialty"?<BackButton onClick={onBack}/>:<BackButton onClick={()=>setPhase("specialty")}/>}<ExitButton/><button type="submit" className="pc-onboarding-primary" disabled={pending}>{pending?"Salvando…":"Continuar"}</button></div>
 </form>}
 
 function SlugForm({draft,onBack,onSaved}:{draft:OnboardingDraft|null;onBack:()=>void;onSaved:()=>void}) {
@@ -106,6 +125,7 @@ function FirstStudent({studentActivation}:Pick<Props,"studentActivation">){retur
 
 export function OnboardingForm({draft,profile,billing,canPublish,studentActivation,publicUrl,step,checkout}:Props){const authoritativeStage=stageOf(draft,profile,step);const[editingStage,setEditingStage]=useState<EditableStage|null>(null);const stage=editingStage??authoritativeStage;const[publishState,publishAction,publishPending]=useActionState(requestOnboardingPublication,initial);const activeBilling=billing?.billing_state==="ACTIVE"||billing?.billing_state==="GRACE";
   const router=useRouter();
+  const stepRef=useOnboardingStepFocus<HTMLDivElement>(stage==="professional"?null:stage);
   const awaitingActivation=checkout==="returned"&&!canPublish&&!profile?.published;
   useEffect(()=>{
     if(!awaitingActivation)return;
@@ -113,9 +133,11 @@ export function OnboardingForm({draft,profile,billing,canPublish,studentActivati
     const timer=window.setInterval(()=>{router.refresh();if(++attempts>=10)window.clearInterval(timer)},3000);
     return()=>window.clearInterval(timer);
   },[awaitingActivation,router]);
-  return <div className="pc-onboarding-form" data-stage={stage}>
+  return <div ref={stepRef} className="pc-onboarding-form" data-stage={stage}>
+    {/* Exit has its own form so Enter in a profile field always continues onboarding. */}
+    <form id="onboarding-exit" action={logout} hidden />
     {stage!=="professional"?<OnboardingProgress stage={stage}/>:null}
-    {stage==="identity"?<SubmitForm action={saveOnboardingIdentity} submit="Continuar" multipart><header><span>Seu site começa por você</span><h1>Primeiro, vamos conhecer você</h1><p>Use seus dados reais. Você precisa ter 18 anos ou mais.</p></header><label>Nome completo *<input name="full_name" defaultValue={draft?.full_name??draft?.display_name??""} required minLength={2} maxLength={160} autoComplete="name"/></label><label>Data de nascimento *<input name="birth_date" type="date" defaultValue={draft?.birth_date??""} required autoComplete="bday"/></label><OptionalFields title="Deixe com a sua cara" description="Foto, nome profissional e preferências · opcional" hasValues={Boolean(draft?.preferred_name||draft?.pronouns||draft?.professional_name)}><label>Nome profissional<input name="professional_name" defaultValue={draft?.professional_name??""} maxLength={100}/></label><label>Como prefere ser chamado?<input name="preferred_name" defaultValue={draft?.preferred_name??""} maxLength={100}/></label><label>Pronomes<input name="pronouns" defaultValue={draft?.pronouns??""} maxLength={40}/></label><label className="pc-photo-input">Foto profissional<input name="image" type="file" accept="image/jpeg,image/png,image/webp"/><small>{draft?.profile_image_url?"Você já tem uma foto salva. Envie outra para trocar. ":""}JPG, PNG ou WebP · até 5 MB</small></label></OptionalFields></SubmitForm>:null}
+    {stage==="identity"?<SubmitForm action={saveOnboardingIdentity} submit="Continuar"><header><span>Seu site começa por você</span><h1>Primeiro, vamos conhecer você</h1><p>Use seus dados reais. Você precisa ter 18 anos ou mais.</p></header><label>Nome completo *<input name="full_name" defaultValue={draft?.full_name??draft?.display_name??""} required minLength={2} maxLength={160} autoComplete="name"/></label><label>Data de nascimento *<input name="birth_date" type="date" defaultValue={draft?.birth_date??""} required autoComplete="bday"/></label><OptionalFields title="Deixe com a sua cara" description="Foto, nome profissional e preferências · opcional" hasValues={Boolean(draft?.preferred_name||draft?.pronouns||draft?.professional_name)}><label>Nome profissional<input name="professional_name" defaultValue={draft?.professional_name??""} maxLength={100}/></label><label>Como prefere ser chamado?<input name="preferred_name" defaultValue={draft?.preferred_name??""} maxLength={100}/></label><label>Pronomes<input name="pronouns" defaultValue={draft?.pronouns??""} maxLength={40}/></label><label className="pc-photo-input">Foto profissional<input name="image" type="file" accept="image/jpeg,image/png,image/webp"/><small>{draft?.profile_image_url?"Você já tem uma foto salva. Envie outra para trocar. ":""}JPG, PNG ou WebP · até 5 MB</small></label></OptionalFields></SubmitForm>:null}
     {stage==="professional"?<ProfessionalForm draft={draft} initialPhase={authoritativeStage==="professional"?"specialty":"service"} onBack={()=>setEditingStage("identity")}/>:null}
     {stage==="social"?<SubmitForm action={saveOnboardingSocial} submit="Criar meu endereço" onBack={()=>setEditingStage("professional")}><header><span>Contato direto</span><h1>Vamos facilitar o contato</h1><p>WhatsApp é necessário. Os demais canais podem ficar para depois.</p></header><label>WhatsApp *<input name="whatsapp" type="tel" inputMode="tel" autoComplete="tel" defaultValue={draft?.whatsapp??""} required placeholder="55 11 99999-9999"/></label><OptionalFields title="Adicionar redes sociais" description="Instagram, TikTok e YouTube · opcional" hasValues={Boolean(draft?.instagram||draft?.tiktok||draft?.youtube)}><label>Instagram <input name="instagram" defaultValue={draft?.instagram??""} placeholder="@seuperfil" maxLength={120} autoCapitalize="none" autoCorrect="off"/></label><label>TikTok <input name="tiktok" defaultValue={draft?.tiktok??""} placeholder="@seuperfil" maxLength={160} autoCapitalize="none" autoCorrect="off"/></label><label>YouTube <input name="youtube" type="text" defaultValue={draft?.youtube??""} placeholder="@seucanal ou URL" maxLength={360} autoCapitalize="none" autoCorrect="off"/></label></OptionalFields></SubmitForm>:null}
     {stage==="slug"?<SlugForm draft={draft} onBack={()=>setEditingStage("social")} onSaved={()=>setEditingStage("template")}/>:null}

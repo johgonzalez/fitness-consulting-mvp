@@ -248,7 +248,8 @@
 }
 @media(max-width:360px) {
   .cheipi-personal-app :is(.dashboard-main,.pc-dashboard,.matrix-page) { width:calc(100% - 32px); }
-  .cheipi-personal-app .pp-primary-nav--mobile .pp-nav-item__label { font-size:.75rem; }
+  .cheipi-personal-app .pp-primary-nav--mobile { grid-template-columns:repeat(5,minmax(max-content,1fr)); column-gap:4px; }
+  .cheipi-personal-app .pp-primary-nav--mobile .pp-nav-item__label { white-space:nowrap; }
   .cheipi-personal-app .cheipi-today-actions { flex-direction:column; }
   .cheipi-personal-app .cheipi-task-list>:is(a,button) { gap:12px; }
   .cheipi-personal-app .pp-template-tile-preview { height:280px; }
@@ -265,3 +266,26 @@
 .cheipi-personal-app .cheipi-loading-list { display:grid; gap:18px; margin-top:36px; }
 .cheipi-personal-app .cheipi-loading-list>div { min-height:64px; border-radius:10px; }
 .cheipi-personal-app .pp-site-page:has(.cheipi-site-builder:not([data-view="overview"]))>.cheipi-back { display:none; }
+
+/* Assistant fieldsets must let their grid and flex children shrink on narrow screens. */
+.cheipi-personal-app :is(.pp-headline-assistant, .pp-content-assistant) {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+.cheipi-personal-app :is(.pp-headline-assistant, .pp-content-assistant) > *,
+.cheipi-personal-app :is(.pp-headline-assistant__intro, .pp-content-assistant__intro) > div {
+  min-width: 0;
+  max-width: 100%;
+}
+.cheipi-personal-app :is(.pp-headline-assistant__intro, .pp-content-assistant__intro) :is(strong, p),
+.cheipi-personal-app :is(.pp-headline-suggestions, .pp-content-assistant__suggestions) button > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cheipi-personal-app .pp-content-assistant__footer { flex-wrap: wrap; }
+.cheipi-personal-app :is(.pp-content-assistant__footer, .pp-specialty-assistant__options, .pp-specialty-assistant__selected) > button {
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

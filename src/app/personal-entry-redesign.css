@@ -317,6 +317,11 @@
 .pc-auth-page :is(.pc-auth-forgot, .pc-auth-back, .pc-auth-switch a) { min-height: 44px; display: inline-flex; align-items: center; }
 .pc-auth-page .pc-auth-form :is(input, button) { scroll-margin-block: 96px; }
 
+/* The panel owns the viewport height; the step must leave room for its footer. */
+@media (max-width: 760px) {
+  .pc-auth-page[data-auth-view="signup"] .pc-signup-flow { min-height: 0; }
+}
+
 @keyframes pc-entry-arrive { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 @media (min-width: 761px) {
   .onboarding-page.personal-entry { padding-bottom: 60px; }

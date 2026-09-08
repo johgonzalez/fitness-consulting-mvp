@@ -70,7 +70,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .55rem;
   font-weight: 650;
 }
@@ -180,7 +180,7 @@
   padding: 0 20px;
   border: 1px solid transparent;
   background: var(--ee-accent-strong);
-  color: white;
+  color: var(--ee-on-accent);
   font-size: .72rem;
   font-weight: 680;
   transition: transform .2s ease, background-color .2s ease, color .2s ease;
@@ -199,11 +199,12 @@
   stroke-width: 1.7;
 }
 
-.headerAction:hover,
-.primaryAction:hover,
-.finalAction:hover {
-  transform: translateY(-2px);
-  background: var(--ee-ink);
+@media (hover: hover) and (pointer: fine) {
+  .root :is(.headerAction, .primaryAction, .finalAction):hover {
+    transform: translateY(-2px);
+    background: var(--ee-ink);
+    color: #ffffff;
+  }
 }
 
 .mobileNavigation {
@@ -279,7 +280,7 @@
 }
 
 .heroIdentity span {
-  color: var(--ee-accent);
+  color: var(--ee-accent-text);
 }
 
 .heroCopy h1 {
@@ -317,7 +318,7 @@
 
 .secondaryAction svg {
   width: 18px;
-  color: var(--ee-accent);
+  color: var(--ee-accent-text);
   transition: transform .2s ease;
 }
 
@@ -342,7 +343,7 @@
 
 .heroMeta svg {
   width: 15px;
-  color: var(--ee-accent);
+  color: var(--ee-accent-text);
 }
 
 .heroScroll {
@@ -377,7 +378,7 @@
 }
 
 .sectionLabel {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .62rem;
   font-weight: 720;
   letter-spacing: .13em;
@@ -404,7 +405,7 @@
 
 .positioningStatement h2 em,
 .experience h2 em {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-style: normal;
 }
 
@@ -430,7 +431,7 @@
 }
 
 .specialtyList small {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .57rem;
   font-weight: 700;
 }
@@ -556,7 +557,7 @@
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--ee-accent) 28%, var(--ee-border));
   border-radius: 50%;
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .59rem;
   font-weight: 720;
 }
@@ -628,13 +629,13 @@
 .serviceNumber {
   align-self: start;
   padding-top: 4px;
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .57rem;
   font-weight: 720;
 }
 
 .serviceCopy small {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .56rem;
   font-weight: 680;
   letter-spacing: .09em;
@@ -679,7 +680,7 @@
 .serviceAction:hover {
   transform: translateY(-2px);
   border-color: var(--ee-accent-strong);
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
 }
 
 .experience {
@@ -736,7 +737,7 @@
 
 .experienceCopy li svg {
   width: 14px;
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
 }
 
 .experienceBrand {
@@ -853,7 +854,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--ee-accent-strong);
-  color: white;
+  color: var(--ee-on-accent);
   font-size: .59rem;
 }
 
@@ -889,7 +890,7 @@
 }
 
 .phoneWorkout > small {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .48rem;
   font-weight: 700;
   letter-spacing: .08em;
@@ -924,14 +925,14 @@
   place-items: center;
   border-radius: 50%;
   background: color-mix(in srgb, var(--ee-accent) 12%, white);
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .45rem;
   font-style: normal;
 }
 
 .phoneWorkout > div svg {
   width: 12px;
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
 }
 
 .phoneButton {
@@ -940,7 +941,7 @@
   place-items: center;
   margin-top: 13px;
   background: var(--ee-accent-strong);
-  color: white;
+  color: var(--ee-on-accent);
   font-size: .54rem;
   font-weight: 680;
 }
@@ -998,7 +999,7 @@
 }
 
 .phone footer strong {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
 }
 
 .phoneCaption {
@@ -1086,7 +1087,7 @@
   border: 1px solid color-mix(in srgb, var(--ee-accent) 22%, var(--ee-border));
   border-radius: 50%;
   background: color-mix(in srgb, var(--ee-accent) 8%, white);
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .74rem;
   font-weight: 650;
 }
@@ -1142,7 +1143,7 @@
 }
 
 .final > div > p {
-  color: var(--ee-accent-strong);
+  color: var(--ee-accent-text);
   font-size: .62rem;
   font-weight: 720;
   letter-spacing: .11em;
@@ -1197,7 +1198,7 @@
 }
 
 .root :is(.headerAction, .primaryAction, .finalAction) {
-  color: white;
+  color: var(--ee-on-accent);
 }
 
 .root .serviceAction {

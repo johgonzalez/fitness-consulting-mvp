@@ -55,12 +55,11 @@ import type {
 } from "@/lib/domain/trainer";
 import { type TemplateDefinition } from "@/lib/domain/template-registry";
 import { curatedSiteTemplates, getSiteTemplatePresentation } from "@/lib/domain/site-template-presentation";
+import { normalizeSiteEditorSection, siteEditorTab, type SiteEditorSection, type SiteEditorTab } from "@/lib/navigation/site-editor";
 
 const initialState: SiteActionState = {};
 
 type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance" | "publication";
-type PersonalizationSection = "identity" | "presentation" | "methodology" | "services" | "testimonials" | "organize";
-type PersonalizationTab = "content" | "appearance" | "organize";
 const siteSections: SiteSection[] = ["overview", "templates", "personalize", "contact", "performance", "publication"];
 
 function ActionMessage({ state }: { state: SiteActionState }) {
@@ -278,15 +277,20 @@ export function SiteBuilder({
   const searchParams = useSearchParams();
   const requestedSection = searchParams.get("view") as SiteSection;
   const section = siteSections.includes(requestedSection) ? requestedSection : "overview";
-  function setSection(next: SiteSection) {
+  const personalization = normalizeSiteEditorSection(searchParams.get("editor"));
+  const personalizationTab = siteEditorTab(personalization);
+  function setSection(next: SiteSection, editor: SiteEditorSection = personalization) {
     const url = new URL(window.location.href);
     if (next === "overview") url.searchParams.delete("view");
     else url.searchParams.set("view", next);
+    if (next === "personalize") url.searchParams.set("editor", editor);
+    else url.searchParams.delete("editor");
     window.history.pushState(null, "", url.pathname + url.search);
     window.scrollTo({ top: 0, behavior: "instant" });
   }
-  const [personalization, setPersonalization] = useState<PersonalizationSection>("presentation");
-  const [personalizationTab, setPersonalizationTab] = useState<PersonalizationTab>("content");
+  function setPersonalization(next: SiteEditorSection) {
+    setSection("personalize", next);
+  }
   const [presentationState, presentationAction, presentationPending] = useActionState(savePresentation, initialState);
   const [contactState, contactAction, contactPending] = useActionState(saveContact, initialState);
   const [identityState, identityAction, identityPending] = useActionState(saveIdentity, initialState);
@@ -300,10 +304,8 @@ export function SiteBuilder({
   const [shareMessage, setShareMessage] = useState("");
   const instagram = normalizeInstagramIdentity(profile.instagram_handle ?? profile.instagram, profile.instagram_url);
 
-  function openEditor(next: PersonalizationSection = "presentation") {
-    setPersonalization(next);
-    setPersonalizationTab(next === "identity" ? "appearance" : next === "organize" ? "organize" : "content");
-    setSection("personalize");
+  function openEditor(next: SiteEditorSection = "presentation") {
+    setSection("personalize", next);
   }
 
   async function copyLink() {
@@ -380,9 +382,9 @@ export function SiteBuilder({
 
       {section === "personalize" ? (
         <section className="pp-site-view" aria-label="Personalização do site">
-          <SectionHeader title="Do seu jeito" description="Salve as alterações e confira como ficam no seu site." action={<Link href="/dashboard/preview?returnView=personalize">Visualizar <ExternalLink aria-hidden="true" /></Link>} />
+          <SectionHeader title="Do seu jeito" description="Salve as alterações e confira como ficam no seu site." action={<Link href={`/dashboard/preview?returnView=personalize&returnEditor=${personalization}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>} />
           <nav className="pp-site-editor-tabs" aria-label="Modos de personalização">
-            {([['content', 'Conteúdo'], ['appearance', 'Aparência'], ['organize', 'Seções']] as Array<[PersonalizationTab, string]>).map(([id, label]) => <button key={id} type="button" className={personalizationTab === id ? "is-active" : ""} aria-current={personalizationTab === id ? "page" : undefined} onClick={() => { setPersonalizationTab(id); if (id === "appearance") setPersonalization("identity"); if (id === "organize") setPersonalization("organize"); if (id === "content" && ["identity", "organize"].includes(personalization)) setPersonalization("presentation"); }}>{label}</button>)}
+            {([['content', 'Conteúdo'], ['appearance', 'Aparência'], ['organize', 'Seções']] as Array<[SiteEditorTab, string]>).map(([id, label]) => <button key={id} type="button" className={personalizationTab === id ? "is-active" : ""} aria-current={personalizationTab === id ? "page" : undefined} onClick={() => setPersonalization(id === "appearance" ? "identity" : id === "organize" ? "organize" : personalizationTab === "content" ? personalization : "presentation")}>{label}</button>)}
           </nav>
 
           <button type="button" className="cheipi-contact-entry" onClick={() => setSection("contact")}><MessageCircle aria-hidden="true" /><span>Contato e redes sociais</span><ChevronRight aria-hidden="true" /></button>
@@ -393,7 +395,7 @@ export function SiteBuilder({
                 ["methodology", "Metodologia", `${methodology.length} etapas`],
                 ["services", "Serviços", `${services.length} cadastrados`],
                 ["testimonials", "Depoimentos", `${testimonials.length} cadastrados`],
-              ] as Array<[PersonalizationSection, string, string]>).map(([id, label, detail]) => <button key={id} type="button" className={personalization === id ? "is-active" : ""} onClick={() => setPersonalization(id)}><span>{label}</span><small>{detail}</small></button>)}
+              ] as Array<[SiteEditorSection, string, string]>).map(([id, label, detail]) => <button key={id} type="button" className={personalization === id ? "is-active" : ""} onClick={() => setPersonalization(id)}><span>{label}</span><small>{detail}</small></button>)}
             </nav>
             <div className="pp-site-editor-panel">
               {personalization === "presentation" ? <><header><Settings2 aria-hidden="true" /><div><h2>Apresentação</h2><p>Use sugestões ou escreva com suas palavras. Tudo continua editável.</p></div></header><form action={presentationAction} className="builder-form"><label>Nome profissional<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} /></label><HeadlineAssistant initialValue={profile.headline} /><AssistedTextField name="bio" label="Bio" initialValue={profile.bio} suggestions={bioSuggestions} maxLength={2000} rows={5} /><SpecialtyAssistant initialValue={profile.specialty} suggestions={specialtySuggestions} /><AssistedTextField name="methodology_description" label="Introdução da metodologia" initialValue={profile.methodology_description ?? ""} suggestions={methodologySuggestions} maxLength={1000} rows={4} /><AssistedTextField name="testimonials_intro" label="Introdução dos depoimentos" initialValue={profile.testimonials_intro ?? ""} suggestions={testimonialsIntroSuggestions} maxLength={500} rows={3} /><label className="check-row"><input type="checkbox" name="profile_status_enabled" defaultChecked={profile.profile_status_enabled ?? false} /> Exibir status público no site</label><div className="builder-grid"><label>Texto do status<input name="profile_status_text" maxLength={40} defaultValue={profile.profile_status_text ?? ""} placeholder="Agenda aberta" /></label><label>Tom do status<select name="profile_status_semantic_tone" defaultValue={profile.profile_status_semantic_tone ?? ""}><option value="">Selecione</option><option value="availability">Disponibilidade</option><option value="online">Online</option><option value="announcement">Anúncio</option><option value="attention">Atenção</option><option value="neutral">Neutro</option></select></label></div><input type="hidden" name="city" value={profile.city ?? ""} /><input type="hidden" name="cref" value={profile.cref ?? ""} /><label>Modalidade<select name="service_mode" defaultValue={profile.service_mode}><option value="online">Online</option><option value="presencial">Presencial</option><option value="both">Online e presencial</option></select></label><Submit pending={presentationPending}>Salvar conteúdo</Submit><ActionMessage state={presentationState} /></form></> : null}

@@ -48,7 +48,7 @@ A faixa principal com muitas abas foi substituída por uma visão vertical: esta
 
 A curadoria está em `src/lib/domain/site-template-presentation.ts`, usada pelo onboarding e pelo editor. Os IDs 05 e 06 preservam os dois modelos mais recentes exigidos. Os modelos 02, 03 e 04 continuam registrados: não há exclusão, migração ou substituição automática de sites existentes. O onboarding permite manter um modelo anterior já selecionado. Disponibilidade e permissões do catálogo continuam verificadas.
 
-No celular, a prévia completa usa **um iframe isolado em tela cheia**, abaixo de uma toolbar de 64 px. A navegação do painel e a rolagem externa ficam fora dessa tela; o iframe ocupa o espaço restante. O isolamento preserva estilos e cabeçalhos dos templates aprovados, evitando interferência do painel. As rotas e a autenticação existentes permanecem. As amostras da seleção continuam sendo previews limitados, com ação explícita para visualizar. A prévia informa que usa **dados salvos**; esta V1 não implementa atualização instantânea de campos ainda não salvos. O retorno conserva o contexto de modelos, personalização ou publicação. Copiar e compartilhar têm mensagens de resultado e tratamento de cancelamento.
+No celular, a prévia completa usa **um iframe isolado em tela cheia**, abaixo de uma toolbar de 64 px. A navegação do painel e a rolagem externa ficam fora dessa tela; o iframe ocupa o espaço restante. O isolamento preserva estilos e cabeçalhos dos templates aprovados, evitando interferência do painel. As rotas e a autenticação existentes permanecem. As amostras da seleção continuam sendo previews limitados, com ação explícita para visualizar. A prévia informa que usa **dados salvos**; esta V1 não implementa atualização instantânea de campos ainda não salvos. O retorno conserva o contexto de modelos, personalização ou publicação. A área aberta no editor (Apresentação, Aparência, Metodologia, Serviços, Depoimentos ou Seções) também é preservada na URL e restaurada ao voltar da prévia. Copiar e compartilhar têm mensagens de resultado e tratamento de cancelamento.
 
 ## Demais alterações de apresentação
 
@@ -65,29 +65,48 @@ O bloqueio visual de publicação agora encaminha a `/dashboard/settings/billing
 
 A funcionalidade existente de criar rascunhos com IA continua identificada como IA e exige revisão. O pedido de evitar aparência genérica orientou o tratamento visual; não foi interpretado como autorização para remover essa capacidade.
 
+## Revisão visual autenticada de 08/09/2026
+
+A revisão continuou na branch `codex/personal-mobile-redesign-v1`, em worktree separada, usando o navegador IAB autorizado da sessão e o servidor local `http://127.0.0.1:3001`. Foram usadas janelas de 320 × 812, 390 × 844 e 430 × 932 px. O relatório de execução, evidências e limites está em [CHEIPI_PERSONAL_MOBILE_QA_2026-09-08.md](CHEIPI_PERSONAL_MOBILE_QA_2026-09-08.md).
+
+O Supabase usado é o projeto separado de testes `smqkpqpixnglkflhwxhr`; a configuração de Stripe foi confirmada como TEST. Checkout/publicação não foram executados, pois o webhook TEST legado ainda apontava para produção. O acesso Pro usado para inspecionar o feed foi uma fixture explícita no banco de testes, identificada por `qa_mobile_fixture`, sem validação de assinatura via Stripe. Produção não foi usada para os testes.
+
+O próximo Preview automático desta branch também foi isolado com configurações públicas do sandbox, sem chave administrativa nem credenciais Stripe. Runtime e build foram conferidos; os 46 registros de ambiente dos demais escopos ficaram idênticos. O checkout do Preview permanece indisponível. Deploys anteriores não recebem retroativamente essa configuração.
+
+A conta fictícia autenticada percorreu os seis passos do onboarding. Cadastro por e-mail e senha foi inspecionado nas três larguras, mas a tentativa real recebeu erro genérico do Supabase; a confirmação por e-mail/OTP não foi concluída. Portanto, a conta preparada administrativamente para o QA não comprova cadastro novo de ponta a ponta.
+
+Foram executados navegação e retornos, busca de alunos, criação de avaliação em rascunho, criação/revisão/publicação de treino e clonagem de nova versão, feed com publicação fictícia e Meu Site. Neste último, os três modelos foram escolhidos, conteúdo/aparência/seções/serviço foram salvos e as nove combinações de modelo e largura foram abertas em prévia. O site fictício permaneceu privado.
+
+## Correções encontradas nesta rodada
+
+- Enter nos formulários do onboarding deixou de acionar “Sair”; a especialidade avança para o formato de atendimento. A saída continua disponível explicitamente.
+- Removida a configuração redundante de encoding do formulário que gerava aviso do React ao usar Server Actions.
+- A prévia restaura a aba e a área de conteúdo abertas no editor, incluindo Aparência, Seções e Serviços.
+- A busca da biblioteca é atualizada após criar um exercício personalizado, mantendo texto e filtros.
+- Perfil e Essencial calculam cores legíveis para texto sobre a cor da marca. O hover escuro do Essencial recebeu texto branco e foi limitado a dispositivos com mouse.
+- Ajustadas contenção e quebra dos assistentes do editor em 320 px. A altura artificial do cadastro foi ajustada; voltar de publicação para modelos/endereço no onboarding retorna ao topo e foca o título.
+
 ## Verificação e limites do handoff
 
-| Verificação | Situação documentada |
+| Verificação | Situação desta rodada |
 | --- | --- |
-| TypeScript, ESLint e build | `pnpm lint` e `pnpm build` passaram na integração final em 08/09/2026. O build inclui a checagem TypeScript. |
-| Testes direcionados de integração | **30/30 passaram**: templates aprovados, ativação opcional, integridade do onboarding, convite de aluno, criação de treino e shell. Comando reproduzível abaixo. |
-| Revisão independente | Corrigidos acesso mobile a avaliações, largura das abas, contraste/retorno da prévia e conflitos de CSS. `git diff --check` passou. |
-| QA renderizado no navegador | **Bloqueado pela política do navegador deste ambiente.** Não há aprovação visual de responsividade, gestos, teclado ou fluidez. |
-| Produção e aceite visual | Pendentes. Este documento não representa publicação nem satisfação de 98%. |
+| Navegador autorizado | Executado em IAB local nas três larguras acima; há capturas reais fora do repositório. |
+| Persistência no sandbox | **14/14 verificações aprovadas** em leitura posterior, com relatório sanitizado. |
+| Testes automatizados | **197 testes únicos aprovados**, sem falhas ou skips, incluindo navegação do editor e contraste. |
+| ESLint | Verificação global final aprovada. |
+| TypeScript e build | Aprovados no código final; build gerou 42 páginas. Download de Google Fonts exigiu acesso de rede aprovado. |
+| Retestes visuais finais | Aprovados: editor nas três larguras sem overflow do documento; retorno do onboarding ao topo com foco no título; hover do Essencial com texto branco sobre fundo escuro. |
+| Cadastro novo e OTP | Pendente; tentativa real não chegou à confirmação por e-mail. |
+| Stripe, checkout e publicação do site | Não executados; webhook TEST legado aponta para produção. |
+
+Comandos direcionados reproduzíveis para as novas regressões:
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm lint
-pnpm build
-node --no-warnings --test tests/templates/approved-site-templates.test.mjs tests/onboarding/optional-activation.test.mjs tests/onboarding/activation-flow-integrity.test.mjs tests/auth/student-invitation-routing.test.mjs tests/workouts/trainer-workout-creation-sprint3.test.mjs tests/product/app-shell-v1.test.mjs
+node --no-warnings --test tests/templates/site-editor-navigation.test.mjs tests/templates/brand-contrast.test.mjs tests/templates/approved-site-templates.test.mjs tests/onboarding/optional-activation.test.mjs tests/onboarding/activation-flow-integrity.test.mjs tests/workouts/workout-builder-visual-sprint1c.test.mjs tests/workouts/trainer-workout-creation-sprint3.test.mjs
 ```
 
-Uma rodada adicional de onboarding/autenticação teve 41/42 testes aprovados: `tests/onboarding/functional-onboarding-v2.test.mjs` procura `constructEventAsync` diretamente na rota do webhook, mas a versão base já delega a verificação a `verifyStripeWebhookEvent`. Essa falha preexistente não foi corrigida nem contabilizada como aprovação. O preflight de billing do build foi ignorado automaticamente fora do ambiente Vercel Production; não houve transação Stripe real ou teste E2E de pagamento.
+Para continuar a revisão local, usar a configuração isolada de testes já preparada na worktree. Não copiar configuração de produção. Nenhum segredo, arquivo de ambiente ou captura com dados de sessão faz parte do commit. A fixture `/demo` continua sendo uma alternativa de desenvolvimento e não substitui o fluxo autenticado descrito no relatório.
 
-Para continuar a revisão no checkout desta branch, executar `pnpm dev`. A fixture existente pode ser habilitada exclusivamente em desenvolvimento com `PPERFIL_DEMO_MODE=true` e acessada em `/demo`; ela não substitui validação autenticada de uma conta nova. Nenhum segredo ou arquivo de ambiente faz parte desta entrega.
+Foi usado teclado de desktop, incluindo Enter real nos formulários. Não foram validados teclado virtual de um aparelho, gestos de toque nativos, áreas seguras físicas, movimento reduzido em dispositivo ou distribuição como app nativo. A visão do aluno não foi redesenhada; não foram medidos redução de cliques, conversão, retenção ou tempo de tarefa.
 
-Antes do aceite visual, revisar em 320, 390 e 430 px, nos temas claro/escuro: entrada e retomada de cadastro; navegação e retornos; criação de treino/avaliação; seleção dos três modelos; personalização → salvar → prévia → voltar; publicação conforme entitlement e retorno do checkout. Verificar teclado aberto, foco, áreas seguras, rolagem do site e movimento reduzido. Esse roteiro é uma pendência de validação, não evidência de execução.
-
-A visão do aluno não foi redesenhada nesta entrega. O browser mobile ainda pode exibir sua própria interface; a reorganização não equivale à distribuição de aplicativo nativo. Não foram medidos redução de cliques, conversão, retenção ou tempo de tarefa.
-
-Arquivos centrais para revisão: `src/components/dashboard/BottomNavigation.tsx`, `src/components/dashboard/SiteBuilder.tsx`, `src/components/dashboard/TemplatePreviewShell.tsx`, `src/components/onboarding/OnboardingForm.tsx`, `src/app/dashboard/business/page.tsx` e os três estilos `src/app/personal-*-redesign.css`. O diff também contém o launcher de desenvolvimento em `scripts/dev.mjs`/`package.json`, uma alteração de suporte local a revisar separadamente do comportamento do produto.
+Arquivos centrais para revisão: `src/components/dashboard/BottomNavigation.tsx`, `src/components/dashboard/SiteBuilder.tsx`, `src/components/dashboard/TemplatePreviewShell.tsx`, `src/components/onboarding/OnboardingForm.tsx`, `src/components/workouts/ExerciseLibraryDrawer.tsx`, `src/lib/navigation/site-editor.ts`, `src/components/templates/brand-contrast.ts`, `src/app/dashboard/business/page.tsx` e os três estilos `src/app/personal-*-redesign.css`. O launcher de desenvolvimento em `scripts/dev.mjs`/`package.json` continua sendo suporte local separado das regras do produto.
