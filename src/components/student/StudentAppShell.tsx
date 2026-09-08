@@ -7,6 +7,7 @@ import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { Avatar } from "@/components/ui/PPerfilPrimitives";
 import type { StudentWorkoutIdentity } from "@/lib/workouts/student-workspace";
 import { AppFullscreenController } from "@/components/app-shell/AppFullscreenController";
+import { CheipiBrand } from "@/components/auth/CheipiBrand";
 
 const navigation = [
   { label: "Hoje", href: "/student/today", icon: House },
@@ -26,7 +27,7 @@ export function StudentAppShell({ children, demoMode, identity }: { children: Re
         <Avatar name={identity.trainer.name} imageUrl={identity.trainer.imageUrl} size="small" loading="eager" />
         <span><strong>{identity.trainer.name}</strong><small>{trainerLabel}</small></span>
       </Link>
-      <span className="pp-student-brand" aria-label="Cheipi">Cheipi</span>
+      <span className="pp-student-brand"><CheipiBrand symbolOnly /></span>
       <div className="pp-student-app__tools">
         {demoMode ? <Link href="/demo?next=/dashboard" className="pp-student-demo-indicator" title="Voltar ao portal demo do Personal"><i aria-hidden="true" />Demo aluno · Ver como Personal</Link> : null}
         <ThemeToggle />

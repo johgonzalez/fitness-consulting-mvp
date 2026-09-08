@@ -1,0 +1,75 @@
+/* Approved Cheipi athlete: the original raster is never recolored or stretched. */
+.cheipi-brand .cheipi-brand__mark {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  aspect-ratio: 1;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.cheipi-brand .cheipi-brand__mark-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: none;
+  transform: none;
+}
+.cheipi-brand strong {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+.dashboard-header .brand-logo.cheipi-dashboard-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  padding: 0;
+  gap: 0;
+}
+.dashboard-header .cheipi-dashboard-brand .cheipi-brand__mark {
+  width: 44px;
+  height: 44px;
+}
+.pc-auth-page .pc-auth-header .cheipi-brand,
+.personal-entry .pc-entry-header .cheipi-brand {
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+}
+.pc-auth-page .pc-auth-header .cheipi-brand__mark,
+.personal-entry .pc-entry-header .cheipi-brand__mark {
+  width: 52px;
+  height: 52px;
+}
+.cheipi-splash .cheipi-splash__brand .cheipi-brand__mark {
+  width: 88px;
+  height: 88px;
+}
+.cheipi-splash { background: #000; }
+.cheipi-splash__halo,
+.cheipi-splash__orbit { display: none; }
+.cheipi-welcome .cheipi-welcome__wordmark .cheipi-brand__mark {
+  width: 44px;
+  height: 44px;
+}
+.pp-student-brand .cheipi-brand__mark {
+  width: 32px;
+  height: 32px;
+}
+/* Platform attribution stays secondary to the trainer's own identity and palette. */
+.approved-template-profile .site-footer .cheipi-platform-credit,
+.approved-template-conversion footer .cheipi-platform-credit {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: .01em;
+}
+.cheipi-platform-credit strong { font-weight: 650; }
+.cheipi-footer-details { display: grid; gap: 8px; }
+.cheipi-footer-details p { margin: 0; }

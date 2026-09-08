@@ -7,16 +7,16 @@ type CheipiBrandProps = {
   className?: string;
 };
 
-/** Presentation-only boundary for the provisional mark used during visual review. */
+/** The approved athlete, extracted from the original artwork without redrawing it. */
 export function CheipiBrand({ href, symbolOnly = false, className = "" }: CheipiBrandProps) {
   const content = <>
     <span className="cheipi-brand__mark" aria-hidden="true">
-      <Image className="cheipi-brand__mark-image" src="/auth/provisional-app-mark.png" alt="" width={256} height={256} />
+      <Image className="cheipi-brand__mark-image" src="/brand/cheipi/symbol.svg" alt="" width={374} height={374} unoptimized />
     </span>
     {symbolOnly ? null : <strong>Cheipi</strong>}
   </>;
   const classes = `cheipi-brand${symbolOnly ? " cheipi-brand--symbol" : ""}${className ? ` ${className}` : ""}`;
 
   if (href) return <Link href={href} className={classes} aria-label="Cheipi — início">{content}</Link>;
-  return <span className={classes} role={symbolOnly ? "img" : undefined} aria-label={symbolOnly ? "Marca provisória da Cheipi" : undefined}>{content}</span>;
+  return <span className={classes} role={symbolOnly ? "img" : undefined} aria-label={symbolOnly ? "Cheipi" : undefined}>{content}</span>;
 }

@@ -425,7 +425,7 @@ export function Template01({ site }: { site: TrainerSiteData }) {
           </a>
           <p>{profile.role}{profile.cref ? ` · CREF ${profile.cref}` : ""}</p>
         </div>
-        <p>Perfil criado com Cheipi.</p>
+        <p className="cheipi-platform-credit">Powered by <strong>Cheipi</strong></p>
       </footer>
 
       <a className="mobile-contact" href="#contato">
