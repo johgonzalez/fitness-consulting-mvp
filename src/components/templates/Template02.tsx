@@ -369,7 +369,7 @@ export function Template02({ site }: { site: TrainerSiteData }) {
           <span className="brand-mark" aria-hidden="true">{data.trainer.initials}</span>
           <span>{data.trainer.name}<small>{data.trainer.credential}</small></span>
         </a>
-        <p>{data.trainer.location}</p>
+        <div className="cheipi-footer-details"><p>{data.trainer.location}</p><p className="cheipi-platform-credit">Powered by <strong>Cheipi</strong></p></div>
         <a href={whatsappUrl} target="_blank" rel="noreferrer">WhatsApp</a>
       </footer>
 

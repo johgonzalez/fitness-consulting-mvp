@@ -26,6 +26,7 @@ import "./community.css";
 import "./personal-mobile-redesign.css";
 import "./personal-entry-redesign.css";
 import "./personal-workspaces-redesign.css";
+import "./cheipi-approved-brand.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });
@@ -37,6 +38,10 @@ export const metadata: Metadata = {
   alternates: siteConfig.siteUrl ? { canonical: siteConfig.siteUrl } : undefined,
   openGraph: { title: siteConfig.seo.title, description: siteConfig.seo.description, type: "website", locale: "pt_BR" },
   twitter: { card: "summary_large_image", title: siteConfig.seo.title, description: siteConfig.seo.description },
+  icons: {
+    icon: [{ url: "/brand/cheipi/symbol.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/brand/cheipi/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 const structuredData = {
@@ -48,11 +53,11 @@ const structuredData = {
 };
 
 const serializedStructuredData = JSON.stringify(structuredData).replace(/</g, "\\u003c");
-const themeScript = `try{var m=document.cookie.match(/(?:^|; )${themeCookieName}=([^;]*)/);var t=m?decodeURIComponent(m[1]):localStorage.getItem('${themeStorageKey}');t=t==='dark'?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;if(!m)document.cookie='${themeCookieName}='+t+'; Path=/; Max-Age=31536000; SameSite=Lax'}catch(e){}`;
+const themeScript = `try{var m=document.cookie.match(/(?:^|; )${themeCookieName}=([^;]*)/);var t=m?decodeURIComponent(m[1]):localStorage.getItem('${themeStorageKey}');t=t==='light'?'light':'dark';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;if(!m)document.cookie='${themeCookieName}='+t+'; Path=/; Max-Age=31536000; SameSite=Lax'}catch(e){}`;
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const savedTheme = (await cookies()).get(themeCookieName)?.value;
-  const theme = isAppTheme(savedTheme) ? savedTheme : "light";
+  const theme = isAppTheme(savedTheme) ? savedTheme : "dark";
   return <html lang="pt-BR" className={`${inter.variable} ${manrope.variable}`} data-theme={theme} data-scroll-behavior="smooth" style={{ colorScheme: theme }} suppressHydrationWarning>
     <head>
       <Script id="pperfil-theme-init" strategy="beforeInteractive">{themeScript}</Script>

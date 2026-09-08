@@ -45,11 +45,11 @@ test("password recovery uses canonical Supabase Auth without product-role mutati
 });
 
 test("dashboard remains factual, attention-first and open-layout", () => {
-  assert.match(dashboard, /Veja o que precisa da sua atenção agora/);
+  assert.match(dashboard, /Sua próxima ação/);
   assert.match(dashboard, /workoutNotifications/);
   assert.match(dashboard, /reviewAssessments/);
   assert.match(dashboard, /attentionLeads/);
-  assert.match(dashboard, /Meu Site/);
+  assert.match(dashboard, /Meu site/i);
   assert.doesNotMatch(dashboard, /receita|retenção|rating|faturamento/i);
   assert.match(css, /pc-dashboard--v1b/);
   assert.match(css, /pc-priority-row/);
@@ -58,7 +58,7 @@ test("dashboard remains factual, attention-first and open-layout", () => {
 
 test("auth reuses the canonical monochrome product shell identity", () => {
   assert.match(authShell, /className="pc-auth-page pp-app-shell-v1"/);
-  assert.match(authShell, /<CheipiBrand href="\/" \/>/);
+  assert.match(authShell, /<CheipiBrand href="\/" symbolOnly \/>/);
   assert.match(authEntryCss, /var\(--pp-shell-solid\)/);
   assert.match(authEntryCss, /var\(--pp-shell-on-solid\)/);
   assert.match(css, /var\(--pp-shell-solid\)/);
