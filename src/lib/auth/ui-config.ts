@@ -1,4 +1,4 @@
-/** Hosted Supabase signup e-mails were verified on 2026-09-03. */
+/** Keep hosted Auth and the confirmation template aligned; see docs/auth/SANDBOX_EMAIL_OTP.md. */
 export const SIGNUP_OTP_LENGTH = 8;
 
 export type AuthMethodIntent = "email" | "google";

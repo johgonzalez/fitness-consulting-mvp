@@ -2,7 +2,7 @@
 
 ## Escopo e estado do relatório
 
-Revisão do PR #1 em `codex/personal-mobile-redesign-v1`, com worktree separada e dados fictícios no ambiente de testes. Esta rodada executou fluxos autenticados e inspeção visual real; não representa aceite de produção. Build e verificações finais passaram. Confirmação de cadastro por e-mail e checkout permanecem pendentes. Os retestes finais de overflow, retorno do onboarding e hover foram aprovados.
+Revisão do PR #1 em `codex/personal-mobile-redesign-v1`, com worktree separada e dados fictícios no ambiente de testes. Esta rodada executou fluxos autenticados e inspeção visual real; não representa aceite de produção. Build e verificações finais passaram. Cadastro real, entrega SMTP, reenvio e confirmação por OTP foram aprovados no Preview. Checkout permanece pendente. Os retestes finais de overflow, retorno do onboarding e hover foram aprovados.
 
 A sessão usou o navegador IAB autorizado, apontado para `http://127.0.0.1:3001`, com viewports:
 
@@ -18,9 +18,10 @@ A variação de viewport ocorreu em navegador de desktop. As larguras foram insp
 
 - Supabase confirmado: projeto separado `smqkpqpixnglkflhwxhr`, em `https://smqkpqpixnglkflhwxhr.supabase.co`.
 - Stripe configurado em TEST. O webhook TEST legado ainda apontava para produção; por isso não foram executados checkout, pagamento, retorno de checkout ou publicação do site.
-- A conta autenticada de QA foi preparada administrativamente. Isso viabilizou o restante da revisão, mas não comprova o cadastro por e-mail/OTP.
+- A conta inicial de QA foi preparada administrativamente para a revisão dos módulos. Depois, uma conta nova concluiu o cadastro real no Preview, com código recebido por e-mail e digitado na UI; essa confirmação não usou acesso administrativo.
 - O bloqueio FREE da comunidade foi observado. Para testar feed e composição, foi usada uma fixture Pro explícita no banco de testes, com provider `qa_mobile_fixture`. Não foi uma assinatura Stripe verificada.
 - O site fictício de Marina QA Mobile permaneceu com `published = false`. Os registros criados foram preservados no sandbox; não houve exclusão do app nem dos dados existentes.
+- SMTP do sandbox usa uma chave Resend nova de `sending_access`, limitada a `auth.cheipi.com`, com remetente `no-reply-test@auth.cheipi.com` e nome “Cheipi — Testes”. As chaves existentes não foram alteradas. Conta, domínio e cotas do Resend continuam compartilhados; o isolamento é da credencial de envio e da configuração Supabase.
 - Nenhuma configuração de ambiente, credencial ou imagem de sessão será incluída no repositório.
 
 Antes do push, o Preview automático do PR foi isolado com sete overrides públicos exclusivos de `preview` + `codex/personal-mobile-redesign-v1`: URL/publishable/anon do Supabase, origem do alias observado, demo/lab desativados e `STRIPE_ENVIRONMENT=TEST`. A leitura efetiva de runtime e build confirmou o sandbox; o fingerprint dos outros 46 registros de ambiente permaneceu idêntico. Nenhuma chave administrativa, credencial Stripe ou segredo de webhook foi enviada. O checkout desse Preview fica indisponível. Evidência externa: `vercel-pr-preview-isolation.json`. A configuração vale para o próximo deploy automático; não transforma deploys anteriores em ambientes isolados.
@@ -30,8 +31,8 @@ Antes do push, o Preview automático do PR foi isolado com sete overrides públi
 | Fluxo | Ações executadas e resultados reais | Cobertura visual e limites |
 | --- | --- | --- |
 | Login | Inspeção nos temas claro e escuro; login bem-sucedido com a conta fictícia. | Tela nas três larguras. Não foi usada conta real de produção. |
-| Cadastro novo | E-mail e senha inspecionados nas três larguras. Houve tentativa real de criar acesso; o Supabase retornou erro genérico. | Confirmação por e-mail/OTP não concluída. Foi solicitado somente um e-mail de testes para continuar. A fixture administrativa não substitui este teste. |
-| Onboarding | Conta fixture percorreu identidade, especialidade, formato de atendimento, contato, endereço e modelo. Retomada mostrou dados salvos. Enter real no teclado deixou de encerrar a sessão. | Identidade capturada nas três larguras; demais etapas exercitadas em larguras distribuídas. Não se afirma que cada etapa foi repetida integralmente em cada viewport. |
+| Cadastro novo | E-mail e senha inspecionados nas três larguras. Após configurar SMTP do sandbox, cadastro real no Preview, entrega inicial, reenvio pela UI e confirmação com o código do segundo e-mail foram aprovados; redirecionou ao onboarding, etapa 1. | Fluxo final de OTP executado no painel de 358 px. A chegada ao onboarding foi recapturada em 320/390/430 px sem overflow; não se afirma repetição do OTP nas três larguras. |
+| Onboarding | Conta fixture percorreu identidade, especialidade, formato de atendimento, contato, endereço e modelo. Retomada mostrou dados salvos. Enter real no teclado deixou de encerrar a sessão. | Identidade capturada nas três larguras, incluindo a chegada da conta com e-mail realmente confirmado; demais etapas exercitadas em larguras distribuídas. Não se afirma que cada etapa foi repetida integralmente em cada viewport. |
 | Navegação | Hoje, Alunos, Treinos, Comunidade e Negócio abertos; retornos entre áreas e contexto do aluno exercitados. | Telas principais nas três larguras. |
 | Alunos | Três vínculos ativos fictícios; busca e abertura do aluno com contexto. | Lista nas três larguras e detalhe em 320 px. |
 | Avaliações | Criada e salva pela UI a avaliação “Avaliação inicial QA · setembro”, vinculada à aluna fictícia; estado final `DRAFT`. | Configuração, modelo e revisão exercitados em larguras distribuídas; lista final nas três larguras. Envio/resposta pelo aluno não foi escopo concluído. |
@@ -87,6 +88,7 @@ O relatório identifica separadamente a fixture de billing como `EXPLICIT_DATABA
 ## Testes automatizados e build
 
 - A rodada final consolidada registrou **197 testes únicos aprovados, sem falhas ou skips**, incluindo as novas suites de navegação do editor e contraste.
+- Na rodada direcionada de Auth, os **22 testes de contratos Auth/OTP/convites passaram**. Não são somados aos 197 testes consolidados, pois há sobreposição.
 - A nova suite `tests/templates/site-editor-navigation.test.mjs` passou seus oito testes de retorno e parâmetros inválidos.
 - A nova suite `tests/templates/brand-contrast.test.mjs` passou quatro testes, incluindo amostragem de 4.096 cores para texto sobre a marca e verificação de rótulos nas superfícies claras.
 - Suites de templates aprovados, onboarding e criação/biblioteca de treinos também passaram nas execuções direcionadas das correções. Essas rodadas compartilham testes; não devem ser somadas como um novo total único.
@@ -126,12 +128,37 @@ As capturas PNG prefixadas por `final-` registram a rodada final; as capturas an
 | Editor após correção | `final-site-editor-{320,390,430}.png`, todas no tema escuro, sem overflow do documento |
 | Hover Essencial após correção | `final-site-essential-hover-430.png`, branco sobre fundo escuro, sem navegar para o contato |
 | Persistência | `final-persistence-sanitized.json` |
+| Cadastro/OTP real no Preview | `otp-preview-358.jpg`, `otp-confirmed-onboarding-358.jpg` |
+| Chegada ao onboarding após OTP | `otp-confirmed-onboarding-320.jpg`, `otp-confirmed-onboarding-390.jpg`, `otp-confirmed-onboarding-430.jpg` |
+| SMTP e confirmação — relatórios sanitizados | `auth-smtp-readback-sanitized.json`, `otp-preview-browser-result.json` |
 
 O arquivo `final-site-essential-430.png` foi recapturado com o estado normal corrigido; `final-site-essential-hover-430.png` registra o hover corrigido. O pacote `cheipi-capturas-mobile-2026-09-08.zip` contém 54 capturas selecionadas, incluindo a falha real `signup-result-390.png`, sem arquivos de credenciais ou preparação. `viewport-measurements.json` mantém medidas cronológicas, incluindo o overflow encontrado e os retestes posteriores; `final-browser-checks.json` registra foco, hover, busca e console finais.
 
+## Reteste de confirmação por e-mail — aprovado
+
+O primeiro teste identificou uma incompatibilidade: a UI exigia OTP de oito dígitos, mas o template padrão do Supabase enviava somente um link. O provedor padrão do projeto Free recusou a personalização com HTTP 400. Essa falha inicial foi resolvida com SMTP próprio no sandbox; não é mais uma pendência de cadastro.
+
+Após login autorizado do usuário no Resend, foi criada uma chave nova de `sending_access`, restrita a `auth.cheipi.com`, sem reutilizar, remover ou rotacionar as chaves existentes. O remetente é `no-reply-test@auth.cheipi.com`, com nome “Cheipi — Testes”. O projeto Supabase e a credencial de envio são exclusivos desta configuração de testes; a conta, o domínio e as cotas do Resend continuam compartilhados.
+
+O PATCH somente no projeto `smqkpqpixnglkflhwxhr` retornou HTTP 200 e aplicou SMTP, o HTML versionado em `supabase/templates/confirmation.html`, o assunto “Seu código de confirmação — Cheipi” e limite de 30 e-mails/h. A releitura confirmou OTP de oito dígitos, validade de 3.600 s, confirmação obrigatória e intervalo de reenvio de 60 s. SiteURL, redirect da branch de billing e redirect do Preview foram preservados. O fingerprint Auth de produção permaneceu idêntico. A API atualizou metadados de conteúdo customizado do sandbox; não há snapshot anterior campo a campo para alegar identidade integral dos demais metadados remotos.
+
+O reteste final foi executado no Preview pelo navegador autorizado, em painel de 358 px:
+
+1. Cadastro enviado pela UI e primeiro e-mail entregue no Resend: `5180bc07-385c-467c-9f18-2b406fec77d1`.
+2. Botão “Reenviar código” acionado na UI; segundo e-mail entregue: `c0de1fd3-9227-4520-8a5e-5ec5bdd337ce`.
+3. Ambos os corpos de e-mail estavam em português, com OTP numérico de oito dígitos e sem link de confirmação.
+4. O código do segundo e-mail foi digitado na aplicação e aceito. A conta foi redirecionada ao onboarding, etapa 1, sem confirmação administrativa.
+
+A leitura posterior em `otp-browser-persistence.json` confirmou `email_confirmed_at` preenchido e nenhum perfil/draft de onboarding criado ainda, consistente com a etapa 1. E-mail real e identificador da conta não são reproduzidos neste documento.
+
+A chegada ao onboarding foi então recapturada em 320 × 812, 390 × 844 e 430 × 932 px. As larguras de documento/scroll foram, respectivamente, 305/305, 390/390 e 430/430 px; os 15 px restantes no viewport de 320 correspondem à barra de rolagem. Não houve overflow horizontal. Isso valida a chegada nas três larguras; o ciclo final de envio/reenvio/OTP ocorreu uma vez no painel de 358 px. As telas de cadastro em 320/390/430 já haviam sido cobertas na rodada anterior.
+
+A prova preliminar por API com `generateLink`/`verifyOtp` não enviava e-mail; foi complementada pelo teste real acima. Os 22 testes de contratos Auth/OTP/convites também passaram. Nenhum código, senha, chave ou token de sessão é reproduzido neste relatório.
+
+Evidências sanitizadas externas: `auth-smtp-readback-sanitized.json`, `otp-preview-browser-result.json` e `otp-browser-persistence.json`. Capturas: `otp-preview-358.jpg`, `otp-confirmed-onboarding-358.jpg` e `otp-confirmed-onboarding-{320,390,430}.jpg`. O adendo externo `cheipi-confirmacao-cadastro-2026-09-08.zip` contém somente essas cinco capturas JPEG (106.795 bytes), separado do pacote original de 54 imagens. O contrato e a configuração final estão em [SANDBOX_EMAIL_OTP.md](../auth/SANDBOX_EMAIL_OTP.md).
+
 ## Pendências para fechamento
 
-1. Concluir cadastro por e-mail/OTP quando houver e-mail de testes utilizável. Não pedir senha, chave ou segredo pelo chat.
-2. Corrigir/configurar um destino de webhook exclusivamente de testes antes de executar Stripe TEST, checkout e publicação. Até lá, manter esses fluxos sem execução e produção intacta.
+1. Corrigir/configurar um destino de webhook exclusivamente de testes antes de executar Stripe TEST, checkout e publicação. Até lá, manter esses fluxos sem execução e produção intacta.
 
 Teclado virtual nativo, gestos em aparelho, áreas seguras físicas, preferência de movimento reduzido em dispositivo e execução completa como aluno não foram validados nesta rodada. Não há medição de conversão, retenção, fluidez quantitativa ou ganho de tempo.

@@ -73,7 +73,9 @@ O Supabase usado é o projeto separado de testes `smqkpqpixnglkflhwxhr`; a confi
 
 O próximo Preview automático desta branch também foi isolado com configurações públicas do sandbox, sem chave administrativa nem credenciais Stripe. Runtime e build foram conferidos; os 46 registros de ambiente dos demais escopos ficaram idênticos. O checkout do Preview permanece indisponível. Deploys anteriores não recebem retroativamente essa configuração.
 
-A conta fictícia autenticada percorreu os seis passos do onboarding. Cadastro por e-mail e senha foi inspecionado nas três larguras, mas a tentativa real recebeu erro genérico do Supabase; a confirmação por e-mail/OTP não foi concluída. Portanto, a conta preparada administrativamente para o QA não comprova cadastro novo de ponta a ponta.
+A conta fictícia inicial percorreu os seis passos do onboarding. O cadastro por e-mail e senha foi inspecionado nas três larguras. Depois de resolver a incompatibilidade entre o template padrão de e-mail e o OTP da UI, uma conta nova concluiu cadastro real, entrega de e-mail, reenvio e confirmação de código no Preview, sem confirmação administrativa. O ciclo final ocorreu no painel de 358 px; a chegada ao onboarding, etapa 1, foi recapturada em 320/390/430 px sem overflow horizontal.
+
+O SMTP aplicado somente ao sandbox usa uma chave Resend nova de sending_access limitada a auth.cheipi.com, com remetente no-reply-test@auth.cheipi.com e nome “Cheipi — Testes”. Conta, domínio e cotas do provedor continuam compartilhados. O HTML de confirmação versionado foi aplicado com sucesso; ambos os e-mails recebidos exibiram OTP de oito dígitos em português, sem link. Validade de 3.600 s, confirmação obrigatória e reenvio após 60 s foram preservados; limite de envio configurado em 30 e-mails/h. O fingerprint Auth de produção permaneceu idêntico e as chaves existentes não foram alteradas. Veja [SANDBOX_EMAIL_OTP.md](../auth/SANDBOX_EMAIL_OTP.md).
 
 Foram executados navegação e retornos, busca de alunos, criação de avaliação em rascunho, criação/revisão/publicação de treino e clonagem de nova versão, feed com publicação fictícia e Meu Site. Neste último, os três modelos foram escolhidos, conteúdo/aparência/seções/serviço foram salvos e as nove combinações de modelo e largura foram abertas em prévia. O site fictício permaneceu privado.
 
@@ -96,7 +98,7 @@ Foram executados navegação e retornos, busca de alunos, criação de avaliaç�
 | ESLint | Verificação global final aprovada. |
 | TypeScript e build | Aprovados no código final; build gerou 42 páginas. Download de Google Fonts exigiu acesso de rede aprovado. |
 | Retestes visuais finais | Aprovados: editor nas três larguras sem overflow do documento; retorno do onboarding ao topo com foco no título; hover do Essencial com texto branco sobre fundo escuro. |
-| Cadastro novo e OTP | Pendente; tentativa real não chegou à confirmação por e-mail. |
+| Cadastro novo e OTP | Aprovados no Preview: envio e reenvio entregues, código do segundo e-mail aceito na UI e chegada ao onboarding 1. Fluxo OTP em 358 px; chegada recapturada nas três larguras. 22 testes de contratos Auth passaram em rodada direcionada, sem somar ao total consolidado. |
 | Stripe, checkout e publicação do site | Não executados; webhook TEST legado aponta para produção. |
 
 Comandos direcionados reproduzíveis para as novas regressões:
