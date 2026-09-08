@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { SiteBuilder } from "@/components/dashboard/SiteBuilder";
 import { findSiteBuilderData } from "@/lib/supabase/trainers";
 
@@ -7,11 +9,10 @@ export default async function SitePage() {
   if (!data) notFound();
   return (
     <main className="dashboard-main pp-workspace pp-site-page">
+      <Link href="/dashboard/business" className="cheipi-back"><ChevronLeft aria-hidden="true" />Negócio</Link>
       <header className="pp-page-header">
         <div>
-          <p className="pp-page-context">Presença digital</p>
           <h1>Meu site</h1>
-          <p>Cuide da sua presença profissional, do conteúdo e dos canais de conversão.</p>
         </div>
       </header>
       <SiteBuilder {...data} />

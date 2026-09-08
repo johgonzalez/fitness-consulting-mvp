@@ -3,5 +3,5 @@ import type { WorkoutVersionStatus } from "@/lib/domain/workouts";
 import { workoutStatusLabels, workoutStatusTones } from "@/lib/workouts/presentation";
 
 export function WorkoutStatusBadge({ status }: { status: WorkoutVersionStatus }) {
-  return <Status tone={workoutStatusTones[status]}>{workoutStatusLabels[status]}</Status>;
+  return <Status tone={workoutStatusTones[status]}>{status === "DRAFT" ? "Rascunho" : workoutStatusLabels[status]}</Status>;
 }

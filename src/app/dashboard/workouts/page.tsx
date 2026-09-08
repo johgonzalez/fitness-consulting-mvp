@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Clock3, Dumbbell, Plus, Sparkles, UserRound } from "lucide-react";
+import { CalendarDays, Clock3, Dumbbell, Plus, UserRound } from "lucide-react";
 import { WorkoutStatusBadge } from "@/components/workouts/WorkoutStatusBadge";
 import { WorkoutDraftDiscardButton } from "@/components/workouts/WorkoutDraftDiscardButton";
 import { Avatar, EmptyState } from "@/components/ui/PPerfilPrimitives";
@@ -55,18 +55,18 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
 
   return <main className={`dashboard-main pp-workspace ${styles.workspace}${selectedStudent ? " pp-record-page pp-student-record" : ""}`}>
     {selectedStudent ? <StudentRecordChrome student={selectedStudent} active="workouts" /> : <header className="pp-page-header">
-      <div><p className="pp-page-context">Programação</p><h1>Treinos</h1><p>Planeje, revise e publique experiências de treino com contexto e precisão.</p></div>
+      <div><p className="pp-page-context">Programação</p><h1>Treinos</h1><p>Monte a rotina de cada aluno.</p></div>
     </header>}
 
     <OperationalToolbar
       filters={[
         { label: "Todos", href: filterHref("all", relationshipId), count: count("all"), active: filter === "all" },
-        { label: "Drafts", href: filterHref("draft", relationshipId), count: count("draft"), active: filter === "draft" },
+        { label: "Rascunhos", href: filterHref("draft", relationshipId), count: count("draft"), active: filter === "draft" },
         { label: "Publicados", href: filterHref("published", relationshipId), count: count("published"), active: filter === "published" },
         { label: "Arquivados", href: filterHref("archived", relationshipId), count: count("archived"), active: filter === "archived" },
       ]}
-      note={<><Sparkles aria-hidden="true" />{attentionCount} treino(s) pedem atenção</>}
-      action={<Link href="/dashboard/workouts/new" className="pp-button pp-button--primary"><Plus aria-hidden="true" />Criar treino</Link>}
+      note={attentionCount ? <>{attentionCount} {attentionCount === 1 ? "treino para revisar" : "treinos para revisar"}</> : null}
+      action={<Link href={relationshipId ? `/dashboard/workouts/new?student=${relationshipId}` : "/dashboard/workouts/new"} className="pp-button pp-button--primary"><Plus aria-hidden="true" />Criar treino</Link>}
     />
 
     {visible.length ? <section className={styles.planList} aria-label="Planos de treino">
@@ -75,7 +75,7 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
         <Link href={`/dashboard/workouts/${item.currentVersion.id}${relationshipId ? `?student=${relationshipId}` : ""}`} className={styles.planRowLink}>
         <span className={styles.planIdentity}>
           <Avatar name={item.student?.name ?? "Aluno"} imageUrl={item.student?.profileImageUrl} size="medium" />
-          <span><strong>{item.plan.name}</strong><small><UserRound aria-hidden="true" />{item.student?.name ?? "Relacionamento protegido"}</small><em>{item.plan.goal ?? "Objetivo não informado"}</em></span>
+          <span><strong>{item.plan.name}</strong><small><UserRound aria-hidden="true" />{item.student?.name ?? "Aluno não disponível"}</small><em>{item.plan.goal ?? "Objetivo não informado"}</em></span>
         </span>
         <span className={styles.planStructure}><strong><Dumbbell aria-hidden="true" />{item.sessionCount} sessões</strong><small><Clock3 aria-hidden="true" />{item.totalDurationMinutes || "—"} min planejados</small></span>
         <span className={styles.planVersion}>v{item.currentVersion.versionNumber}<small>{item.currentVersion.sourceType === "AI_DRAFT" ? "Com IA" : "Manual"}</small></span>
@@ -91,7 +91,7 @@ export default async function WorkoutsPage({ searchParams }: { searchParams: Pro
         /> : null}
       </article>)}
     </section> : <section className="pp-panel">
-      <EmptyState icon={Dumbbell} title={filter === "all" ? "Crie o primeiro treino" : "Nenhum treino neste filtro"} description={filter === "all" ? "Comece manualmente ou use um Draft com IA para acelerar a primeira estrutura." : "Os treinos aparecerão aqui conforme avançam no ciclo."} action={filter === "all" ? <div className={styles.emptyActions}><Link href="/dashboard/workouts/new?mode=manual" className="pp-button pp-button--primary">Criar manualmente</Link><Link href="/dashboard/workouts/new?mode=ai" className="pp-button pp-button--secondary">Criar com IA</Link></div> : null} />
+      <EmptyState icon={Dumbbell} title={filter === "all" ? "Crie o primeiro treino" : "Nenhum treino neste filtro"} description={filter === "all" ? "Monte do zero ou comece com um rascunho gerado por IA." : "Os treinos com este status aparecerão aqui."} action={filter === "all" ? <div className={styles.emptyActions}><Link href={`/dashboard/workouts/new?mode=manual${relationshipId ? `&student=${relationshipId}` : ""}`} className="pp-button pp-button--primary">Criar manualmente</Link><Link href={`/dashboard/workouts/new?mode=ai${relationshipId ? `&student=${relationshipId}` : ""}`} className="pp-button pp-button--secondary">Criar com IA</Link></div> : null} />
     </section>}
   </main>;
 }

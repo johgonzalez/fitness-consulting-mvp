@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { test } from "node:test";
 
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), "utf8");
@@ -7,15 +7,21 @@ const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), "utf8
 test("trainer shell exposes only supported production destinations", async () => {
   const navigation = await read("src/components/dashboard/BottomNavigation.tsx");
 
-  for (const label of ["Início", "Alunos", "Leads", "Avaliações", "Treinos", "Meu Site"]) {
+  for (const label of ["Hoje", "Alunos", "Leads", "Avaliações", "Treinos", "Meu site", "Comunidade", "Negócio"]) {
     assert.match(navigation, new RegExp(`label: "${label}"`));
   }
 
   assert.doesNotMatch(navigation, /label: "Mensagens"/);
   assert.doesNotMatch(navigation, /label: "Financeiro"/);
-  assert.match(navigation, /mobileDestinations = \[destinations\[0\], destinations\[1\], destinations\[4\], destinations\[2\]\]/);
-  assert.match(navigation, /aria-haspopup="dialog"/);
-  assert.match(navigation, /aria-expanded=\{moreOpen\}/);
+  const destinations = [...navigation.matchAll(/href: "(\/dashboard[^"]*)"/g)].map((match) => match[1]);
+  for (const destination of destinations) {
+    await access(new URL(`../../src/app${destination}/page.tsx`, import.meta.url));
+  }
+  assert.match(navigation, /aria-current=/);
+  const business = await read("src/app/dashboard/business/page.tsx");
+  for (const route of ["/dashboard/site", "/dashboard/leads", "/dashboard/settings/billing", "/dashboard/profile"]) {
+    assert.ok(business.includes(route), `Business must expose ${route}`);
+  }
 });
 
 test("student shell is trainer-first and keeps the execution route immersive", async () => {

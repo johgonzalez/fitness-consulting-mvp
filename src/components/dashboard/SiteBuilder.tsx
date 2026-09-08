@@ -2,15 +2,15 @@
 
 import {
   BarChart3,
+  ChevronLeft,
+  ChevronRight,
   Check,
   Copy,
   ExternalLink,
   Globe2,
   ImagePlus,
-  LayoutTemplate,
   LockKeyhole,
   MessageCircle,
-  Palette,
   Pencil,
   Plus,
   Settings2,
@@ -18,12 +18,12 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useActionState, useRef, useState, type FormHTMLAttributes, type ReactNode } from "react";
 import {
   deleteService,
   deleteMethodologyItem,
   deleteTestimonial,
-  registerPurchaseIntent,
   saveContact,
   saveIdentity,
   saveMethodologyItem,
@@ -53,30 +53,15 @@ import type {
   TrainerProfile,
   TrainerService,
 } from "@/lib/domain/trainer";
-import { getTemplateDefinition, templateCatalog, type TemplateDefinition } from "@/lib/domain/template-registry";
+import { type TemplateDefinition } from "@/lib/domain/template-registry";
+import { curatedSiteTemplates, getSiteTemplatePresentation } from "@/lib/domain/site-template-presentation";
 
 const initialState: SiteActionState = {};
 
-const templatePositioning: Record<TrainerProfile["template_id"], { traits: string; fit: string }> = {
-  template_01: { traits: "Limpo · Direto", fit: "Para uma presença profissional sem excesso." },
-  template_02: { traits: "Visual · Dinâmico", fit: "Para quem vende energia e transformação." },
-  template_03: { traits: "Comercial · Objetivo", fit: "Para destacar serviços e chamadas para ação." },
-  template_04: { traits: "Editorial · Premium", fit: "Para construir uma marca pessoal sofisticada." },
-  template_05: { traits: "Perfil · Direto", fit: "Para começar com autoridade, avatar, serviços e app." },
-  template_06: { traits: "Cinemático · Conversão", fit: "Para vender acompanhamento, desafios e comunidade." },
-};
-
-type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance";
+type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance" | "publication";
 type PersonalizationSection = "identity" | "presentation" | "methodology" | "services" | "testimonials" | "organize";
 type PersonalizationTab = "content" | "appearance" | "organize";
-
-const siteNavigation: Array<{ id: SiteSection; label: string; icon: typeof Globe2 }> = [
-  { id: "overview", label: "Visão geral", icon: Globe2 },
-  { id: "templates", label: "Templates", icon: LayoutTemplate },
-  { id: "personalize", label: "Personalizar", icon: Palette },
-  { id: "contact", label: "Contato e conversão", icon: MessageCircle },
-  { id: "performance", label: "Desempenho", icon: BarChart3 },
-];
+const siteSections: SiteSection[] = ["overview", "templates", "personalize", "contact", "performance", "publication"];
 
 function ActionMessage({ state }: { state: SiteActionState }) {
   return state.message ? (
@@ -116,18 +101,11 @@ function PublicationStatus({ published }: { published: boolean }) {
   );
 }
 
-function SitePreviewFrame({ profile, compact = false }: { profile: TrainerProfile; compact?: boolean }) {
-  return (
-    <div className={`pp-site-preview-frame${compact ? " is-compact" : ""}`}>
-      <div className="pp-site-preview-toolbar" aria-hidden="true">
-        <span className="pp-site-preview-dots"><i /><i /><i /></span>
-            <span className="pp-site-preview-address">cheipi.com/p/{profile.slug}</span>
-      </div>
-      <div className="pp-site-preview-canvas">
-        <TemplatePreview profile={profile} templateId={profile.template_id} compact={compact} />
-      </div>
-    </div>
-  );
+function SitePreviewFrame({ profile }: { profile: TrainerProfile }) {
+  return <Link href="/dashboard/preview?returnView=overview" className="cheipi-site-cover" aria-label="Visualizar seu site completo">
+    <TemplatePreview profile={profile} templateId={profile.template_id} />
+    <span>Ver meu site <ChevronRight aria-hidden="true" /></span>
+  </Link>;
 }
 
 function UploadForm({ kind, label }: { kind: "profile" | "hero" | "logo"; label: string }) {
@@ -156,8 +134,13 @@ function TemplateCatalogTile({
   entitlements: TrainerEntitlements;
   onCustomize: () => void;
 }) {
-  const [state, action, pending] = useActionState(selectTemplate.bind(null, definition.id), initialState);
+  const [state, action, pending] = useActionState(async (previous: SiteActionState) => {
+    const result = await selectTemplate(definition.id, previous);
+    if (result.ok) onCustomize();
+    return result;
+  }, initialState);
   const selected = profile.template_id === definition.id;
+  const display = getSiteTemplatePresentation(definition.id);
   const allowed = entitlements[definition.entitlement];
   const available = definition.availability.production;
   const availabilityLabel = !available
@@ -169,23 +152,23 @@ function TemplateCatalogTile({
   return (
     <article className={`pp-template-tile${selected ? " is-selected" : ""}`} data-template={definition.id}>
       <div className="pp-template-tile-preview">
-        <TemplatePreview profile={profile} templateId={definition.id} compact />
+        <iframe src={`/site-preview?template=${definition.id}`} title={`Prévia de ${display.name}`} loading="lazy" tabIndex={-1} inert />
         {selected ? <span className="pp-template-selected"><Check aria-hidden="true" /> Em uso</span> : null}
       </div>
       <div className="pp-template-tile-copy">
-        <div><h3>{definition.name}</h3><span>{availabilityLabel}</span></div>
-        <strong className="pp-template-positioning">{templatePositioning[definition.id].traits}</strong>
-        <p>{templatePositioning[definition.id].fit}</p>
+        <div><h3>{display.name}</h3><span>{availabilityLabel}</span></div>
+        <strong className="pp-template-positioning">{display.purpose}</strong>
+        <p>{display.description}</p>
       </div>
       <div className="pp-template-tile-actions">
-        <Link href={`/dashboard/preview?template=${definition.id}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>
+        <Link href={`/dashboard/preview?template=${definition.id}&returnView=templates`}>Visualizar <ExternalLink aria-hidden="true" /></Link>
         {selected ? (
           <button type="button" className="pp-template-edit" onClick={onCustomize}>
             <Pencil aria-hidden="true" /> Editar
           </button>
         ) : available && allowed ? (
           <form action={action}>
-            <button className="builder-secondary" disabled={pending}>{pending ? "Selecionando..." : "Usar template"}</button>
+            <button className="builder-secondary" disabled={pending}>{pending ? "Selecionando..." : "Escolher este modelo"}</button>
           </form>
         ) : <button type="button" className="builder-secondary" disabled title={available ? "Seu plano atual não libera este template." : "Este template ainda está em preparação."}>{available ? "Indisponível no plano" : "Em preparação"}</button>}
       </div>
@@ -197,7 +180,7 @@ function TemplateCatalogTile({
 function TemplateSelector({ profile, entitlements, onCustomize }: { profile: TrainerProfile; entitlements: TrainerEntitlements; onCustomize: () => void }) {
   return (
     <div className="pp-template-grid">
-      {templateCatalog.filter(({ availability }) => availability.enabled).map((definition) => (
+      {curatedSiteTemplates().map((definition) => (
         <TemplateCatalogTile key={definition.id} definition={definition} profile={profile} entitlements={entitlements} onCustomize={onCustomize} />
       ))}
     </div>
@@ -280,8 +263,6 @@ export function SiteBuilder({
   testimonials,
   methodology,
   entitlements,
-  offer,
-  hasPurchaseIntent,
   demoMode = false,
 }: {
   profile: TrainerProfile;
@@ -294,94 +275,117 @@ export function SiteBuilder({
   hasPurchaseIntent: boolean;
   demoMode?: boolean;
 }) {
-  const [section, setSection] = useState<SiteSection>("overview");
-  const [personalization, setPersonalization] = useState<PersonalizationSection>("identity");
-  const [personalizationTab, setPersonalizationTab] = useState<PersonalizationTab>("appearance");
+  const searchParams = useSearchParams();
+  const requestedSection = searchParams.get("view") as SiteSection;
+  const section = siteSections.includes(requestedSection) ? requestedSection : "overview";
+  function setSection(next: SiteSection) {
+    const url = new URL(window.location.href);
+    if (next === "overview") url.searchParams.delete("view");
+    else url.searchParams.set("view", next);
+    window.history.pushState(null, "", url.pathname + url.search);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  const [personalization, setPersonalization] = useState<PersonalizationSection>("presentation");
+  const [personalizationTab, setPersonalizationTab] = useState<PersonalizationTab>("content");
   const [presentationState, presentationAction, presentationPending] = useActionState(savePresentation, initialState);
   const [contactState, contactAction, contactPending] = useActionState(saveContact, initialState);
   const [identityState, identityAction, identityPending] = useActionState(saveIdentity, initialState);
   const [publishState, publishAction, publishPending] = useActionState(setPublication.bind(null, !profile.published), initialState);
-  const [intentState, intentAction, intentPending] = useActionState(registerPurchaseIntent.bind(null, offer?.code ?? "unavailable"), initialState);
   const [addingService, setAddingService] = useState(false);
   const [addingMethodology, setAddingMethodology] = useState(false);
   const [addingTestimonial, setAddingTestimonial] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const publicPath = `/p/${profile.slug}/`;
-  const offerPrice = offer ? offer.price.toLocaleString("pt-BR", { style: "currency", currency: offer.currency, maximumFractionDigits: 0 }) : null;
-  const selectedTemplate = getTemplateDefinition(profile.template_id).name;
+  const selectedTemplate = getSiteTemplatePresentation(profile.template_id).name;
+  const [shareMessage, setShareMessage] = useState("");
   const instagram = normalizeInstagramIdentity(profile.instagram_handle ?? profile.instagram, profile.instagram_url);
 
-  function openEditor(next: PersonalizationSection = "identity") {
+  function openEditor(next: PersonalizationSection = "presentation") {
     setPersonalization(next);
     setPersonalizationTab(next === "identity" ? "appearance" : next === "organize" ? "organize" : "content");
     setSection("personalize");
   }
 
+  async function copyLink() {
+    try { await navigator.clipboard.writeText(`${window.location.origin}${publicPath}`); setShareMessage("Link copiado."); }
+    catch { setShareMessage("Não foi possível copiar. Selecione o endereço do seu site para copiá-lo."); }
+  }
+
   async function share() {
     const url = `${window.location.origin}${publicPath}`;
-    if (navigator.share) await navigator.share({ title: profile.display_name, url });
-    else await navigator.clipboard.writeText(url);
+    try {
+      if (navigator.share) await navigator.share({ title: profile.display_name, url });
+      else await copyLink();
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) setShareMessage("Não foi possível compartilhar. Tente copiar o link.");
+    }
   }
 
   return (
-    <div className="pp-site-product" data-demo-workspace={demoMode || undefined}>
-      <nav className="pp-site-navigation" aria-label="Seções do Meu site">
-        {siteNavigation.map((item) => {
-          const Icon = item.icon;
-          return <button key={item.id} type="button" className={section === item.id ? "is-active" : ""} onClick={() => setSection(item.id)} aria-current={section === item.id ? "page" : undefined}><Icon aria-hidden="true" /><span>{item.label}</span></button>;
-        })}
-      </nav>
+    <div className="pp-site-product cheipi-site-builder" data-view={section} data-demo-workspace={demoMode || undefined}>
+      {section !== "overview" ? <button type="button" className="cheipi-back" onClick={() => setSection("overview")}><ChevronLeft aria-hidden="true" />Meu site</button> : null}
+      {shareMessage ? <p role="status" className="builder-message">{shareMessage}</p> : null}
 
       {section === "overview" ? (
-        <section className="pp-site-view" aria-labelledby="site-overview-title">
-          <SectionHeader title="Visão geral" description="Revise como sua presença profissional aparece e mantenha o site pronto para converter visitas em contatos." />
+        <section className="pp-site-view" aria-label="Seu site">
+          <div className="cheipi-site-summary"><PublicationStatus published={profile.published} /><span>cheipi.com/p/{profile.slug}</span></div>
+          <SitePreviewFrame profile={profile} />
+          <nav className="cheipi-task-list cheipi-site-steps" aria-label="Preparar seu site">
+            <button type="button" onClick={() => setSection("templates")}><i>1</i><span><strong>Modelo</strong><small>{selectedTemplate}</small></span><ChevronRight aria-hidden="true" /></button>
+            <button type="button" onClick={() => openEditor()}><i>2</i><span><strong>Conteúdo e aparência</strong><small>Apresentação, serviços e contato</small></span><ChevronRight aria-hidden="true" /></button>
+            <button type="button" onClick={() => setSection("publication")}><i>3</i><span><strong>{profile.published ? "Publicação e link" : "Publicar"}</strong><small>{profile.published ? "Seu site está no ar" : "Confira antes de compartilhar"}</small></span><ChevronRight aria-hidden="true" /></button>
+          </nav>
+          <Link className="builder-primary cheipi-site-preview-action" href="/dashboard/preview?returnView=overview">Visualizar meu site<ExternalLink aria-hidden="true" /></Link>
+          <button type="button" className="cheipi-site-metrics" onClick={() => setSection("performance")}><BarChart3 aria-hidden="true" />Desempenho do site</button>
+        </section>
+      ) : null}
+
+      {section === "publication" ? (
+        <section className="pp-site-view" aria-label="Publicação">
+          <SectionHeader title={profile.published ? "Seu site está no ar" : "Pronto para compartilhar?"} description={profile.published ? "Compartilhe seu link ou continue editando." : "Confira a prévia e publique quando estiver pronto."} />
           <div className="pp-site-overview-grid">
-            <SitePreviewFrame profile={profile} />
             <aside className="pp-site-control-panel">
               <div className="pp-site-control-heading"><PublicationStatus published={profile.published} /><span>{selectedTemplate}</span></div>
               <div className="pp-site-public-address"><Globe2 aria-hidden="true" /><div><small>Endereço público</small><strong>cheipi.com/p/{profile.slug}</strong></div></div>
               <button type="button" className="builder-primary" onClick={() => openEditor()}><Pencil aria-hidden="true" /> Editar site</button>
-              <Link className="builder-secondary" href="/dashboard/preview">Visualizar <ExternalLink aria-hidden="true" /></Link>
+              <Link className="builder-secondary" href="/dashboard/preview?returnView=publication">Visualizar <ExternalLink aria-hidden="true" /></Link>
               {profile.published ? <Link className="pp-site-text-action" href={publicPath} target="_blank">Abrir site publicado <ExternalLink aria-hidden="true" /></Link> : null}
               {entitlements.can_publish_site ? (
                 <form action={publishAction}><button className={profile.published ? "builder-secondary danger" : "builder-primary"} disabled={publishPending}>{publishPending ? "Atualizando..." : profile.published ? "Tirar site do ar" : "Publicar meu site"}</button></form>
               ) : <button type="button" className="pp-site-text-action" onClick={() => setShowPaywall(true)}><LockKeyhole aria-hidden="true" /> Ver opções de publicação</button>}
               <ActionMessage state={publishState} />
-              {profile.published ? <div className="pp-site-share-actions"><button type="button" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${publicPath}`)}><Copy aria-hidden="true" /> Copiar</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div> : null}
+              {profile.published ? <div className="pp-site-share-actions"><button type="button" onClick={copyLink}><Copy aria-hidden="true" /> Copiar</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div> : null}
             </aside>
           </div>
 
           {showPaywall && !entitlements.can_publish_site ? (
             <section className="pp-publication-paywall">
-              <button type="button" className="pp-paywall-close" onClick={() => setShowPaywall(false)} aria-label="Fechar">×</button>
-              <p>Seu site está pronto para ir ao ar.</p><h2>Publique seu site na Cheipi</h2><p>Tenha uma presença profissional pronta para apresentar seus serviços e conquistar novos alunos.</p>
-              {offer ? <><span>{offer.label}</span><strong>{offerPrice}</strong><small>{offer.payment_label}</small><ul>{["Site profissional", "Personalização", "Link público", "WhatsApp integrado", "Serviços", "Depoimentos", "Acesso antecipado ao Cheipi Leads Beta"].map((item) => <li key={item}><Check aria-hidden="true" /> {item}</li>)}</ul><form action={intentAction}><button className="builder-primary" disabled={intentPending || hasPurchaseIntent}>{intentPending ? "Registrando..." : hasPurchaseIntent ? "Interesse registrado" : "Quero publicar meu site"}</button></form><ActionMessage state={intentState} /><em>Pagamento online em breve. Registrar interesse não libera a publicação.</em></> : <p>A oferta está temporariamente indisponível.</p>}
+              <h2>Publicação com Cheipi Pro</h2>
+              <p>Veja seu plano e as opções disponíveis para publicar. Seu rascunho continua salvo.</p>
+              <Link className="builder-primary" href="/dashboard/settings/billing">Ver plano e cobrança</Link>
+              <button type="button" className="pp-site-text-action" onClick={() => setShowPaywall(false)}>Continuar editando depois</button>
             </section>
           ) : null}
 
-          <div className="pp-site-overview-facts">
-            <article><span>Contato e conversão</span><strong>{profile.whatsapp}</strong><p>{profile.instagram ? `Instagram: ${profile.instagram}` : "Instagram não informado"}</p><button type="button" onClick={() => setSection("contact")}>Revisar contato</button></article>
-            <article><span>Conteúdo do site</span><strong>{services.length} serviço{services.length === 1 ? "" : "s"}</strong><p>{testimonials.length} depoimento{testimonials.length === 1 ? "" : "s"} cadastrado{testimonials.length === 1 ? "" : "s"}</p><button type="button" onClick={() => openEditor("services")}>Gerenciar conteúdo</button></article>
-          <article><span>Aquisição</span><strong>Leads Cheipi</strong><p>O canal específico de origem ainda não é registrado; nenhuma visita ou conversão é estimada.</p><Link href="/dashboard/leads">Abrir leads</Link></article>
-          </div>
         </section>
       ) : null}
 
       {section === "templates" ? (
-        <section className="pp-site-view" aria-labelledby="site-templates-title">
-          <SectionHeader title="Templates" description="Escolha a estrutura do seu site. Seus dados permanecem e você pode revisar a opção antes de trocar." />
+        <section className="pp-site-view" aria-label="Modelos do site">
+          <SectionHeader title="Escolha seu modelo" description="Três formas de apresentar seu trabalho. Explore antes de escolher." />
           <TemplateSelector profile={profile} entitlements={entitlements} onCustomize={() => openEditor()} />
-      <aside className="pp-site-inline-note"><LockKeyhole aria-hidden="true" /><div><strong>Templates são opções visuais do seu site</strong><p>Você pode visualizar todas as opções. A seleção depende da disponibilidade no seu plano, e a liberação comercial para publicação continua separada.</p></div></aside>
+          <p className="cheipi-site-note">Seus textos e serviços são mantidos ao trocar de modelo. Confira a prévia para revisar a apresentação.</p>
         </section>
       ) : null}
 
       {section === "personalize" ? (
-        <section className="pp-site-view" aria-labelledby="site-personalize-title">
-          <SectionHeader title={`Personalizar · ${selectedTemplate}`} description="Cuide do conteúdo, da aparência e da narrativa da página sem perder a qualidade do template." action={<Link href="/dashboard/preview">Visualizar <ExternalLink aria-hidden="true" /></Link>} />
+        <section className="pp-site-view" aria-label="Personalização do site">
+          <SectionHeader title="Do seu jeito" description="Salve as alterações e confira como ficam no seu site." action={<Link href="/dashboard/preview?returnView=personalize">Visualizar <ExternalLink aria-hidden="true" /></Link>} />
           <nav className="pp-site-editor-tabs" aria-label="Modos de personalização">
-            {([['content', 'Conteúdo'], ['appearance', 'Aparência'], ['organize', 'Organizar página']] as Array<[PersonalizationTab, string]>).map(([id, label]) => <button key={id} type="button" className={personalizationTab === id ? "is-active" : ""} aria-current={personalizationTab === id ? "page" : undefined} onClick={() => { setPersonalizationTab(id); if (id === "appearance") setPersonalization("identity"); if (id === "organize") setPersonalization("organize"); if (id === "content" && ["identity", "organize"].includes(personalization)) setPersonalization("presentation"); }}>{label}</button>)}
+            {([['content', 'Conteúdo'], ['appearance', 'Aparência'], ['organize', 'Seções']] as Array<[PersonalizationTab, string]>).map(([id, label]) => <button key={id} type="button" className={personalizationTab === id ? "is-active" : ""} aria-current={personalizationTab === id ? "page" : undefined} onClick={() => { setPersonalizationTab(id); if (id === "appearance") setPersonalization("identity"); if (id === "organize") setPersonalization("organize"); if (id === "content" && ["identity", "organize"].includes(personalization)) setPersonalization("presentation"); }}>{label}</button>)}
           </nav>
 
+          <button type="button" className="cheipi-contact-entry" onClick={() => setSection("contact")}><MessageCircle aria-hidden="true" /><span>Contato e redes sociais</span><ChevronRight aria-hidden="true" /></button>
           {personalizationTab === "content" ? <div className="pp-site-editor-layout">
             <nav className="pp-site-editor-navigation" aria-label="Conteúdo do site">
               {([
@@ -406,19 +410,19 @@ export function SiteBuilder({
       ) : null}
 
       {section === "contact" ? (
-        <section className="pp-site-view" aria-labelledby="site-contact-title">
+        <section className="pp-site-view" aria-label="Contato e conversão">
           <SectionHeader title="Contato e conversão" description="Mantenha os canais usados pelos visitantes para falar com você." />
           <div className="pp-site-contact-layout">
             <form action={contactAction} className="builder-form pp-site-contact-form"><label>WhatsApp<input name="whatsapp" required inputMode="tel" defaultValue={profile.whatsapp} /></label><label>Instagram — usuário<input name="instagram_handle" maxLength={30} defaultValue={instagram.handle ?? ""} placeholder="seu.usuario" /><small>Informe sem o @.</small></label><label>Instagram — link<input name="instagram_url" type="url" maxLength={300} defaultValue={instagram.url ?? ""} placeholder="https://www.instagram.com/seu.usuario/" /></label><Submit pending={contactPending}>Salvar contato</Submit><ActionMessage state={contactState} /></form>
-        <aside><MessageCircle aria-hidden="true" /><h2>Link do seu site</h2><p>cheipi.com/p/{profile.slug}</p><div><button type="button" onClick={() => navigator.clipboard.writeText(`${window.location.origin}${publicPath}`)}><Copy aria-hidden="true" /> Copiar link</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div></aside>
+        <aside><MessageCircle aria-hidden="true" /><h2>Link do seu site</h2><p>cheipi.com/p/{profile.slug}</p><div><button type="button" onClick={copyLink}><Copy aria-hidden="true" /> Copiar link</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div></aside>
           </div>
         </section>
       ) : null}
 
       {section === "performance" ? (
-        <section className="pp-site-view" aria-labelledby="site-performance-title">
+        <section className="pp-site-view" aria-label="Desempenho do site">
           <SectionHeader title="Desempenho" description="Acompanhe os dados reais do seu site quando as métricas estiverem disponíveis." />
-          <EmptyState icon={BarChart3} title="Métricas ainda não disponíveis" description="Assim que o acompanhamento de visitas e conversões estiver ativo, os dados aparecerão aqui — sem estimativas ou informações fictícias." />
+          <EmptyState icon={BarChart3} title="Métricas ainda não disponíveis" description="O acompanhamento de visitas e conversões ainda não está disponível." />
         </section>
       ) : null}
     </div>

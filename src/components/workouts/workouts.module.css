@@ -663,3 +663,169 @@
     width:min(230px,calc(100vw - 48px));
   }
 }
+
+/* Personal app: solid surfaces, readable prescriptions, and complete mobile controls. */
+:global(.cheipi-personal-app) :is(.workspace, .newWorkspace, .builderPage) {
+  font-size: 16px;
+}
+
+:global(.cheipi-personal-app) :is(.workspace, .newWorkspace, .builderPage) :is(p, small, label, dt, em),
+:global(.cheipi-personal-app) :is(.workspace, .newWorkspace, .builderPage) :is(.textButton, .saveState, .saveState button, .planDate, .planActionMenu > a, .planActionMenu > button, .addSet, .librarySearchStatus, .libraryCardAdd, .mobileSetAdvanced summary) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+:global(.cheipi-personal-app) :is(.workspace, .newWorkspace, .builderPage) :is(input, textarea, select) {
+  min-width: 0;
+  font-size: 16px;
+}
+
+:global(.cheipi-personal-app) :is(.planIdentity, .planStructure, .studentOption, .selectedStudent, .exerciseSummaryTitle, .libraryCardSelect) strong {
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+:global(.cheipi-personal-app) :is(.planList, .studentPicker, .creationChoice, .manualSetup, .aiSetup, .aiResult, .studentGrid, .sessionRail, .editorCanvas, .studentContext) {
+  border: 0;
+  border-radius: 0;
+  background: var(--pp-background);
+  box-shadow: none;
+}
+
+:global(.cheipi-personal-app) :is(.studentPicker, .creationChoice, .manualSetup, .aiSetup, .aiResult) {
+  padding: 24px 0;
+}
+
+:global(.cheipi-personal-app) .studentGrid { gap: 0; }
+:global(.cheipi-personal-app) .studentOption {
+  min-height: 106px;
+  padding: 20px 0;
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: var(--pp-background);
+}
+:global(.cheipi-personal-app) .studentOption:hover { transform: none; }
+:global(.cheipi-personal-app) .studentOption :is(small, em) { white-space: normal; }
+:global(.cheipi-personal-app) .sectionTitle h2 { font-size: 22px; }
+:global(.cheipi-personal-app) .sectionTitle > span { background: var(--pp-surface-subtle); color: var(--pp-text-primary); }
+:global(.cheipi-personal-app) .selectedStudent {
+  padding: 20px 0;
+  border: 0;
+  border-block: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: var(--pp-background);
+  box-shadow: none;
+}
+:global(.cheipi-personal-app) .creationChoice > div:last-child { gap: 0; }
+:global(.cheipi-personal-app) .creationChoice > div:last-child > button {
+  min-height: 126px;
+  padding: 22px 0;
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: var(--pp-background);
+}
+:global(.cheipi-personal-app) .creationChoice > div:last-child > button > span {
+  background: var(--pp-surface-subtle);
+  color: var(--pp-text-primary);
+}
+:global(.cheipi-personal-app) .creationChoice strong { font-size: 18px; }
+:global(.cheipi-personal-app) .promptSuggestions button { font-size: 14px; }
+:global(.cheipi-personal-app) .aiDisclaimer { background: var(--pp-surface-subtle); }
+:global(.cheipi-personal-app) .stepper li { font-size: 14px; }
+:global(.cheipi-personal-app) .stepper .activeStep span { background: var(--pp-text-primary); color: var(--pp-background); }
+:global(.cheipi-personal-app) .builderTopbar { background: var(--pp-background); backdrop-filter: none; }
+:global(.cheipi-personal-app) .builderTitle strong { font-size: 16px; }
+:global(.cheipi-personal-app) .builderPage :is(.setRow:nth-child(even), .exerciseDetails) { background: var(--pp-surface-subtle); }
+:global(.cheipi-personal-app) .exerciseSummaryCopy small { white-space: normal; }
+:global(.cheipi-personal-app) .exerciseEmpty { border-style: solid; background: var(--pp-surface-subtle); }
+:global(.cheipi-personal-app) .exerciseEmpty strong { font-size: 18px; }
+:global(.cheipi-personal-app) .libraryCardSelect :is(strong, small) { white-space: normal; }
+:global(.cheipi-personal-app) .libraryCardAdd { min-width: 80px; padding: 0 8px; }
+:global(.cheipi-personal-app) .exerciseDetails label > span,
+:global(.cheipi-personal-app) .setRow label > span,
+:global(.cheipi-personal-app) .mobileSetAdvanced label > span { font-size: 14px; }
+:global(.cheipi-personal-app) .historyRow { grid-template-columns: 38px minmax(0, 1fr); border: 0; border-bottom: 1px solid var(--pp-divider); border-radius: 0; }
+:global(.cheipi-personal-app) .historyRow > :global(.pp-status) { grid-column: 2; justify-self: start; }
+:global(.cheipi-personal-app) .historyRow strong { font-size: 16px; }
+:global(.cheipi-personal-app) .builderPage .historyRow small,
+:global(.cheipi-personal-app) .builderPage .publishConfirm p,
+:global(.cheipi-personal-app) .workspace .discardDialog p { font-size: 14px; }
+
+@media (max-width: 900px) {
+  :global(.cheipi-personal-app) .planRow {
+    min-height: 150px;
+    margin: 0;
+    border: 0 !important;
+    border-bottom: 1px solid var(--pp-divider) !important;
+    border-radius: 0;
+    background: var(--pp-background);
+    box-shadow: none;
+  }
+  :global(.cheipi-personal-app) .planRowLink { min-height: 150px; padding: 22px 0; gap: 12px; }
+  :global(.cheipi-personal-app) .planIdentity { padding-right: 38px; gap: 12px; }
+  :global(.cheipi-personal-app) .planIdentity strong { white-space: normal; }
+  :global(.cheipi-personal-app) .planIdentity em { display: none; }
+  :global(.cheipi-personal-app) .planStructure { padding-left: 0; gap: 3px; }
+  :global(.cheipi-personal-app) .planDiscard { top: 22px; right: -6px; bottom: auto; }
+  :global(.cheipi-personal-app) .planRowLink > span:nth-child(4) { grid-column: 2; grid-row: 2; }
+  :global(.cheipi-personal-app) .planOpen { display: none; }
+  :global(.cheipi-personal-app) .builderPage { width: 100% !important; padding-bottom: 170px; }
+  :global(.cheipi-personal-app) .builderLayout { gap: 18px; padding: 0 18px; }
+  :global(.cheipi-personal-app) .builderTopbar { top: 0; gap: 6px 10px; padding: 8px 18px; }
+  :global(.cheipi-personal-app) .builderTopbar > .historyButton { grid-column: 1; grid-row: 2; display: flex; justify-content: center; }
+  :global(.cheipi-personal-app) .builderTopbar > .saveState { grid-column: 2; }
+  :global(.cheipi-personal-app) .builderTopbar > :global(.pp-status) { grid-column: 3; }
+  :global(.cheipi-personal-app) .sessionRail { padding: 18px 0 0; }
+  :global(.cheipi-personal-app) .sessionRail nav { gap: 8px; }
+  :global(.cheipi-personal-app) .sessionRail nav > button { min-width: 196px; }
+  :global(.cheipi-personal-app) .addSessionButton { display: flex; min-height: 48px; margin-top: 10px; font-size: 14px; }
+  :global(.cheipi-personal-app) .studentContext { padding: 0; border-bottom: 1px solid var(--pp-divider); }
+  :global(.cheipi-personal-app) .editorCanvas { padding: 0; }
+  :global(.cheipi-personal-app) .sessionHeader { align-items: flex-start; }
+  :global(.cheipi-personal-app) .sessionHeader > div:last-child { display: block; }
+  :global(.cheipi-personal-app) .sessionHeader > div:first-child { min-width: 0; }
+  :global(.cheipi-personal-app) .sessionHeader input[aria-label="Nome da sessão"] { font-size: 22px; }
+  :global(.cheipi-personal-app) .sectionHeader { grid-template-columns: 30px minmax(0, 1fr); }
+  :global(.cheipi-personal-app) .sectionActions { grid-column: 2; justify-content: flex-end; }
+  :global(.cheipi-personal-app) .sectionActions button:nth-child(-n+2) { display: grid; }
+  :global(.cheipi-personal-app) .exerciseIdentity { grid-template-columns: 70px minmax(0, 1fr); }
+  :global(.cheipi-personal-app) .exerciseIdentity .exerciseActions { grid-column: 1 / -1; grid-row: 2; justify-content: flex-end; }
+  :global(.cheipi-personal-app) .exerciseIdentity .exerciseActions button:not(:last-child) { display: grid; }
+  :global(.cheipi-personal-app) .exerciseEditorFooter :global(.pp-button) { width: 100%; }
+  :global(.cheipi-personal-app) .mobilePrimaryAction {
+    left: 0;
+    right: 0;
+    bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+    padding: 10px 18px;
+    border-top: 1px solid var(--pp-divider);
+    background: var(--pp-background);
+  }
+  :global(.cheipi-personal-app) .mobilePrimaryAction :global(.pp-button) { min-height: 48px; box-shadow: none; }
+  :global(.cheipi-personal-app) .builderPage .libraryFilters { grid-template-columns: 20px minmax(0, 1fr); }
+  :global(.cheipi-personal-app) .builderPage .libraryFilters select:nth-of-type(2),
+  :global(.cheipi-personal-app) .builderPage .libraryFilters select:nth-of-type(3) { display: block; grid-column: 2; }
+  :global(.cheipi-personal-app) .builderPage .libraryDrawer { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  :global(.cheipi-personal-app) .selectedStudent > .textButton { width: auto; font-size: 14px; }
+  :global(.cheipi-personal-app) .selectedStudent > .textButton::after { content: none; }
+}
+
+.mobileLibraryBack,
+.mobileSessionActions { display: none; }
+
+@media (max-width: 900px) {
+  :global(.cheipi-personal-app) .mobileSessionActions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  :global(.cheipi-personal-app) .mobileSessionActions span { margin-right: auto; font-size: 14px; color: var(--pp-text-secondary); }
+  :global(.cheipi-personal-app) .mobileSessionActions button { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--pp-border); border-radius: 12px; background: var(--pp-background); color: var(--pp-text-primary); }
+  :global(.cheipi-personal-app) .mobileSessionActions button:disabled { opacity: .35; }
+  :global(.cheipi-personal-app) .mobileSessionActions svg { width: 18px; }
+}
+
+@media (max-width: 560px) {
+  :global(.cheipi-personal-app) .libraryContent[data-view="details"] .libraryList { display: none; }
+  :global(.cheipi-personal-app) .libraryContent[data-view="details"] .exercisePreview { display: block; min-height: 100%; }
+  :global(.cheipi-personal-app) .libraryContent[data-view="list"] .exercisePreview { display: none; }
+  :global(.cheipi-personal-app) .mobileLibraryBack { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 14px; padding: 0; border: 0; background: transparent; color: var(--pp-text-primary); font: 650 14px var(--pp-font-ui); }
+  :global(.cheipi-personal-app) .mobileLibraryBack svg { width: 18px; }
+}

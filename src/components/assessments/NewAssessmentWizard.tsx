@@ -9,11 +9,11 @@ import type { AssessmentTemplateSummary } from "@/lib/domain/assessments";
 import type { ManagedStudent } from "@/lib/domain/students";
 import { assessmentTypeLabels, estimateAssessmentMinutes } from "@/lib/assessments/presentation";
 
-const steps = ["Aluno", "Modelo", "Configuração", "Revisão"];
+const steps = ["Aluno", "Modelo", "Ajustes", "Revisão"];
 
 export function NewAssessmentWizard({ students, templates, demoMode, initialStudentId }: { students: ManagedStudent[]; templates: AssessmentTemplateSummary[]; demoMode: boolean; initialStudentId?: string | null }) {
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => students.some((student) => student.id === initialStudentId) ? 1 : 0);
   const [studentId, setStudentId] = useState(() => students.some((student) => student.id === initialStudentId) ? initialStudentId! : students[0]?.id ?? "");
   const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
   const [title, setTitle] = useState(templates[0]?.name ?? "");
@@ -68,7 +68,7 @@ export function NewAssessmentWizard({ students, templates, demoMode, initialStud
 
     <section className="pp-wizard-surface" aria-live="polite">
       {step === 0 ? <div className="pp-wizard-step">
-        <header><span><UserRound aria-hidden="true" /></span><div><p>Etapa 1 de 4</p><h2>Para quem é a avaliação?</h2><small>Somente relacionamentos ativos podem receber uma nova avaliação.</small></div></header>
+        <header><span><UserRound aria-hidden="true" /></span><div><p>Etapa 1 de 4</p><h2>Para quem é a avaliação?</h2><small>Escolha um aluno com acompanhamento ativo.</small></div></header>
         <fieldset className="pp-choice-grid"><legend className="sr-only">Selecione um aluno ativo</legend>
           {students.map((item) => <label key={item.id} className={studentId === item.id ? "selected" : undefined}>
             <input type="radio" name="student_choice" value={item.id} checked={studentId === item.id} onChange={() => setStudentId(item.id)} />
@@ -78,7 +78,7 @@ export function NewAssessmentWizard({ students, templates, demoMode, initialStud
       </div> : null}
 
       {step === 1 ? <div className="pp-wizard-step">
-        <header><span><ClipboardCheck aria-hidden="true" /></span><div><p>Etapa 2 de 4</p><h2>Escolha o modelo</h2><small>O conteúdo da versão selecionada é imutável e não será alterado por este fluxo.</small></div></header>
+        <header><span><ClipboardCheck aria-hidden="true" /></span><div><p>Etapa 2 de 4</p><h2>Escolha o modelo</h2><small>Cada modelo traz perguntas prontas para seu aluno.</small></div></header>
         <fieldset className="pp-template-choice"><legend className="sr-only">Selecione um modelo</legend>
           {templates.map((item) => {
             const latest = item.versions.toSorted((a, b) => b.versionNumber - a.versionNumber)[0];
@@ -94,11 +94,11 @@ export function NewAssessmentWizard({ students, templates, demoMode, initialStud
       </div> : null}
 
       {step === 2 ? <div className="pp-wizard-step pp-wizard-step--metadata">
-        <header><span><CalendarDays aria-hidden="true" /></span><div><p>Etapa 3 de 4</p><h2>Configure o envio</h2><small>Defina somente os dados desta aplicação. O modelo permanece intacto.</small></div></header>
+        <header><span><CalendarDays aria-hidden="true" /></span><div><p>Etapa 3 de 4</p><h2>Configure o envio</h2><small>Escolha o título, o prazo e a prioridade.</small></div></header>
         <div className="pp-form-grid">
           <label className="pp-field pp-field--wide"><span>Título da avaliação <b>Obrigatório</b></span><input value={title} onChange={(event) => setTitle(event.target.value)} minLength={2} maxLength={160} required /></label>
           <label className="pp-field"><span>Prazo de resposta <em>Opcional</em></span><input type="date" value={dueAt} min={minimumDueDate} onChange={(event) => setDueAt(event.target.value)} /></label>
-          <label className="pp-switch-field"><input type="checkbox" checked={required} onChange={(event) => setRequired(event.target.checked)} /><span><strong>Resposta obrigatória</strong><small>Indica prioridade para o aluno; não envia notificação automática.</small></span></label>
+          <label className="pp-switch-field"><input type="checkbox" checked={required} onChange={(event) => setRequired(event.target.checked)} /><span><strong>Resposta obrigatória</strong><small>Destaca a avaliação como prioridade para o aluno.</small></span></label>
         </div>
       </div> : null}
 
@@ -112,7 +112,7 @@ export function NewAssessmentWizard({ students, templates, demoMode, initialStud
           <div><dt>Prioridade</dt><dd>{required ? "Resposta obrigatória" : "Resposta opcional"}</dd></div>
         </dl>
         <div className="pp-review-questions"><strong>Perguntas do modelo</strong><ol>{version?.schema.questions.map((question) => <li key={question.key}>{question.label["pt-BR"] ?? Object.values(question.label)[0]}{question.required ? <b>Obrigatória</b> : null}</li>)}</ol></div>
-        {demoMode ? <p className="pp-demo-note">No workspace demo, o fluxo pode ser revisado por completo, mas a criação não grava dados nem chama o Supabase.</p> : null}
+        {demoMode ? <p className="pp-demo-note">Demonstração: você pode explorar as etapas, mas as alterações não são salvas.</p> : null}
       </div> : null}
     </section>
 

@@ -4,6 +4,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition }
 import { Check, ChevronLeft, Dumbbell, Filter, Plus, Search, X } from "lucide-react";
 import { createCustomExerciseAction, searchExerciseLibraryAction } from "@/app/actions/workouts";
 import { ExerciseMedia } from "@/components/workouts/ExerciseMedia";
+import { exerciseFactsLabel } from "@/components/workouts/exercise-labels";
 import type { Exercise } from "@/lib/domain/workouts";
 import { exerciseEquipmentOptions, exerciseMuscleGroupOptions } from "@/lib/workouts/presentation";
 import styles from "./workouts.module.css";
@@ -33,6 +34,7 @@ export function ExerciseLibraryDrawer({
   const [source, setSource] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(exercises[0]?.id ?? null);
   const [creating, setCreating] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [customName, setCustomName] = useState("");
   const [customInstructions, setCustomInstructions] = useState("");
   const [customMuscle, setCustomMuscle] = useState("full_body");
@@ -119,15 +121,15 @@ export function ExerciseLibraryDrawer({
     <aside className={styles.libraryDrawer} role="dialog" aria-modal="true" aria-labelledby="exercise-library-title">
       <header className={styles.libraryHeader}><div><span><Dumbbell aria-hidden="true" /></span><div><h2 id="exercise-library-title">Biblioteca de exercícios</h2><p>{mode === "ADD" ? "Escolha o próximo exercício" : "Substitua sem perder a prescrição"}</p></div></div><button type="button" className="pp-icon-button" onClick={onClose} aria-label="Fechar biblioteca"><X aria-hidden="true" /></button></header>
       <div className={styles.librarySearch}><Search aria-hidden="true" /><input ref={searchRef} value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar exercício" aria-label="Buscar exercício" />{query ? <button type="button" onClick={() => setQuery("")} aria-label="Limpar busca"><X aria-hidden="true" /></button> : null}</div>
-      <div className={styles.libraryFilters}><Filter aria-hidden="true" /><select value={muscle} onChange={(event) => setMuscle(event.target.value)} aria-label="Filtrar por grupo muscular"><option value="all">Todos os músculos</option>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={equipment} onChange={(event) => setEquipment(event.target.value)} aria-label="Filtrar por equipamento"><option value="all">Todos os equipamentos</option>{exerciseEquipmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={source} onChange={(event) => setSource(event.target.value)} aria-label="Filtrar por origem"><option value="all">Sistema + meus</option><option value="PPERFIL_LIBRARY">Cheipi</option><option value="TRAINER_CUSTOM">Meus exercícios</option></select></div>
+      <div className={styles.libraryFilters}><Filter aria-hidden="true" /><select value={muscle} onChange={(event) => setMuscle(event.target.value)} aria-label="Filtrar por grupo muscular"><option value="all">Todos os músculos</option>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={equipment} onChange={(event) => setEquipment(event.target.value)} aria-label="Filtrar por equipamento"><option value="all">Todos os equipamentos</option>{exerciseEquipmentOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select><select value={source} onChange={(event) => setSource(event.target.value)} aria-label="Filtrar por origem"><option value="all">Todos os exercícios</option><option value="PPERFIL_LIBRARY">Cheipi</option><option value="TRAINER_CUSTOM">Meus exercícios</option></select></div>
       <p className={styles.librarySearchStatus} role="status" aria-live="polite">{searchPending ? "Consultando catálogo…" : remoteSearch ? searchResult.signature === searchSignature ? searchResult.message : "Consultando catálogo…" : `${exercises.length} exercícios carregados. Use a busca para consultar todo o catálogo.`}</p>
 
-      <div className={styles.libraryContent}>
+      <div className={styles.libraryContent} data-view={creating || showDetails ? "details" : "list"}>
         <div className={styles.libraryList}>
           {filtered.length ? filtered.map((exercise) => <div className={`${styles.libraryCard}${selected?.id === exercise.id ? ` ${styles.libraryCardSelected}` : ""}`} key={exercise.id}>
-            <button type="button" className={styles.libraryCardSelect} onClick={() => setSelectedId(exercise.id)} aria-label={`Ver detalhes de ${exercise.name}`}>
+            <button type="button" className={styles.libraryCardSelect} onClick={() => { setSelectedId(exercise.id); setShowDetails(true); }} aria-label={`Ver detalhes de ${exercise.name}`}>
               <ExerciseMedia exercise={exercise} demoMode={demoMode} />
-              <span><strong>{exercise.name}</strong><small>{exercise.primaryMuscleGroup} · {exercise.equipment.join(" · ") || "Sem equipamento"}</small></span>
+              <span><strong>{exercise.name}</strong><small>{exerciseFactsLabel(exercise)}</small></span>
               {selected?.id === exercise.id ? <Check aria-hidden="true" /> : null}
             </button>
             <button type="button" className={styles.libraryCardAdd} onClick={() => onChoose(exercise)} aria-label={`${mode === "ADD" ? "Adicionar" : "Usar"} ${exercise.name}`}>{mode === "ADD" ? "Adicionar" : "Usar"}</button>
@@ -135,9 +137,10 @@ export function ExerciseLibraryDrawer({
           <button type="button" className={styles.createExerciseButton} onClick={() => setCreating(true)}><Plus aria-hidden="true" />Criar exercício personalizado</button>
         </div>
         <div className={styles.exercisePreview}>
+          {!creating ? <button type="button" className={styles.mobileLibraryBack} onClick={() => setShowDetails(false)}><ChevronLeft aria-hidden="true" />Voltar aos exercícios</button> : null}
           {creating ? <div className={styles.customExerciseForm}><button type="button" onClick={() => setCreating(false)}><ChevronLeft aria-hidden="true" />Voltar à biblioteca</button><h3>Novo exercício</h3><label>Nome<input value={customName} onChange={(event) => setCustomName(event.target.value)} maxLength={160} /></label><label>Grupo muscular <small>opcional</small><select value={customMuscle} onChange={(event) => setCustomMuscle(event.target.value)}>{exerciseMuscleGroupOptions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label><label>Equipamentos <small>opcional</small><input value={customEquipment} onChange={(event) => setCustomEquipment(event.target.value)} placeholder="dumbbell, bench" /></label><label>Instruções <small>opcional</small><textarea value={customInstructions} onChange={(event) => setCustomInstructions(event.target.value)} maxLength={5000} /></label><label>URL do YouTube <small>opcional</small><input type="url" value={customYoutube} onChange={(event) => setCustomYoutube(event.target.value)} placeholder="https://www.youtube.com/watch?v=..." /></label>{message ? <p role="status">{message}</p> : null}<button type="button" className="pp-button pp-button--primary" disabled={pending || customName.trim().length < 2} onClick={createCustom}>Criar exercício</button></div> : selected ? <>
             <ExerciseMedia exercise={selected} demoMode={demoMode} priority />
-          <div className={styles.previewIdentity}><small>{selected.sourceType === "PPERFIL_LIBRARY" ? "Biblioteca Cheipi" : "Meu exercício"}</small><h3>{selected.name}</h3><p>{selected.primaryMuscleGroup} · {selected.equipment.join(" · ") || "Sem equipamento"}</p></div>
+          <div className={styles.previewIdentity}><small>{selected.sourceType === "PPERFIL_LIBRARY" ? "Biblioteca Cheipi" : "Meu exercício"}</small><h3>{selected.name}</h3><p>{exerciseFactsLabel(selected)}</p></div>
             <section><h4>Instruções</h4><p>{selected.instructions}</p></section>
             <section><h4>Pontos de atenção</h4>{selected.coachingCues.length ? <ul>{selected.coachingCues.map((cue) => <li key={cue}>{cue}</li>)}</ul> : <p>Sem dicas adicionais.</p>}</section>
             <button type="button" className="pp-button pp-button--primary" onClick={() => onChoose(selected)}>{mode === "ADD" ? "Adicionar ao treino" : "Usar este exercício"}</button>

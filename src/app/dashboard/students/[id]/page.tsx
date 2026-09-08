@@ -40,10 +40,10 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
 
   return <main className="dashboard-main pp-record-page pp-student-record">
     <StudentRecordChrome student={student} active="overview" />
-    <section className="pp-student-pulse" aria-label="Resumo factual do aluno">
-      <div><span>Vínculo</span><strong>{student.status === "active" ? "Acompanhamento ativo" : statusLabels[student.status]}</strong></div>
+    <section className="pp-student-pulse" aria-label="Resumo do aluno">
+      <div><span>Acompanhamento</span><strong>{student.status === "active" ? "Acompanhamento ativo" : statusLabels[student.status]}</strong></div>
       <div><span>Treino atual</span><strong>{currentWorkout?.plan.name ?? "Nenhum treino publicado"}</strong></div>
-      <div><span>Próxima atenção</span><strong>{attentionAssessment ? attentionAssessment.assessment.title : "Nenhuma revisão pendente"}</strong></div>
+      <div><span>Para revisar</span><strong>{attentionAssessment ? attentionAssessment.assessment.title : "Nenhuma revisão pendente"}</strong></div>
     </section>
     <div className="pp-student-workspace">
       <div className="pp-student-workspace__main">
@@ -66,7 +66,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
         <section className="pp-student-open-section" aria-labelledby="student-followup-title">
           <header><div><span>Acompanhamento</span><h2 id="student-followup-title">O que pede atenção</h2></div></header>
           <div className="pp-student-operational-list">
-            {assessments.slice(0, 2).map(({ assessment }) => <Link href={`/dashboard/assessments/${assessment.id}`} key={assessment.id}>
+            {assessments.slice(0, 2).map(({ assessment }) => <Link href={`/dashboard/assessments/${assessment.id}?student=${student.id}`} key={assessment.id}>
               <span className="pp-student-row-icon"><ClipboardCheck aria-hidden="true" /></span><span><strong>{assessment.title}</strong><small>Atualizada em {shortDate(assessment.updatedAt)}</small></span><Status tone={assessment.status === "COMPLETED" ? "success" : assessment.status === "IN_REVIEW" || assessment.status === "ANSWERED" ? "warning" : "neutral"}>{assessmentLabels[assessment.status]}</Status><ChevronRight aria-hidden="true" />
             </Link>)}
             {latestTraining ? <Link href={`/dashboard/students/${student.id}/progress`}>
@@ -79,7 +79,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
 
       <aside className="pp-student-workspace__aside">
         <section className="pp-student-relationship" aria-labelledby="relationship-title">
-          <header><span>Relacionamento</span><h2 id="relationship-title">Contexto do aluno</h2></header>
+          <header><span>Cadastro</span><h2 id="relationship-title">Dados do aluno</h2></header>
           <dl>
             <div><dt>Status</dt><dd><Status tone={student.status === "active" ? "success" : "neutral"}>{statusLabels[student.status]}</Status></dd></div>
             <div><dt><Mail aria-hidden="true" />Contato</dt><dd>{student.email ?? "Oculto para relacionamento inativo"}</dd></div>
@@ -89,7 +89,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
             {student.endedAt ? <div><dt>Encerrado em</dt><dd>{new Date(student.endedAt).toLocaleDateString("pt-BR")}</dd></div> : null}
           </dl>
           <div className="pp-student-relationship__action">
-            {student.status === "active" ? <ActionForm action={deactivateStudentAction} fields={{ relationship_id: student.id }} className="deactivate-action"><UserRoundX aria-hidden="true" />Desativar relacionamento</ActionForm> : <InviteStudentForm />}
+            {student.status === "active" ? <ActionForm action={deactivateStudentAction} fields={{ relationship_id: student.id }} className="deactivate-action"><UserRoundX aria-hidden="true" />Desativar acompanhamento</ActionForm> : <InviteStudentForm />}
           </div>
         </section>
       </aside>

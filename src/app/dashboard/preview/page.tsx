@@ -2,12 +2,15 @@ import { notFound } from "next/navigation";
 import { TemplatePreviewShell } from "@/components/dashboard/TemplatePreviewShell";
 import { findOwnerPreview } from "@/lib/supabase/trainers";
 import type { TemplateId } from "@/lib/domain/trainer";
-import { getTemplateDefinition, isTemplateId } from "@/lib/domain/template-registry";
+import { isTemplateId } from "@/lib/domain/template-registry";
+import { getSiteTemplatePresentation } from "@/lib/domain/site-template-presentation";
 
-export default async function OwnerPreviewPage({ searchParams }: { searchParams: Promise<{ template?: string }> }) {
+export default async function OwnerPreviewPage({ searchParams }: { searchParams: Promise<{ template?: string; returnView?: string }> }) {
   const data = await findOwnerPreview();
   if (!data) notFound();
-  const requested = (await searchParams).template;
+  const query = await searchParams;
+  const requested = query.template;
   const previewTemplate: TemplateId = isTemplateId(requested) ? requested : data.profile.template_id;
-  return <TemplatePreviewShell templateId={previewTemplate} templateName={getTemplateDefinition(previewTemplate).name} />;
+  const returnView = ["templates", "personalize", "publication"].includes(query.returnView ?? "") ? query.returnView : "overview";
+  return <TemplatePreviewShell templateId={previewTemplate} templateName={getSiteTemplatePresentation(previewTemplate).name} returnView={returnView} />;
 }

@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Bell, ClipboardCheck, Dumbbell, ExternalLink, Globe2, Send, Share2, UserPlus, UsersRound } from "lucide-react";
+import { ArrowRight, Bell, ClipboardCheck, Dumbbell, Globe2, Send, UserPlus, UsersRound } from "lucide-react";
 import { getTrainerAssessmentIndex } from "@/lib/assessments/workspace";
 import { getWorkoutIndex } from "@/lib/workouts/workspace";
-import { Avatar, Status } from "@/components/ui/PPerfilPrimitives";
+import { Avatar } from "@/components/ui/PPerfilPrimitives";
 import { getLeadsWorkspace } from "@/lib/supabase/leads";
 import { getStudentsWorkspace } from "@/lib/supabase/students";
-import { findDashboardMetrics, findOwnerProfile } from "@/lib/supabase/trainers";
+import { findOwnerProfile } from "@/lib/supabase/trainers";
 import { SupabaseWorkoutExecutionRepository } from "@/lib/supabase/workout-executions";
 import { WorkoutExecutionService } from "@/lib/workouts/execution-service";
 import { listCommunityNotifications } from "@/lib/supabase/community";
@@ -19,8 +19,8 @@ function countLabel(count: number, singular: string, plural: string) {
 
 export default async function DashboardPage() {
   const executionService = new WorkoutExecutionService(new SupabaseWorkoutExecutionRepository());
-  const [profile, metrics, studentData, leadData, assessmentData, workoutData, workoutNotifications, communityNotifications] = await Promise.all([
-    findOwnerProfile(), findDashboardMetrics(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null), executionService.listTrainerNotifications(3).catch(() => []), listCommunityNotifications().catch(() => []),
+  const [profile, studentData, leadData, assessmentData, workoutData, workoutNotifications, communityNotifications] = await Promise.all([
+    findOwnerProfile(), getStudentsWorkspace().catch(() => null), getLeadsWorkspace().catch(() => null), getTrainerAssessmentIndex().catch(() => null), getWorkoutIndex().catch(() => null), executionService.listTrainerNotifications(3).catch(() => []), listCommunityNotifications().catch(() => []),
   ]);
   if (!profile) redirect("/onboarding");
 
@@ -30,8 +30,6 @@ export default async function DashboardPage() {
   const attentionLeads = (leadData?.matches ?? []).filter((lead) => lead.state === "new" || lead.state === "pending");
   const reviewAssessments = (assessmentData?.items ?? []).filter(({ assessment }) => assessment.status === "ANSWERED" || assessment.status === "IN_REVIEW");
   const draftWorkouts = (workoutData?.items ?? []).filter(({ currentVersion }) => currentVersion.status === "DRAFT");
-  const siteHref = `/p/${profile.slug}`;
-  const siteUrl = `/p/${profile.slug}`;
   const communityRequests = communityNotifications.filter((notification) => notification.type === "JOIN_REQUEST" && !notification.readAt);
   const communityRequestGroup = communityRequests[0]?.groupId;
   const priorities = [
@@ -51,28 +49,25 @@ export default async function DashboardPage() {
 
   const hasWorkspaceContent = priorities.length > 0 || activeStudents.length > 0 || attentionLeads.length > 0 || profile.published;
 
-  return <main className="pc-dashboard pc-dashboard--v1b">
-    <header className="pc-dashboard__header"><div><p>{dayFormatter.format(new Date())}</p><h1>Bom dia, {profile.display_name.split(" ")[0]}</h1><span>Veja o que precisa da sua atenção agora.</span></div><Link className="pc-primary-action" href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link></header>
+  return <main className="pc-dashboard cheipi-today">
+    <header className="pc-dashboard__header"><div><h1>Olá, {profile.display_name.split(" ")[0]}</h1><p>{dayFormatter.format(new Date())}</p></div></header>
+    {hasWorkspaceContent ? <div className="cheipi-today-pulse" aria-label="Resumo da rotina"><Link href="/dashboard/students"><strong>{activeStudents.length}</strong> alunos ativos</Link><span aria-hidden="true">·</span><Link href="/dashboard/workouts?status=draft"><strong>{draftWorkouts.length}</strong> treinos em rascunho</Link></div> : null}
 
-    <section className="pc-pulse" aria-label="Resumo do negócio">
-      <div><strong>{activeStudents.length}</strong><span>alunos ativos</span></div><div><strong>{draftWorkouts.length}</strong><span>treinos em rascunho</span></div><div><strong>{reviewAssessments.length}</strong><span>avaliações pendentes</span></div><div><strong>{attentionLeads.length}</strong><span>novos leads</span></div><div><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Site publicado" : "Site em rascunho"}</Status></div>
+    {!hasWorkspaceContent ? <section className="cheipi-first-action"><h2>Seu espaço está pronto.</h2><p>Convide seu primeiro aluno ou prepare seu site para apresentar seu trabalho.</p><Link className="pp-button pp-button--primary" href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" />Adicionar aluno</Link><Link className="cheipi-text-link" href="/dashboard/site">Preparar meu site<ArrowRight aria-hidden="true" /></Link></section> : null}
+
+    <section className="cheipi-today-priorities" aria-labelledby="today-title">
+      <header className="cheipi-section-heading"><h2 id="today-title">{priorities.length ? "Sua próxima ação" : "Tudo em dia"}</h2></header>
+      <div className="pc-priority-list">{priorities.slice(0, 3).map(({ label, href, action, icon: Icon }) => <Link href={href} key={label} className="pc-priority-row"><span className="pc-priority-row__icon"><Icon aria-hidden="true" /></span><span><strong>{label}</strong><small>{action}</small></span><ArrowRight aria-hidden="true" /></Link>)}</div>
+      {priorities.length > 3 ? <details className="cheipi-other-priorities"><summary>Mais {priorities.length - 3} pendências</summary><div className="pc-priority-list">{priorities.slice(3).map(({ label, href, action, icon: Icon }) => <Link href={href} key={label} className="pc-priority-row"><span className="pc-priority-row__icon"><Icon aria-hidden="true" /></span><span><strong>{label}</strong><small>{action}</small></span><ArrowRight aria-hidden="true" /></Link>)}</div></details> : null}
+      {!priorities.length ? <p className="cheipi-quiet-copy">Quando houver algo para acompanhar, você encontra aqui.</p> : null}
     </section>
 
-    <div className="pc-dashboard__workspace">
-      <section className="pc-dashboard__today" aria-labelledby="today-title">
-        <header><h2 id="today-title">Hoje</h2><span>{countLabel(priorities.length, "prioridade", "prioridades")}</span></header>
-        <div className="pc-priority-list">{priorities.length ? priorities.map(({ label, href, action, icon: Icon, tone }) => <Link href={href} key={label} className="pc-priority-row"><span className={`pc-priority-row__icon pc-tone--${tone}`}><Icon aria-hidden="true" /></span><strong>{label}</strong><span>{action}</span><ArrowRight aria-hidden="true" /></Link>) : <div className="pc-quiet-state"><strong>Nada pendente agora.</strong><span>Seus módulos disponíveis estão em dia.</span></div>}</div>
+    <section className="cheipi-today-students" aria-label="Seus alunos">
+      <header className="cheipi-section-heading"><h2>Alunos</h2><Link href="/dashboard/students">Ver todos<ArrowRight aria-hidden="true" /></Link></header>
+      <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} imageUrl={student.profileImageUrl} size="small" /><span><strong>{student.name}</strong><small>Acompanhamento ativo</small></span><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <p className="cheipi-quiet-copy">Seus alunos aparecerão aqui depois de aceitar o convite.</p> : null}</div>
+    </section>
 
-        {!hasWorkspaceContent ? <div className="pc-dashboard-zero"><div><strong>Comece pelo primeiro aluno.</strong><p>Convide alguém para liberar a rotina de treinos e acompanhamento.</p></div><Link href="/dashboard/students?add=1#add-student">Adicionar aluno<ArrowRight aria-hidden="true" /></Link></div> : null}
-
-        <div className="pc-section-heading"><h2>Alunos</h2><Link href="/dashboard/students">Ver todos <ArrowRight aria-hidden="true" /></Link></div>
-        <div className="pc-student-list">{activeStudents.slice(0, 5).map((student) => <Link href={`/dashboard/students/${student.id}`} key={student.id}><Avatar name={student.name} imageUrl={student.profileImageUrl} size="small" /><span><strong>{student.name}</strong><small>{student.email ?? "Contato não informado"}</small></span><Status tone="success">Ativo</Status><ArrowRight aria-hidden="true" /></Link>)}{!activeStudents.length ? <div className="pc-quiet-state"><strong>Nenhum aluno ativo.</strong><Link href="/dashboard/students?add=1#add-student">Adicionar aluno</Link></div> : null}</div>
-      </section>
-
-      <aside className="pc-dashboard__rail">
-        <section className="pc-site-panel"><header><Globe2 aria-hidden="true" /><div><strong>Meu Site</strong><Status tone={profile.published ? "success" : "warning"}>{profile.published ? "Publicado" : "Rascunho"}</Status></div></header><a href={siteHref} target="_blank" rel="noreferrer">{siteUrl}<ExternalLink aria-hidden="true" /></a>{profile.published ? <p>{metrics.profile_views.toLocaleString("pt-BR")} visitas · {metrics.leads.toLocaleString("pt-BR")} leads</p> : <p>Finalize a revisão antes de publicar.</p>}<div><Link href={siteHref} target="_blank">Abrir</Link><Link href="/dashboard/site">Editar</Link><Link href="/dashboard/site"><Share2 aria-hidden="true" />Compartilhar</Link></div></section>
-        <section className="pc-quick-actions" aria-labelledby="quick-actions-title"><h2 id="quick-actions-title">Ações rápidas</h2><div><Link href="/dashboard/students?add=1#add-student"><UserPlus aria-hidden="true" />Adicionar aluno</Link><Link href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link><Link href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" />Nova avaliação</Link><Link href="/dashboard/site"><Globe2 aria-hidden="true" />Meu Site</Link></div></section>
-      </aside>
-    </div>
+    <div className="cheipi-today-actions"><Link className="pp-button pp-button--primary" href="/dashboard/workouts/new"><Dumbbell aria-hidden="true" />Criar treino</Link><Link className="pp-button pp-button--secondary" href="/dashboard/assessments/new"><ClipboardCheck aria-hidden="true" />Nova avaliação</Link></div>
+    <Link className="cheipi-home-site" href="/dashboard/site"><Globe2 aria-hidden="true" /><span><strong>Meu site</strong><small>{profile.published ? "Publicado · pronto para compartilhar" : "Rascunho · continue quando quiser"}</small></span><ArrowRight aria-hidden="true" /></Link>
   </main>;
 }

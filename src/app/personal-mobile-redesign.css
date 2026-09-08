@@ -1,0 +1,267 @@
+/* Cheipi Personal — shared mobile presentation. Domain and public-template tokens stay scoped. */
+.dashboard-shell.cheipi-personal-app {
+  --pp-background:#000; --pp-sidebar:#000; --pp-surface:#141414;
+  --pp-surface-elevated:#191919; --pp-surface-raised:#191919;
+  --pp-surface-subtle:#1d1d1d; --pp-surface-hover:#222;
+  --pp-border:#303030; --pp-border-strong:#666; --pp-divider:#262626;
+  --pp-text-primary:#fff; --pp-text-secondary:#c7c7c7; --pp-text-muted:#a3a3a3;
+  --pp-accent:#fff; --pp-accent-strong:#fff; --pp-accent-soft:#202020;
+  --pp-accent-contrast:#000; --pp-shell-solid:#fff; --pp-shell-on-solid:#000;
+  --pp-shadow:none; --pp-shadow-raised:0 12px 32px #0003;
+  --pp-font-ui:var(--font-display),sans-serif; --pp-font-display:var(--font-display),sans-serif;
+  --pp-type-body:400 1rem/1.5 var(--pp-font-ui);
+  --pp-type-body-compact:400 .875rem/1.4 var(--pp-font-ui);
+  --pp-type-caption:500 .8125rem/1.4 var(--pp-font-ui);
+  --pp-radius-sm:10px; --pp-radius-md:12px; --pp-radius-lg:16px;
+  --cheipi-ease:cubic-bezier(.23,1,.32,1);
+  min-height:100dvh; color:var(--pp-text-primary); font:400 1rem/1.5 var(--pp-font-ui);
+  background:var(--pp-background); color-scheme:dark;
+}
+[data-theme="light"] .dashboard-shell.cheipi-personal-app {
+  --pp-background:#fff; --pp-sidebar:#fff; --pp-surface:#f5f5f5;
+  --pp-surface-elevated:#fafafa; --pp-surface-raised:#fafafa;
+  --pp-surface-subtle:#f0f0f0; --pp-surface-hover:#ededed;
+  --pp-border:#ddd; --pp-border-strong:#929292; --pp-divider:#e5e5e5;
+  --pp-text-primary:#111; --pp-text-secondary:#525252; --pp-text-muted:#666;
+  --pp-accent:#111; --pp-accent-strong:#111; --pp-accent-soft:#f0f0f0;
+  --pp-accent-contrast:#fff; --pp-shell-solid:#111; --pp-shell-on-solid:#fff;
+  color-scheme:light;
+}
+.cheipi-personal-app :is(button,input,select,textarea) { font-family:var(--pp-font-ui); }
+.cheipi-personal-app :is(button,a,input,select,textarea,summary):focus-visible { outline:2px solid var(--pp-text-primary); outline-offset:4px; box-shadow:none; }
+.cheipi-personal-app :is(button,[role="button"],.pp-button,.builder-primary,.builder-secondary) { touch-action:manipulation; }
+.cheipi-personal-app :is(button,.pp-button,.builder-primary,.builder-secondary):active:not(:disabled) { transform:scale(.98); }
+.cheipi-personal-app :is(button,.pp-button,.builder-primary,.builder-secondary) { transition:transform 140ms var(--cheipi-ease),background-color 160ms ease; }
+.cheipi-personal-app :is(input,textarea,select):not([type="checkbox"]):not([type="radio"]):not([type="color"]) { font-size:1rem; min-height:48px; }
+.cheipi-personal-app :is(input,textarea)::placeholder { color:var(--pp-text-muted); opacity:1; }
+.cheipi-personal-app :is(.pp-button,.builder-primary,.builder-secondary) { min-height:50px; font-size:.9375rem; font-weight:650; border-radius:12px; }
+.cheipi-personal-app .builder-primary { display:inline-flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; background:var(--pp-shell-solid); color:var(--pp-shell-on-solid); }
+.cheipi-personal-app :is(h1,h2,h3) { letter-spacing:-.025em; text-wrap:balance; }
+.cheipi-personal-app :is(.dashboard-content,.dashboard-sidebar) { background:var(--pp-background); background-image:none; box-shadow:none; }
+.cheipi-personal-app :is(.dashboard-main,.pc-dashboard,.matrix-page) { width:min(calc(100% - 48px),1040px); max-width:1040px!important; margin-inline:auto; padding:28px 0 56px!important; }
+.cheipi-personal-app .pp-page-header { margin:0 0 24px; min-height:0; gap:16px; }
+.cheipi-personal-app .pp-page-header h1 { margin:0; font:750 2rem/1.12 var(--pp-font-display); }
+.cheipi-personal-app .pp-page-header p:not(.pp-page-context) { margin-top:10px; max-width:58ch; font-size:.9375rem; line-height:1.5; color:var(--pp-text-secondary); }
+.cheipi-personal-app .pp-page-context { display:none; }
+.cheipi-personal-app .dashboard-header .brand-logo { padding:0; gap:0; }
+.cheipi-personal-app .dashboard-header .brand-logo svg { display:none; }
+.cheipi-personal-app .dashboard-header .brand-logo strong { position:static; width:auto; height:auto; clip:auto; overflow:visible; font-size:1.25rem; letter-spacing:-.035em; }
+.cheipi-personal-app .pp-demo-indicator { font-size:12px; }
+.cheipi-personal-app .pp-demo-indicator strong { font-size:12px; }
+.cheipi-personal-app .pp-primary-nav--desktop { padding:14px 8px; }
+.cheipi-personal-app .pp-primary-nav a { min-height:48px; display:flex; align-items:center; gap:12px; border:0; border-radius:10px; padding:10px 14px; color:var(--pp-text-muted); background:transparent; text-decoration:none; }
+.cheipi-personal-app .pp-primary-nav a[aria-current="page"] { color:var(--pp-text-primary); background:var(--pp-surface); }
+.cheipi-personal-app .pp-primary-nav .nav-icon { width:26px; height:26px; flex:none; background:transparent; border:0; box-shadow:none; }
+.cheipi-personal-app .pp-primary-nav .nav-icon svg { width:24px; height:24px; }
+.cheipi-personal-app .pp-primary-nav .pp-nav-item__label { font-size:.875rem; font-weight:550; }
+.cheipi-personal-app .cheipi-nav-secondary { margin-top:22px; padding-top:14px; border-top:1px solid var(--pp-divider); }
+.cheipi-personal-app .cheipi-nav-secondary a { min-height:44px; }
+.cheipi-personal-app .cheipi-back { display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0; margin:0 0 8px; border:0; background:transparent; color:var(--pp-text-secondary); font-size:.9375rem; text-decoration:none; cursor:pointer; }
+.cheipi-personal-app .cheipi-back svg { width:20px; height:20px; }
+.cheipi-personal-app .cheipi-task-list { display:grid; }
+.cheipi-personal-app .cheipi-task-list>:is(a,button) { min-height:88px; width:100%; display:flex; align-items:center; gap:18px; padding:20px 0; background:none; border:0; border-bottom:1px solid var(--pp-divider); color:var(--pp-text-primary); text-decoration:none; text-align:left; cursor:pointer; }
+.cheipi-personal-app .cheipi-task-list>:last-child { border-bottom:0; }
+.cheipi-personal-app .cheipi-task-list>:is(a,button)>svg { width:25px; height:25px; flex:none; }
+.cheipi-personal-app .cheipi-task-list>:is(a,button)>svg:last-child { margin-left:auto; width:18px; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-task-list strong { display:block; font-size:1.0625rem; font-weight:650; }
+.cheipi-personal-app .cheipi-task-list small { display:block; margin-top:3px; font-size:.875rem; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-task-list i { width:34px; height:34px; display:grid; place-items:center; border:1px solid var(--pp-border-strong); border-radius:50%; font-size:.875rem; font-style:normal; flex:none; }
+.cheipi-personal-app .cheipi-business { max-width:720px!important; }
+.cheipi-personal-app .cheipi-business .pp-page-header { margin-bottom:20px; }
+.cheipi-personal-app .cheipi-business-utility { margin-top:48px; display:flex; flex-wrap:wrap; gap:20px; align-items:center; }
+.cheipi-personal-app .cheipi-business-utility :is(button,summary) { min-height:44px; color:var(--pp-text-secondary); font-size:.875rem; }
+/* The home is a working list, with one next action carrying the emphasis. */
+.cheipi-personal-app .cheipi-today { max-width:760px!important; }
+.cheipi-personal-app .cheipi-today .pc-dashboard__header { margin:0; }
+.cheipi-personal-app .cheipi-today h1 { font:750 2rem/1.12 var(--pp-font-display); margin:0; letter-spacing:-.03em; }
+.cheipi-personal-app .cheipi-today .pc-dashboard__header p { font-size:1rem; margin:8px 0 0; line-height:1.4; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-today-pulse { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:24px 0 36px; font-size:.875rem; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-today-pulse a { color:inherit; min-height:24px; }
+.cheipi-personal-app .cheipi-today-pulse strong { color:var(--pp-text-primary); font-weight:650; }
+.cheipi-personal-app .cheipi-section-heading { display:flex; align-items:center; justify-content:space-between; min-height:44px; gap:12px; margin:24px 0 8px; }
+.cheipi-personal-app .cheipi-section-heading h2 { font:700 1.125rem/1.3 var(--pp-font-display); margin:0; }
+.cheipi-personal-app .cheipi-section-heading a { display:flex; align-items:center; gap:5px; min-height:44px; font-size:.8125rem; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-section-heading svg { width:16px; }
+.cheipi-personal-app .cheipi-today .pc-priority-list { display:grid; gap:0; }
+.cheipi-personal-app .cheipi-today .pc-priority-row { min-height:76px; display:grid; grid-template-columns:26px minmax(0,1fr) 18px; align-items:center; gap:14px; border-bottom:1px solid var(--pp-divider); padding:14px 0; color:var(--pp-text-primary); }
+.cheipi-personal-app .cheipi-today .pc-priority-row>span { display:block; min-width:0; }
+.cheipi-personal-app .cheipi-today .pc-priority-row strong { display:block; font-size:.9375rem; font-weight:600; line-height:1.4; }
+.cheipi-personal-app .cheipi-today .pc-priority-row small { display:block; font-size:.8125rem; color:var(--pp-text-muted); margin-top:4px; }
+.cheipi-personal-app .cheipi-today .pc-priority-row svg { width:22px; height:22px; }
+.cheipi-personal-app .cheipi-today .pc-priority-row>svg:last-child { width:16px; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-today .pc-priority-row__icon { width:26px; height:26px; color:var(--pp-text-secondary); border:0; background:none; }
+.cheipi-personal-app .cheipi-today-priorities>.pc-priority-list>.pc-priority-row:first-child { border:0; background:var(--pp-surface); border-radius:12px; padding:18px 16px; }
+.cheipi-personal-app .cheipi-other-priorities summary { min-height:44px; padding-block:12px; font-size:.875rem; color:var(--pp-text-muted); cursor:pointer; }
+.cheipi-personal-app .cheipi-today .pc-student-list>a { min-height:80px; display:grid; grid-template-columns:44px minmax(0,1fr) 18px; gap:14px; padding:14px 0; border-bottom:1px solid var(--pp-divider); }
+.cheipi-personal-app .cheipi-today .pc-student-list>a:last-child { border:0; }
+.cheipi-personal-app .cheipi-today .pc-student-list strong { font-size:1rem; font-weight:600; }
+.cheipi-personal-app .cheipi-today .pc-student-list small { font-size:.8125rem; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-today .pc-student-list svg { width:16px; }
+.cheipi-personal-app .cheipi-today .pc-student-list .pp-avatar { width:44px; height:44px; font-size:1rem; }
+.cheipi-personal-app .cheipi-today-actions { display:flex; gap:10px; margin:26px 0; flex-wrap:wrap; }
+.cheipi-personal-app .cheipi-today-actions a { flex:1; white-space:nowrap; }
+.cheipi-personal-app .cheipi-home-site { display:flex; align-items:center; gap:14px; min-height:90px; border-top:1px solid var(--pp-divider); color:var(--pp-text-primary); }
+.cheipi-personal-app .cheipi-home-site svg { width:23px; height:23px; }
+.cheipi-personal-app .cheipi-home-site svg:last-child { margin-left:auto; width:16px; }
+.cheipi-personal-app .cheipi-home-site strong { display:block; font-size:.9375rem; }
+.cheipi-personal-app .cheipi-home-site small { display:block; color:var(--pp-text-muted); font-size:.8125rem; margin-top:4px; }
+.cheipi-personal-app .cheipi-first-action { margin:32px 0; }
+.cheipi-personal-app .cheipi-first-action h2 { font-size:1.4rem; margin:0 0 10px; }
+.cheipi-personal-app .cheipi-first-action p,.cheipi-personal-app .cheipi-quiet-copy { font-size:.9375rem; line-height:1.6; color:var(--pp-text-muted); }
+.cheipi-personal-app .cheipi-text-link { display:flex; align-items:center; gap:10px; min-height:48px; margin-top:8px; color:var(--pp-text-primary); }
+.cheipi-personal-app .cheipi-text-link svg { width:16px; }
+/* Site: task list first; each edit gets the page's full width and normal scrolling. */
+.cheipi-personal-app .pp-site-page { max-width:900px!important; }
+.cheipi-personal-app .cheipi-site-builder { min-width:0; }
+.cheipi-personal-app .pp-site-view { margin-top:8px; min-width:0; }
+.cheipi-personal-app .cheipi-site-summary { display:flex; flex-direction:column; gap:5px; color:var(--pp-text-muted); font-size:.875rem; margin-bottom:22px; overflow-wrap:anywhere; }
+.cheipi-personal-app .pp-publication-status { padding:0; border:0; border-radius:0; justify-content:flex-start; width:auto; background:none; font-size:.875rem; }
+.cheipi-personal-app .cheipi-site-cover { position:relative; display:block; border-radius:12px; overflow:hidden; background:var(--pp-surface); color:var(--pp-text-primary); text-decoration:none; }
+.cheipi-personal-app .cheipi-site-cover .template-preview-v2 { min-height:300px; height:360px; aspect-ratio:auto; border-radius:0; }
+.cheipi-personal-app .cheipi-site-cover>span { display:flex; align-items:center; justify-content:space-between; min-height:48px; padding:12px 16px; font-size:.875rem; }
+.cheipi-personal-app .cheipi-site-cover>span svg { width:18px; }
+.cheipi-personal-app .cheipi-site-steps { margin-top:14px; }
+.cheipi-personal-app .cheipi-site-preview-action { display:flex; width:100%; min-height:54px; margin-top:20px; }
+.cheipi-personal-app .cheipi-site-metrics { display:flex; align-items:center; gap:10px; min-height:44px; margin:18px auto 0; padding:0; border:0; background:none; color:var(--pp-text-muted); font-size:.875rem; }
+.cheipi-personal-app .cheipi-site-metrics svg { width:18px; }
+.cheipi-personal-app .pp-site-view>.pp-section-header { display:flex; flex-wrap:wrap; gap:12px; margin:14px 0 24px; }
+.cheipi-personal-app .pp-site-view>.pp-section-header h2 { font-size:1.5rem; }
+.cheipi-personal-app .pp-site-view>.pp-section-header p { font-size:.9375rem; line-height:1.5; color:var(--pp-text-secondary); }
+.cheipi-personal-app .pp-site-view .pp-section-header__action a { font-size:.875rem; min-height:44px; }
+.cheipi-personal-app .pp-template-grid { display:grid; grid-template-columns:1fr; gap:36px; max-width:580px; margin-inline:auto; }
+.cheipi-personal-app .pp-template-tile { background:transparent; border:0; border-radius:0; box-shadow:none; }
+.cheipi-personal-app .pp-template-tile-preview { height:330px; padding:0; overflow:hidden; border:0; border-radius:12px; background:var(--pp-surface); position:relative; }
+.cheipi-personal-app .pp-template-tile-preview iframe { display:block; width:100%; height:660px; border:0; pointer-events:none; }
+.cheipi-personal-app .pp-template-selected { top:12px; right:12px; min-height:30px; padding:5px 10px; background:var(--pp-shell-solid); color:var(--pp-shell-on-solid); font-size:.8125rem; }
+.cheipi-personal-app .pp-template-tile-copy { padding:18px 0 12px; }
+.cheipi-personal-app .pp-template-tile-copy>div { flex-wrap:wrap; gap:6px; }
+.cheipi-personal-app .pp-template-tile-copy h3 { font-size:1.375rem; margin:0; }
+.cheipi-personal-app .pp-template-tile-copy>div>span { color:var(--pp-text-muted); font-size:.8125rem; }
+.cheipi-personal-app .pp-template-positioning { display:block; font-size:.9375rem; font-weight:650; margin-top:8px; }
+.cheipi-personal-app .pp-template-tile-copy p { font-size:.9375rem; margin:6px 0; line-height:1.5; color:var(--pp-text-secondary); }
+.cheipi-personal-app .pp-template-tile-actions { display:flex; align-items:center; flex-wrap:wrap; justify-content:space-between; gap:12px; padding:0 0 18px; border-bottom:1px solid var(--pp-divider); }
+.cheipi-personal-app .pp-template-tile-actions>a { display:inline-flex; align-items:center; gap:8px; min-height:48px; font-size:.875rem; color:var(--pp-text-primary); }
+.cheipi-personal-app .pp-template-tile-actions form { flex:1; min-width:160px; }
+.dashboard-shell.cheipi-personal-app .pp-site-product .builder-secondary { min-height:48px; padding:10px 16px; font-size:.9375rem; background:var(--pp-surface); border:0; }
+.cheipi-personal-app .pp-template-edit { min-height:48px; font-size:.9375rem; padding:10px 16px; background:var(--pp-shell-solid); color:var(--pp-shell-on-solid); }
+.cheipi-personal-app .cheipi-site-note { font-size:.875rem; line-height:1.5; color:var(--pp-text-muted); margin:24px 0; }
+.cheipi-personal-app .pp-site-editor-tabs { display:flex; gap:0; position:static; margin:0 0 20px; padding:0; overflow:visible; border-bottom:1px solid var(--pp-divider); }
+.cheipi-personal-app .pp-site-editor-tabs button { flex:1; min-height:48px; font-size:.875rem; padding:10px 6px; color:var(--pp-text-muted); border-radius:0; background:none; border:0; }
+.cheipi-personal-app .pp-site-editor-tabs button.is-active { box-shadow:inset 0 -2px var(--pp-text-primary); color:var(--pp-text-primary); }
+.cheipi-personal-app .cheipi-contact-entry { display:flex; width:100%; align-items:center; gap:12px; min-height:52px; padding:0; margin-bottom:18px; border:0; background:none; color:var(--pp-text-primary); font-size:.9375rem; text-align:left; }
+.cheipi-personal-app .cheipi-contact-entry svg { width:20px; }
+.cheipi-personal-app .cheipi-contact-entry svg:last-child { margin-left:auto; width:16px; }
+.cheipi-personal-app .pp-site-editor-layout { display:block; }
+.cheipi-personal-app .pp-site-editor-navigation { display:flex; width:100%; max-width:100%; gap:20px; padding:0; margin:0 0 24px; overflow-x:auto; overscroll-behavior-inline:contain; scroll-padding-inline:0; scrollbar-width:thin; background:none; border:0; border-radius:0; }
+.cheipi-personal-app .pp-site-editor-navigation button { flex:0 0 auto; width:auto; min-width:0; padding:8px 0; min-height:48px; border:0; border-radius:0; background:none; color:var(--pp-text-muted); }
+.cheipi-personal-app .pp-site-editor-navigation button.is-active { color:var(--pp-text-primary); box-shadow:inset 0 -2px var(--pp-text-primary); }
+.cheipi-personal-app .pp-site-editor-navigation button span { font-size:.875rem; }
+.cheipi-personal-app .pp-site-editor-navigation button small { display:none; }
+.cheipi-personal-app :is(.pp-site-editor-panel,.pp-site-contact-form,.pp-site-control-panel) { padding:0; background:none; border:0; box-shadow:none; border-radius:0; }
+.cheipi-personal-app .pp-site-editor-panel>header { margin-bottom:24px; }
+.cheipi-personal-app .pp-site-editor-panel>header>svg { display:none; }
+.cheipi-personal-app .pp-site-editor-panel h2 { font-size:1.25rem; }
+.cheipi-personal-app .pp-site-editor-panel p { font-size:.875rem; line-height:1.5; }
+.cheipi-personal-app .builder-form { gap:20px; }
+.cheipi-personal-app .builder-form label { font-size:.9375rem; line-height:1.5; }
+.cheipi-personal-app .builder-form :is(input,textarea,select) { border-radius:10px; background:var(--pp-surface); border:1px solid var(--pp-border); color:var(--pp-text-primary); }
+.cheipi-personal-app :is(.builder-message,.section-help,.pp-upload-row small,.pp-upload-row label,.pp-collection-list small) { font-size:.875rem; line-height:1.5; }
+.cheipi-personal-app .pp-collection-list summary { min-height:64px; }
+.cheipi-personal-app .pp-collection-list summary strong { font-size:1rem; }
+.cheipi-personal-app .pp-site-overview-grid { display:block; max-width:580px; }
+.cheipi-personal-app .pp-site-control-panel { gap:14px; }
+.cheipi-personal-app .pp-site-control-heading>span:last-child { font-size:.875rem; }
+.cheipi-personal-app .pp-site-public-address { background:none; padding:12px 0; }
+.cheipi-personal-app .pp-site-public-address :is(small,strong) { font-size:.9375rem; }
+.cheipi-personal-app .pp-site-text-action { font-size:.875rem; }
+.cheipi-personal-app .pp-site-share-actions button { font-size:.9375rem; }
+.cheipi-personal-app .pp-publication-paywall { background:var(--pp-surface); border:0; border-radius:12px; padding:24px; }
+.cheipi-personal-app .pp-publication-paywall p { font-size:.9375rem; }
+.cheipi-personal-app .pp-publication-paywall .builder-primary { padding:12px 20px; }
+.cheipi-personal-app .pp-site-contact-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:32px; }
+.cheipi-personal-app .pp-site-contact-layout aside { padding:20px 0; border:0; border-top:1px solid var(--pp-divider); border-radius:0; background:none; }
+.cheipi-personal-app .pp-site-contact-layout aside :is(p,button) { font-size:.9375rem; overflow-wrap:anywhere; }
+/* One full-screen preview viewport keeps approved template styles and fixed headers isolated. */
+.cheipi-personal-app:has(.cheipi-full-preview) { display:block; height:100dvh; min-height:0; padding:0; overflow:hidden; }
+.cheipi-personal-app:has(.cheipi-full-preview) .dashboard-sidebar { display:none; }
+.cheipi-personal-app .dashboard-content:has(.cheipi-full-preview) { height:100dvh; min-height:0!important; padding:0!important; overflow:hidden; }
+.cheipi-personal-app .cheipi-full-preview { height:100dvh; min-height:0; display:grid; grid-template-rows:64px minmax(0,1fr); padding:0; color:var(--pp-text-primary); background:var(--pp-background); }
+.cheipi-personal-app .cheipi-full-preview .pp-template-preview-toolbar { position:relative; z-index:1; height:64px; min-height:0; padding:8px 20px; background:var(--pp-background); color:var(--pp-text-primary); border-bottom:1px solid var(--pp-divider); backdrop-filter:none; }
+.cheipi-personal-app .pp-template-preview-toolbar>a { display:flex; align-items:center; gap:4px; width:auto; min-height:44px; padding:0; border:0; background:none; color:var(--pp-text-primary); font-size:.875rem; }
+.cheipi-personal-app .pp-template-preview-toolbar>a:first-child::before { content:none; }
+.cheipi-personal-app .pp-template-preview-toolbar>a:last-child { display:grid; width:44px; }
+.cheipi-personal-app .pp-template-preview-toolbar strong { font-size:.9375rem; }
+.cheipi-personal-app .pp-template-preview-toolbar span { font-size:.8125rem; color:inherit; }
+.cheipi-personal-app .pp-template-preview-toolbar>div:nth-child(2)>span { color:var(--pp-text-muted); }
+.cheipi-personal-app .pp-template-preview-toolbar svg { width:20px; }
+.cheipi-personal-app .pp-template-preview-devices { border-color:var(--pp-border); background:var(--pp-surface); }
+.cheipi-personal-app .pp-template-preview-devices button { color:var(--pp-text-muted); }
+.cheipi-personal-app .pp-template-preview-devices button[aria-pressed="true"] { background:var(--pp-background); color:var(--pp-text-primary); box-shadow:none; }
+.cheipi-personal-app .pp-template-preview-stage { min-height:0; background:var(--pp-surface); }
+.cheipi-personal-app .pp-template-preview-device { border-color:var(--pp-border); }
+/* Consistent reading sizes and open feed surfaces across the trainer community. */
+.cheipi-personal-app .community-header { min-height:0; padding:0 0 20px; }
+.cheipi-personal-app .community-header h1 { font-size:2rem; letter-spacing:-.025em; }
+.cheipi-personal-app .community-header>div>span { display:none; }
+.cheipi-personal-app :is(.community-post-body,.community-post p,.community-comment p,.community-description) { font-size:1rem; line-height:1.55; }
+.cheipi-personal-app :is(.community-header p,.community-post>header strong,.community-switcher a,.community-switcher button,.community-filters a,.community-compose-trigger,.community-load-more) { font-size:.875rem; }
+.cheipi-personal-app :is(.community-post>header small,.community-post>header span,.community-post time,.community-post-meta,.community-feed-sentinel) { font-size:.8125rem; }
+.cheipi-personal-app .community-post { border-radius:0; box-shadow:none; background:none; }
+.cheipi-personal-app .billing-plan-card { border:0; padding:24px 0; background:none; box-shadow:none; }
+.cheipi-personal-app .billing-plan-card h2 { font-size:1.5rem; }
+.cheipi-personal-app .billing-plan-card p { font-size:1rem; line-height:1.6; }
+.cheipi-personal-app .billing-status-summary { border-radius:12px; background:var(--pp-surface); border:0; }
+.cheipi-personal-app .billing-status-summary :is(span,small) { font-size:.875rem; }
+.cheipi-personal-app .billing-status-summary strong { font-size:1.0625rem; }
+@media(min-width:1025px) {
+  .cheipi-personal-app .dashboard-sidebar { width:220px; border-right:1px solid var(--pp-divider); }
+  .dashboard-shell.cheipi-personal-app { grid-template-columns:220px minmax(0,1fr); }
+}
+@media(max-width:1024px) {
+  .dashboard-shell.cheipi-personal-app { display:block; }
+  .cheipi-personal-app .dashboard-sidebar { position:relative; min-height:0; height:64px; overflow:visible; border:0; background:var(--pp-background); }
+  .cheipi-personal-app .dashboard-header>div { min-height:64px; padding:10px 20px; gap:12px; }
+  .cheipi-personal-app .dashboard-user-row { position:absolute; inset:10px 20px auto auto; display:flex; padding:0; width:auto; border:0; background:none; }
+  .cheipi-personal-app .dashboard-user-row>.theme-toggle,.cheipi-personal-app .dashboard-user-row>.pp-secure-logout { display:none; }
+  .cheipi-personal-app .dashboard-identity { padding:0; min-height:44px; }
+  .cheipi-personal-app .dashboard-identity>span { display:none; }
+  .cheipi-personal-app .dashboard-header .pp-demo-indicator { margin:0 48px 0 0; }
+  .cheipi-personal-app .pp-primary-nav--desktop { display:none; }
+  .cheipi-personal-app .bottom-navigation { position:fixed; z-index:55; inset:auto 0 0; height:calc(78px + env(safe-area-inset-bottom)); padding:0 max(8px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(8px,env(safe-area-inset-left)); border:0; background:var(--pp-background); backdrop-filter:none; box-shadow:0 -1px 0 var(--pp-divider); }
+  .cheipi-personal-app .pp-primary-nav--mobile { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); align-items:stretch; padding:0; gap:0; height:78px; }
+  .cheipi-personal-app .pp-primary-nav--mobile a { min-height:64px; padding:11px 0 8px; display:flex; flex-direction:column; justify-content:center; gap:5px; border-radius:0; background:none; min-width:0; }
+  .cheipi-personal-app .pp-primary-nav--mobile a[aria-current="page"] { color:var(--pp-text-primary); background:none; }
+  .cheipi-personal-app .pp-primary-nav--mobile .pp-nav-item__label { display:block; position:static; width:auto; height:auto; overflow:visible; clip:auto; line-height:1.2; font-size:.75rem; letter-spacing:-.015em; }
+  .cheipi-personal-app .pp-primary-nav--mobile a[aria-current="page"] .pp-nav-item__label { font-weight:750; }
+  .cheipi-personal-app .pp-primary-nav--mobile .nav-icon { transition:transform 180ms var(--cheipi-ease); }
+  .cheipi-personal-app .pp-primary-nav--mobile a[aria-current="page"] .nav-icon { transform:translateY(-2px); filter:drop-shadow(0 -3px 0 #8883) drop-shadow(0 -5px 0 #8881); }
+  .cheipi-personal-app .dashboard-content { min-height:calc(100dvh - 64px); }
+  .cheipi-personal-app :is(.dashboard-main,.pc-dashboard,.matrix-page) { width:calc(100% - 40px); margin-inline:auto; padding:20px 0 calc(108px + env(safe-area-inset-bottom))!important; }
+  .cheipi-personal-app .dashboard-content:has(>.dashboard-main,>.pc-dashboard,>.matrix-page) { padding-bottom:0; }
+  .cheipi-personal-app .cheipi-business { padding-top:36px!important; }
+  .cheipi-personal-app .pp-template-preview-toolbar { display:grid; grid-template-columns:80px minmax(0,1fr) 44px; gap:6px; }
+  .cheipi-personal-app .pp-template-preview-devices { display:none; }
+  .cheipi-personal-app .pp-template-preview-stage { padding:0; overflow:hidden; }
+  .cheipi-personal-app .pp-template-preview-stage .pp-template-preview-device { width:100%; height:100%; min-height:0; border:0; border-radius:0; box-shadow:none; }
+  .cheipi-personal-app .cheipi-site-cover .template-preview-v2 { height:300px; }
+  .cheipi-personal-app .cheipi-site-builder[data-view="overview"] { max-width:540px; margin-inline:auto; }
+}
+@media(max-width:360px) {
+  .cheipi-personal-app :is(.dashboard-main,.pc-dashboard,.matrix-page) { width:calc(100% - 32px); }
+  .cheipi-personal-app .pp-primary-nav--mobile .pp-nav-item__label { font-size:.75rem; }
+  .cheipi-personal-app .cheipi-today-actions { flex-direction:column; }
+  .cheipi-personal-app .cheipi-task-list>:is(a,button) { gap:12px; }
+  .cheipi-personal-app .pp-template-tile-preview { height:280px; }
+}
+@media(hover:hover) and (pointer:fine) {
+  .cheipi-personal-app .cheipi-task-list>:is(a,button):hover { color:var(--pp-text-primary); background:var(--pp-surface); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .cheipi-personal-app :is(button,a,.nav-icon) { transition:none; animation:none; }
+  .cheipi-personal-app .pp-primary-nav--mobile a[aria-current="page"] .nav-icon { transform:none; filter:none; }
+  .cheipi-personal-app :is(button,.pp-button,.builder-primary,.builder-secondary):active:not(:disabled) { transform:none; }
+}
+.cheipi-personal-app .cheipi-loading { max-width:760px; }
+.cheipi-personal-app .cheipi-loading-list { display:grid; gap:18px; margin-top:36px; }
+.cheipi-personal-app .cheipi-loading-list>div { min-height:64px; border-radius:10px; }
+.cheipi-personal-app .pp-site-page:has(.cheipi-site-builder:not([data-view="overview"]))>.cheipi-back { display:none; }
