@@ -1,31 +1,95 @@
-.hero { position:relative; height:490px; isolation:isolate; margin:0 -24px; }
-.media { position:absolute; inset:0 0 auto; height:440px; overflow:hidden; border-radius:0 0 50% 50% / 0 0 30% 30%; background:#151515; }
-.media::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,#0009,transparent 45%); }
-.photo { object-fit:cover; object-position:50% 61%; }
-.header { position:absolute; top:24px; left:24px; right:24px; display:flex; align-items:center; gap:12px; color:#fff; }
-.header>a { flex:none; }
-.header>div { min-width:0; }
-.header h1 { overflow-wrap:anywhere; margin:0!important; font:650 20px/26px var(--font-display),sans-serif!important; letter-spacing:-.025em; }
-.header p { margin:3px 0 0; color:#d4d7dc; font:400 12px/17px var(--font-body),sans-serif; }
-.metrics { position:absolute; inset:0; pointer-events:none; }
-.metric { position:absolute; display:grid; grid-template-columns:1fr auto; align-content:center; gap:4px 12px; padding:15px 17px; min-height:96px; width:140px; border-radius:16px; color:#fff; background:#090909; box-shadow:0 8px 24px #0000000f; text-decoration:none; pointer-events:auto; font-variant-numeric:tabular-nums; }
-.metric svg { grid-column:2; grid-row:1; align-self:center; }
-.metric strong { grid-column:1; grid-row:1; font:650 28px/34px var(--font-display),sans-serif; }
-.metric span { grid-column:1/-1; font:500 12px/16px var(--font-body),sans-serif; }
-.metric[data-metric="students"] { top:148px; left:24px; }
-.metric[data-metric="workouts"] { top:219px; right:24px; }
-.metric[data-metric="assessments"] { top:329px; left:24px; color:#090909; background:#fff; }
-.metric[data-metric="leads"] { top:374px; right:24px; color:#090909; background:#fff; }
-@media (min-width:1025px) { .hero { margin:0; } .media { border-radius:32px 32px 50% 50% / 32px 32px 30% 30%; } }
-@media (max-width:359px) {
-  .hero { margin-inline:-20px; height:472px; }
-  .media { height:420px; }
-  .header { left:20px; right:20px; gap:8px; }
-  .header h1 { font-size:18px!important; }
-  .header p { max-width:180px; }
-  .metric { width:128px; padding:14px; }
-  .metric[data-metric="students"] { left:20px; top:137px; }
-  .metric[data-metric="workouts"] { right:20px; top:210px; }
-  .metric[data-metric="assessments"] { left:20px; top:318px; }
-  .metric[data-metric="leads"] { right:20px; top:358px; }
+.hero {
+  margin: 0 -24px 0;
+  border-radius: 0 0 var(--pp-radius-md) var(--pp-radius-md);
+  padding: 24px 24px 14px;
+  display: grid;
+  gap: 14px;
+  background: transparent;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--pp-text-primary);
+}
+
+.header > a {
+  flex: none;
+}
+
+.header > div {
+  min-width: 0;
+}
+
+.header h1 {
+  overflow-wrap: anywhere;
+  margin: 0 !important;
+  font: 650 1.4rem/1.22 var(--font-display), sans-serif !important;
+  letter-spacing: -0.03em;
+}
+
+.header p {
+  margin: 3px 0 0;
+  color: var(--pp-text-muted);
+  font: 500 12px/17px var(--font-body), sans-serif;
+}
+
+.metrics {
+  display: grid;
+  gap: 8px;
+}
+
+.metric {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 36px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  border-radius: var(--pp-radius-md);
+  text-decoration: none;
+  color: var(--pp-text-primary);
+  border: 1px solid var(--pp-border);
+  background: var(--pp-surface);
+  padding: 10px 12px;
+  box-shadow: var(--pp-shadow);
+}
+
+.metric strong {
+  font: 650 1.02rem/1.2 var(--font-display), sans-serif;
+  color: var(--pp-text-primary);
+}
+
+.metric span {
+  grid-column: 2;
+  font: 500 12px/16px var(--font-body), sans-serif;
+  color: var(--pp-text-secondary);
+}
+
+.icon {
+  grid-column: 1;
+  color: var(--pp-accent);
+}
+
+@media (max-width: 359px) {
+  .hero {
+    margin-inline: -20px;
+    padding-inline: 20px;
+  }
+
+  .header h1 {
+    font-size: 1.35rem !important;
+  }
+}
+
+@media (min-width: 760px) {
+  .hero {
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-top: 0;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
