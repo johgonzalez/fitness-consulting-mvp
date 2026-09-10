@@ -20,7 +20,6 @@ import {
   MoreHorizontal,
   Plus,
   RefreshCw,
-  Save,
   Send,
   Trash2,
   X,
@@ -30,6 +29,9 @@ import {
   mutateWorkoutAction,
   type WorkoutMutation,
 } from "@/app/actions/workouts";
+import { ActionFeedback, type ActionFeedbackState } from "@/components/ui/ActionFeedback";
+import { ModalSurface } from "@/components/ui/ModalSurface";
+import { workoutVersionHref } from "./workout-navigation";
 import { ExerciseLibraryDrawer } from "@/components/workouts/ExerciseLibraryDrawer";
 import { ExerciseMedia } from "@/components/workouts/ExerciseMedia";
 import { exerciseFactsLabel } from "@/components/workouts/exercise-labels";
@@ -215,7 +217,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
   const [sectionPicker, setSectionPicker] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("saved");
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<ActionFeedbackState | null>(null);
   const [failedMutation, setFailedMutation] = useState<WorkoutMutation | null>(null);
   const [publishConfirm, setPublishConfirm] = useState(false);
   const [discardConfirm, setDiscardConfirm] = useState(false);
@@ -248,7 +250,7 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
       if (!result.ok) {
         setSaveState("error");
         setFailedMutation(mutation);
-        setMessage(result.message);
+        setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
         return;
       }
       if (sequence === saveSequence.current) setSaveState("saved");
@@ -447,14 +449,15 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
     setMessage(null);
     startTransition(async () => {
       const result = await changeWorkoutLifecycleAction({ versionId: projection.version.id, action });
-      setMessage(result.message);
+      setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
       if (!result.ok) return;
       if (action === "DISCARD") {
-        const separator = backHref.includes("?") ? "&" : "?";
-        router.push(`${backHref}${separator}discarded=${projection.version.id}`);
+        const destination = new URL(backHref, "http://local.invalid");
+        destination.searchParams.set("discarded", projection.version.id);
+        router.push(destination.pathname + destination.search);
         return;
       }
-      if (action === "CLONE" && result.resultId && result.resultId !== projection.version.id) { router.push(`/dashboard/workouts/${result.resultId}`); return; }
+      if (action === "CLONE" && result.resultId && result.resultId !== projection.version.id) { router.push(workoutVersionHref(result.resultId, backHref)); return; }
       if (action === "APPROVE") applyLocal((draft) => { draft.version.status = "APPROVED"; draft.version.approvedAt = new Date().toISOString(); });
       if (action === "PUBLISH") applyLocal((draft) => { draft.version.status = "PUBLISHED"; draft.version.publishedAt = new Date().toISOString(); });
       if (action === "ARCHIVE") applyLocal((draft) => { draft.version.status = "ARCHIVED"; draft.version.archivedAt = new Date().toISOString(); });
@@ -472,16 +475,16 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
       <WorkoutStatusBadge status={projection.version.status} />
       <button type="button" className={styles.historyButton} onClick={() => setHistoryOpen(true)} aria-label="Abrir histórico de versões"><History aria-hidden="true" /><span>Versões</span></button>
       <div className={styles.lifecycleActions}>
-        {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className={styles.discardDraftButton} onClick={() => setDiscardConfirm(true)} disabled={pending}><Trash2 aria-hidden="true" />Excluir rascunho</button> : null}
+        {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className={styles.discardDraftButton} onClick={() => { setMessage(null); setDiscardConfirm(true); }} disabled={pending}><Trash2 aria-hidden="true" />Excluir rascunho</button> : null}
         {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className="pp-button pp-button--primary" onClick={() => setReviewMode(true)}><Eye aria-hidden="true" />Revisar treino</button> : null}
         {projection.version.status === "DRAFT" && reviewMode ? <><button type="button" className="pp-button pp-button--secondary" onClick={() => setReviewMode(false)}>Voltar e editar</button><button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("APPROVE")} disabled={pending}><Check aria-hidden="true" />Aprovar</button></> : null}
-        {projection.version.status === "APPROVED" ? <button type="button" className="pp-button pp-button--primary" onClick={() => setPublishConfirm(true)}><Send aria-hidden="true" />Publicar</button> : null}
+        {projection.version.status === "APPROVED" ? <button type="button" className="pp-button pp-button--primary" onClick={() => { setMessage(null); setPublishConfirm(true); }}><Send aria-hidden="true" />Publicar</button> : null}
         {projection.version.status === "PUBLISHED" || projection.version.status === "ARCHIVED" ? <button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("CLONE")} disabled={pending}><Copy aria-hidden="true" />Criar nova versão</button> : null}
       </div>
     </header>
 
     {reviewMode ? <div className={styles.reviewBanner}><Eye aria-hidden="true" /><div><strong>Prévia do aluno</strong><p>Revise mídia, ordem, instruções e séries antes de aprovar.</p></div></div> : null}
-    {message ? <div className={styles.builderMessage} role="status"><Save aria-hidden="true" />{message}<button type="button" onClick={() => setMessage(null)} aria-label="Fechar mensagem"><X aria-hidden="true" /></button></div> : null}
+    {message && !publishConfirm && !discardConfirm ? <div className={styles.builderFeedback}><ActionFeedback feedback={message} /><button type="button" onClick={() => setMessage(null)} aria-label="Fechar mensagem"><X aria-hidden="true" /></button></div> : null}
 
     <div className={styles.builderLayout}>
       <aside className={styles.sessionRail}>
@@ -547,15 +550,15 @@ export function WorkoutBuilder({ record, initialView = "builder", backHref = "/d
     </div>
 
     <div className={styles.mobilePrimaryAction}>
-      {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className={styles.mobileDiscardButton} onClick={() => setDiscardConfirm(true)} aria-label="Excluir rascunho"><Trash2 aria-hidden="true" /></button> : null}
+      {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className={styles.mobileDiscardButton} onClick={() => { setMessage(null); setDiscardConfirm(true); }} aria-label="Excluir rascunho"><Trash2 aria-hidden="true" /></button> : null}
       {projection.version.status === "DRAFT" && reviewMode ? <button type="button" className="pp-button pp-button--secondary" onClick={() => setReviewMode(false)}><ArrowLeft aria-hidden="true" />Editar</button> : null}
-      {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className="pp-button pp-button--primary" onClick={() => setReviewMode(true)}><Eye aria-hidden="true" />Revisar treino</button> : projection.version.status === "DRAFT" ? <button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("APPROVE")} disabled={pending}><Check aria-hidden="true" />Aprovar treino</button> : projection.version.status === "APPROVED" ? <button type="button" className="pp-button pp-button--primary" onClick={() => setPublishConfirm(true)}><Send aria-hidden="true" />Publicar</button> : <button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("CLONE")} disabled={pending}><Copy aria-hidden="true" />Criar nova versão</button>}
+      {projection.version.status === "DRAFT" && !reviewMode ? <button type="button" className="pp-button pp-button--primary" onClick={() => setReviewMode(true)}><Eye aria-hidden="true" />Revisar treino</button> : projection.version.status === "DRAFT" ? <button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("APPROVE")} disabled={pending}><Check aria-hidden="true" />Aprovar treino</button> : projection.version.status === "APPROVED" ? <button type="button" className="pp-button pp-button--primary" onClick={() => { setMessage(null); setPublishConfirm(true); }}><Send aria-hidden="true" />Publicar</button> : <button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("CLONE")} disabled={pending}><Copy aria-hidden="true" />Criar nova versão</button>}
     </div>
 
     <ExerciseLibraryDrawer open={libraryTarget !== null} exercises={exerciseLibrary} demoMode={record.demoMode} mode={libraryTarget?.workoutExerciseId ? "REPLACE" : "ADD"} onClose={() => setLibraryTarget(null)} onChoose={chooseExercise} onCustomCreated={(exercise) => setExerciseLibrary((items) => [...items, exercise])} />
-    <VersionHistoryPanel plan={record.planSummary} currentId={projection.version.id} open={historyOpen} onClose={() => setHistoryOpen(false)} />
+    <VersionHistoryPanel returnHref={backHref} plan={record.planSummary} currentId={projection.version.id} open={historyOpen} onClose={() => setHistoryOpen(false)} />
 
-    {publishConfirm ? <div className={styles.confirmBackdrop} role="presentation"><section className={styles.publishConfirm} role="dialog" aria-modal="true" aria-labelledby="publish-title"><button type="button" onClick={() => setPublishConfirm(false)} aria-label="Fechar"><X aria-hidden="true" /></button><span><Send aria-hidden="true" /></span><h2 id="publish-title">Publicar para {record.studentContext?.student.name ?? "o aluno"}?</h2><p><strong>{projection.plan.name}</strong>, versão {projection.version.versionNumber}, ficará disponível ao aluno e não poderá mais ser editado.</p><div><button type="button" className="pp-button pp-button--secondary" onClick={() => setPublishConfirm(false)}>Cancelar</button><button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("PUBLISH")} disabled={pending}>{pending ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : <Send aria-hidden="true" />}Confirmar publicação</button></div></section></div> : null}
-    {discardConfirm ? <div className={styles.confirmBackdrop} role="presentation"><section className={`${styles.publishConfirm} ${styles.discardConfirm}`} role="dialog" aria-modal="true" aria-labelledby="discard-title"><button type="button" onClick={() => setDiscardConfirm(false)} aria-label="Fechar"><X aria-hidden="true" /></button><span><Trash2 aria-hidden="true" /></span><h2 id="discard-title">Excluir este rascunho?</h2><p><strong>{projection.plan.name}</strong> sairá dos treinos ativos e ficará preservado em Arquivados. Nenhum treino publicado ou histórico do aluno será apagado.</p><div><button type="button" className="pp-button pp-button--secondary" onClick={() => setDiscardConfirm(false)} disabled={pending}>Cancelar</button><button type="button" className="pp-button pp-button--danger" onClick={() => lifecycle("DISCARD")} disabled={pending}>{pending ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : <Trash2 aria-hidden="true" />}Excluir rascunho</button></div></section></div> : null}
+    <ModalSurface open={publishConfirm} onClose={() => setPublishConfirm(false)} pending={pending} labelledBy="publish-title"><section className={styles.publishConfirm}><button type="button" onClick={() => setPublishConfirm(false)} disabled={pending} aria-label="Fechar"><X aria-hidden="true" /></button><span><Send aria-hidden="true" /></span><h2 id="publish-title">Publicar para {record.studentContext?.student.name ?? "o aluno"}?</h2><p><strong>{projection.plan.name}</strong>, versão {projection.version.versionNumber}, ficará disponível ao aluno e não poderá mais ser editado.</p>{message ? <div className={styles.confirmationFeedback}><ActionFeedback feedback={message} /></div> : null}<div><button type="button" className="pp-button pp-button--secondary" onClick={() => setPublishConfirm(false)} disabled={pending} data-modal-initial-focus>Cancelar</button><button type="button" className="pp-button pp-button--primary" onClick={() => lifecycle("PUBLISH")} disabled={pending}>{pending ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : <Send aria-hidden="true" />}Confirmar publicação</button></div></section></ModalSurface>
+    <ModalSurface open={discardConfirm} onClose={() => setDiscardConfirm(false)} pending={pending} labelledBy="discard-title"><section className={`${styles.publishConfirm} ${styles.discardConfirm}`}><button type="button" onClick={() => setDiscardConfirm(false)} disabled={pending} aria-label="Fechar"><X aria-hidden="true" /></button><span><Trash2 aria-hidden="true" /></span><h2 id="discard-title">Excluir este rascunho?</h2><p><strong>{projection.plan.name}</strong> sairá dos treinos ativos e ficará preservado em Arquivados. Nenhum treino publicado ou histórico do aluno será apagado.</p>{message ? <div className={styles.confirmationFeedback}><ActionFeedback feedback={message} /></div> : null}<div><button type="button" className="pp-button pp-button--secondary" onClick={() => setDiscardConfirm(false)} disabled={pending} data-modal-initial-focus>Cancelar</button><button type="button" className="pp-button pp-button--danger" onClick={() => lifecycle("DISCARD")} disabled={pending}>{pending ? <LoaderCircle className={styles.spin} aria-hidden="true" /> : <Trash2 aria-hidden="true" />}Excluir rascunho</button></div></section></ModalSurface>
   </main>;
 }

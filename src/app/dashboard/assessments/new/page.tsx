@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { ArrowLeft, ClipboardCheck } from "lucide-react";
 import { NewAssessmentWizard } from "@/components/assessments/NewAssessmentWizard";
@@ -13,5 +14,6 @@ export default async function NewAssessmentPage({ searchParams }: { searchParams
     <Link href={initialStudentId ? `/dashboard/assessments?student=${initialStudentId}` : "/dashboard/assessments"} className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para avaliações</Link>
     <header className="pp-page-header"><div><p className="pp-page-context">Acompanhamento</p><h1>Nova avaliação</h1><p>Escolha um modelo e envie para seu aluno.</p></div></header>
     {canCreate ? <NewAssessmentWizard students={workspace.students} templates={workspace.templates.filter((template) => template.status === "ACTIVE" && template.versions.length > 0)} demoMode={workspace.demoMode} initialStudentId={initialStudentId} /> : <section className="pp-panel"><EmptyState icon={ClipboardCheck} title="Prepare sua primeira avaliação" description="É necessário ter pelo menos um aluno ativo e um modelo disponível." action={<Link href="/dashboard/students" className="pp-button pp-button--secondary">Ver alunos</Link>} /></section>}
+  <DashboardMotionReady route="/dashboard/assessments/new" />
   </main>;
 }

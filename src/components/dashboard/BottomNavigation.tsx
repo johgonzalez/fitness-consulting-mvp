@@ -1,10 +1,14 @@
 "use client";
 
 import { ChartNoAxesColumnIncreasing, ClipboardCheck, CreditCard, Dumbbell, House, Settings2, UsersRound, UserRound, Globe2, type LucideIcon } from "lucide-react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 type Destination = { label: string; href: string; icon: LucideIcon };
+function NavigationHint() {
+  const { pending } = useLinkStatus();
+  return <span className="cheipi-nav-pending" data-pending={pending || undefined} aria-hidden="true" />;
+}
 const primary: Destination[] = [
   { label: "Hoje", href: "/dashboard", icon: House },
   { label: "Alunos", href: "/dashboard/students", icon: UserRound },
@@ -32,9 +36,10 @@ export function BottomNavigation({ leadCount = 0 }: { leadCount?: number }) {
   const pathname = usePathname();
   function link(item: Destination, grouped = false) {
     const Icon = item.icon;
-    return <Link key={item.href} href={item.href} aria-current={isActive(pathname, item.href, grouped) ? "page" : undefined}>
-      <span className="nav-icon"><Icon aria-hidden="true" strokeWidth={1.8} /></span>
+    return <Link key={item.href} href={item.href} aria-label={item.label} title={item.label} aria-current={isActive(pathname, item.href, grouped) ? "page" : undefined}>
+      <span className="nav-icon"><Icon aria-hidden="true" strokeWidth={1.75} /></span>
       <span className="pp-nav-item__label">{item.label}</span>
+      <NavigationHint />
       {item.href === "/dashboard/leads" && leadCount > 0 ? <span className="pp-nav-count" aria-label={`${leadCount} leads`}>{leadCount}</span> : null}
     </Link>;
   }

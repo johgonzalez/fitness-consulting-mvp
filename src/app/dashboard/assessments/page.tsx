@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, ClipboardCheck, Plus } from "lucide-react";
 import { AssessmentStatusBadge } from "@/components/assessments/AssessmentStatusBadge";
@@ -93,5 +94,6 @@ export default async function AssessmentsPage({ searchParams }: { searchParams: 
     </DataList> : <section className="pp-panel">
       <EmptyState icon={ClipboardCheck} title="Nenhuma avaliação neste filtro" description={filter === "all" ? "Crie a primeira avaliação para um aluno ativo." : "As avaliações com este status aparecerão aqui."} action={<Link href={relationshipId ? `/dashboard/assessments/new?student=${relationshipId}` : "/dashboard/assessments/new"} className="pp-button pp-button--secondary">Nova avaliação</Link>} />
     </section>}
+  <DashboardMotionReady route="/dashboard/assessments" />
   </main>;
 }

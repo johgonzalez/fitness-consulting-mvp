@@ -1,129 +1,96 @@
 "use client";
 
-import { Camera, ChevronRight, CreditCard, Mail, Palette, ShieldCheck, Trash2, UserRound } from "lucide-react";
-import Link from "next/link";
-import { useActionState, useState } from "react";
+import { Camera, Check, CircleAlert, Trash2 } from "lucide-react";
+import { useActionState } from "react";
 import { removeProfilePhoto, requestEmailChange, saveProfileBasics } from "@/app/actions/profile";
 import { uploadIdentityImage, type SiteActionState } from "@/app/actions/site-builder";
+import { FullscreenUtility } from "@/components/app-shell/AppFullscreenController";
 import { SecureLogoutForm } from "@/components/auth/SecureLogoutForm";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { TrainerAvatar } from "@/components/dashboard/TrainerAvatar";
+import { Button, FeedbackMessage } from "@/components/ui/PPerfilPrimitives";
 import type { TrainerProfile } from "@/lib/domain/trainer";
 import { normalizeInstagramIdentity } from "@/lib/instagram";
+import type { ProfileSection } from "@/lib/navigation/profile-sections";
+import styles from "./ProfileSettings.module.css";
 
 const initialState: SiteActionState = {};
 
-type SettingsSectionId = "profile" | "account" | "appearance";
-
-const settingsNavigation = [
-  { id: "profile", label: "Perfil profissional", description: "Foto e dados públicos", icon: UserRound, available: true },
-  { id: "account", label: "Conta e segurança", description: "E-mail e acesso", icon: ShieldCheck, available: true },
-  { id: "appearance", label: "Aparência", description: "Tema do aplicativo", icon: Palette, available: true },
-  { id: "plan", label: "Plano Cheipi", description: "Assinatura e cobrança", icon: CreditCard, available: true, href: "/dashboard/settings/billing" },
-] as const;
-
 function Message({ state }: { state: SiteActionState }) {
-  return state.message ? <p className={`builder-message ${state.ok ? "success" : "error"}`} role="status" aria-live="polite">{state.message}</p> : null;
+  if (!state.message) return null;
+  const Icon = state.ok ? Check : CircleAlert;
+  return <div className={styles.feedback}><FeedbackMessage tone={state.ok ? "success" : "danger"}><Icon aria-hidden="true" /><span>{state.message}</span></FeedbackMessage></div>;
 }
 
-export function ProfileEditor({ profile, email }: { profile: TrainerProfile; email: string }) {
+export function ProfileEditor({ profile, email, activeSection = "profile" }: { profile: TrainerProfile; email: string; activeSection?: ProfileSection }) {
   const instagram = normalizeInstagramIdentity(profile.instagram_handle ?? profile.instagram, profile.instagram_url);
-  const [activeSection, setActiveSection] = useState<SettingsSectionId>("profile");
   const [photoState, photoAction, photoPending] = useActionState(uploadIdentityImage.bind(null, "profile"), initialState);
   const [removeState, removeAction, removePending] = useActionState(removeProfilePhoto, initialState);
   const [profileState, profileAction, profilePending] = useActionState(saveProfileBasics, initialState);
   const [emailState, emailAction, emailPending] = useActionState(requestEmailChange, initialState);
 
-  return <div className="pp-settings-layout">
-    <nav className="pp-settings-navigation" aria-label="Seções de configurações">
-      {settingsNavigation.map((item) => {
-        const Icon = item.icon;
-        const active = item.available && item.id === activeSection;
-        if ("href" in item) return <Link key={item.id} href={item.href}>
-          <span className="pp-settings-navigation__icon"><Icon aria-hidden="true" /></span>
-          <span><strong>{item.label}</strong><small>{item.description}</small></span>
-          <ChevronRight aria-hidden="true" />
-        </Link>;
-        return <button
-          type="button"
-          key={item.id}
-          className={active ? "active" : undefined}
-          onClick={() => item.available && setActiveSection(item.id as SettingsSectionId)}
-          aria-current={active ? "page" : undefined}
-        >
-          <span className="pp-settings-navigation__icon"><Icon aria-hidden="true" /></span>
-          <span><strong>{item.label}</strong><small>{item.description}</small></span>
-          <ChevronRight aria-hidden="true" />
-        </button>;
-      })}
-    </nav>
-
-    <div className="pp-settings-content">
-      {activeSection === "profile" ? <section className="pp-settings-section" aria-labelledby="settings-profile-title">
-        <header className="pp-settings-section__header">
-          <span className="pp-settings-section__icon"><UserRound aria-hidden="true" /></span>
-          <div><h2 id="settings-profile-title">Perfil profissional</h2><p>Esses dados representam você na Cheipi e no seu site público.</p></div>
-        </header>
-
-        <div className="pp-profile-photo">
-          <TrainerAvatar name={profile.display_name} imageUrl={profile.profile_image_url} />
-          <div><strong>Sua foto</strong><p>Use uma imagem clara e profissional.</p></div>
-          <details>
-            <summary><Camera aria-hidden="true" />Alterar foto</summary>
-            <div className="pp-profile-photo__actions">
-              <form action={photoAction}><input type="file" name="image" accept="image/jpeg,image/png,image/webp" required /><button className="pp-button pp-button--primary" disabled={photoPending}>{photoPending ? "Enviando..." : "Substituir foto"}</button></form>
-              {profile.profile_image_url ? <form action={removeAction}><button className="pp-button pp-button--danger" disabled={removePending}><Trash2 aria-hidden="true" />Remover foto</button></form> : null}
-            </div>
+  return <div className={styles.editor}>
+    {activeSection === "profile" ? <section aria-label="Dados do perfil profissional">
+      <p className={styles.intro}>Sua identidade na Cheipi e no seu site público.</p>
+      <div className={styles.photo}>
+        <TrainerAvatar name={profile.display_name} imageUrl={profile.profile_image_url} />
+        <div><strong>Sua foto</strong><p>Uma imagem para reconhecer você.</p></div>
+        <details className={styles.photoDisclosure}>
+          <summary><Camera aria-hidden="true" />Alterar foto</summary>
+          <div className={styles.photoActions}>
+            <form action={photoAction} aria-busy={photoPending}>
+              <label>Nova foto<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required /></label>
+              <Button type="submit" variant="primary" disabled={photoPending}>{photoPending ? "Enviando..." : "Substituir foto"}</Button>
+            </form>
+            {profile.profile_image_url ? <form action={removeAction} aria-busy={removePending}><Button type="submit" variant="danger" disabled={removePending}><Trash2 aria-hidden="true" />{removePending ? "Removendo..." : "Remover foto"}</Button></form> : null}
             <Message state={photoState} />
             <Message state={removeState} />
-          </details>
-        </div>
-
-        <form action={profileAction} className="builder-form pp-settings-form" aria-busy={profilePending}>
-          <div className="pp-settings-form__group"><strong>Identidade pública</strong><p>Seu nome e Instagram aparecem como parte da sua marca profissional.</p></div>
-          <div className="pp-settings-form__grid">
-            <label>Nome<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} /></label>
-            <label>Instagram — usuário<input name="instagram_handle" maxLength={30} defaultValue={instagram.handle ?? ""} placeholder="seu.usuario" /><small>Informe sem o @.</small></label>
-            <label className="pp-settings-form__wide">Instagram — link<input name="instagram_url" type="url" maxLength={300} defaultValue={instagram.url ?? ""} placeholder="https://www.instagram.com/seu.usuario/" /></label>
           </div>
-          <div className="pp-settings-form__group"><strong>Dados profissionais</strong><p>Nesta fase, pedimos somente o necessário para identificar sua atuação.</p></div>
-          <div className="pp-settings-form__grid">
-            <label>CEP<input name="cep" required inputMode="numeric" maxLength={9} defaultValue={profile.cep ?? ""} placeholder="00000-000" /></label>
+        </details>
+      </div>
+
+      <form action={profileAction} className={styles.form} aria-busy={profilePending}>
+        <fieldset className={styles.fieldGroup}>
+          <legend>Sua identidade</legend>
+          <label>Nome<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} autoComplete="name" /></label>
+          <label>Instagram — usuário<input name="instagram_handle" maxLength={30} defaultValue={instagram.handle ?? ""} placeholder="seu.usuario" /><small>Informe sem o @.</small></label>
+          <label>Instagram — link<input name="instagram_url" type="url" maxLength={300} defaultValue={instagram.url ?? ""} placeholder="https://www.instagram.com/seu.usuario/" /></label>
+        </fieldset>
+        <fieldset className={styles.fieldGroup}>
+          <legend>Dados profissionais</legend>
+          <div className={styles.professionalFields}>
+            <label>CEP<input name="cep" required inputMode="numeric" maxLength={9} defaultValue={profile.cep ?? ""} placeholder="00000-000" autoComplete="postal-code" /></label>
             <label>CREF<input name="cref" required minLength={3} maxLength={60} defaultValue={profile.cref ?? ""} placeholder="000000-G/UF" /></label>
           </div>
-          <div className="pp-settings-form__actions"><button className="builder-primary" disabled={profilePending}>{profilePending ? "Salvando..." : "Salvar perfil"}</button></div>
-          <Message state={profileState} />
-        </form>
-      </section> : null}
+        </fieldset>
+        <Button type="submit" variant="primary" className={styles.save} disabled={profilePending}>{profilePending ? "Salvando..." : "Salvar perfil"}</Button>
+        <Message state={profileState} />
+      </form>
+    </section> : null}
 
-      {activeSection === "account" ? <section className="pp-settings-section" aria-labelledby="settings-account-title">
-        <header className="pp-settings-section__header">
-          <span className="pp-settings-section__icon"><ShieldCheck aria-hidden="true" /></span>
-          <div><h2 id="settings-account-title">Conta e segurança</h2><p>Atualize seu acesso com confirmação e mantenha sua conta protegida.</p></div>
-        </header>
-        <form action={emailAction} className="builder-form pp-settings-form" aria-busy={emailPending}>
-          <div className="pp-settings-form__grid">
-            <label>E-mail atual<input type="email" value={email} readOnly /></label>
-            <label>Novo e-mail<input type="email" name="email" required autoComplete="email" /></label>
-          </div>
-          <p className="sensitive-note">Seu e-mail atual continuará válido até o novo endereço ser confirmado pelo Supabase Auth.</p>
-          <div className="pp-settings-form__actions"><button className="builder-primary" disabled={emailPending}>{emailPending ? "Enviando..." : "Enviar confirmação"}</button></div>
-          <Message state={emailState} />
-        </form>
-        <aside className="pp-settings-security-note"><Mail aria-hidden="true" /><p>Verificação de telefone por OTP e proteção adicional para mudanças sensíveis ainda não estão disponíveis.</p></aside>
-        <section className="pp-settings-signout" aria-labelledby="settings-signout-title">
-          <div><h3 id="settings-signout-title">Sessão atual</h3><p>Encerre com segurança o acesso neste dispositivo.</p></div>
-          <SecureLogoutForm />
-        </section>
-      </section> : null}
+    {activeSection === "account" ? <section aria-label="E-mail e sessão">
+      <p className={styles.intro}>Gerencie seu e-mail de acesso e a sessão neste dispositivo.</p>
+      <form action={emailAction} className={styles.form} aria-busy={emailPending}>
+        <label>E-mail atual<input type="email" value={email} readOnly /></label>
+        <label>Novo e-mail<input type="email" name="email" required autoComplete="email" /></label>
+        <p className={styles.note}>Seu e-mail atual continuará válido até a confirmação do novo endereço.</p>
+        <Button type="submit" variant="primary" className={styles.save} disabled={emailPending}>{emailPending ? "Enviando..." : "Enviar confirmação"}</Button>
+        <Message state={emailState} />
+      </form>
+      <section className={styles.signout} aria-labelledby="settings-signout-title">
+        <div><h2 id="settings-signout-title">Sessão atual</h2><p>Encerre o acesso neste dispositivo.</p></div>
+        <SecureLogoutForm />
+      </section>
+    </section> : null}
 
-      {activeSection === "appearance" ? <section className="pp-settings-section" aria-labelledby="settings-appearance-title">
-        <header className="pp-settings-section__header">
-          <span className="pp-settings-section__icon"><Palette aria-hidden="true" /></span>
-          <div><h2 id="settings-appearance-title">Aparência</h2><p>Alterne entre os temas claro e escuro sem mudar a estrutura do produto.</p></div>
-        </header>
-        <div className="pp-settings-theme-row"><div><strong>Tema do aplicativo</strong><p>Sua preferência é aplicada em toda a experiência autenticada e fica salva neste navegador.</p></div><ThemeToggle /></div>
-      </section> : null}
-    </div>
+    {activeSection === "appearance" ? <section aria-label="Preferências de aparência">
+      <p className={styles.intro}>Escolha como você prefere usar a Cheipi.</p>
+      <div className={styles.appearanceGroup}>
+        <h2>Tema do aplicativo</h2>
+        <ThemeToggle variant="selection" />
+        <p className={styles.note}>Sua escolha fica salva neste navegador.</p>
+      </div>
+      <div className={styles.fullscreen}><FullscreenUtility /></div>
+    </section> : null}
   </div>;
 }

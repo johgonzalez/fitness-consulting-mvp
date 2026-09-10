@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, Eye, MessageSquareText, Ruler, ShieldCheck, UserRound } from "lucide-react";
@@ -95,5 +96,6 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
         <ol id="historico">{events.map((event, index) => <li key={event.id}><span className={index === 0 ? "active" : undefined} /><div><strong>{eventLabels[event.eventType]}</strong><small>{formatAssessmentDateTime(event.createdAt)}</small></div></li>)}</ol>
       </ContextPanel>
     </MasterDetail>
+  <DashboardMotionReady route={`/dashboard/assessments/${id}`} />
   </main>;
 }

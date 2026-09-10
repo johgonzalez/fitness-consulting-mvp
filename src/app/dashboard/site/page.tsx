@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
@@ -16,6 +17,7 @@ export default async function SitePage() {
         </div>
       </header>
       <SiteBuilder {...data} />
-    </main>
+    <DashboardMotionReady route="/dashboard/site" />
+  </main>
   );
 }

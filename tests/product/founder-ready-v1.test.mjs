@@ -15,8 +15,10 @@ test("lead detail exposes only factual contact channels", async () => {
 
 test("Meu Site links acquisition to real leads without invented analytics", async () => {
   const source = await read("src/components/dashboard/SiteBuilder.tsx");
-  assert.match(source, /href="\/dashboard\/leads"/);
-  assert.match(source, /nenhuma visita ou conversão é estimada/i);
+  const business = await read("src/app/dashboard/business/page.tsx");
+  assert.match(business, /href: "\/dashboard\/leads", label: "Leads"/);
+  assert.match(source, /section === "performance"/);
+  assert.match(source, /<EmptyState[^>]*title="Métricas ainda não disponíveis"[^>]*description="O acompanhamento de visitas e conversões ainda não está disponível\."/);
   assert.match(source, /TemplatePreview profile=\{profile\}/);
 });
 
@@ -28,10 +30,16 @@ test("billing presents safe product language for every persisted state", async (
   assert.doesNotMatch(source, /provider_customer|provider_subscription|stripe_/i);
 });
 
-test("settings exposes the real billing destination without dead future controls", async () => {
-  const source = await read("src/components/dashboard/ProfileEditor.tsx");
-  assert.match(source, /href: "\/dashboard\/settings\/billing"/);
-  assert.doesNotMatch(source, /Notificações.*Em breve|Integrações.*Em breve|Privacidade e dados.*Em breve/);
+test("business exposes canonical billing without duplicate settings or dead future controls", async () => {
+  const [business, profile] = await Promise.all([
+    read("src/app/dashboard/business/page.tsx"), read("src/components/dashboard/ProfileEditor.tsx"),
+  ]);
+  assert.match(business, /href: "\/dashboard\/settings\/billing", label: "Meu plano"/);
+  assert.equal((business.match(/\/dashboard\/settings\/billing/g) ?? []).length, 1);
+  assert.doesNotMatch(profile, /\/dashboard\/settings\/billing/);
+  for (const source of [business, profile]) {
+    assert.doesNotMatch(source, /Notificações.*Em breve|Integrações.*Em breve|Privacidade e dados.*Em breve/);
+  }
 });
 
 test("demo workout media is deterministic and local-first", async () => {

@@ -833,3 +833,73 @@
   :global(.cheipi-personal-app) .mobileLibraryBack { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 14px; padding: 0; border: 0; background: transparent; color: var(--pp-text-primary); font: 650 14px var(--pp-font-ui); }
   :global(.cheipi-personal-app) .mobileLibraryBack svg { width: 18px; }
 }
+
+
+/* Aura V1.1: compact list controls and feedback in the editing flow. */
+.indexToolbar { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:12px 16px; margin:16px 0 24px; }
+.desktopFilters { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+.desktopFilters > a { min-height:44px; display:inline-flex; align-items:center; gap:8px; padding:10px 13px; border-radius:999px; color:var(--pp-text-secondary); font-size:14px; }
+.desktopFilters > a[aria-current="page"] { background:var(--pp-text-primary); color:var(--pp-background); }
+.desktopFilters > a > span { font-size:12px; opacity:.8; }
+.filterTrigger { display:none; }
+.indexCreate { min-width:0; }
+.indexCreate > a { min-height:48px; border-radius:999px; gap:8px; padding:0 18px; font-size:14px; white-space:nowrap; }
+.indexCreate > a > svg { width:18px; height:18px; }
+.indexNote { grid-column:1/-1; margin:0; color:var(--pp-text-muted); font-size:14px; }
+.filterSheet { position:fixed; inset:auto 0 0; width:min(100%,520px); margin:0 auto; padding:24px 20px max(24px,env(safe-area-inset-bottom)); border:1px solid var(--pp-border); border-radius:28px 28px 0 0; background:var(--pp-surface); color:var(--pp-text-primary); }
+.filterSheet > header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.filterSheet h2 { margin:0; font-size:22px; line-height:1.25; }
+.filterSheet header > button { display:grid; place-items:center; flex:0 0 44px; width:44px; height:44px; border:0; border-radius:50%; background:var(--pp-surface-subtle); color:var(--pp-text-primary); cursor:pointer; }
+.filterSheet header > button svg { width:20px; height:20px; }
+.filterSheet nav { display:grid; gap:4px; }
+.filterSheet nav > a { min-height:64px; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:12px 16px; border:1px solid transparent; border-radius:16px; color:var(--pp-text-primary); }
+.filterSheet nav > a[aria-current="page"] { background:var(--pp-surface-subtle); border-color:var(--pp-border); }
+.filterSheet nav > a > span { display:grid; gap:3px; font-size:16px; font-weight:650; }
+.filterSheet nav small { color:var(--pp-text-muted); font-size:13px; font-weight:400; }
+.filterSheet nav svg { flex:0 0 20px; width:20px; height:20px; }
+.filterTrigger:focus-visible,.desktopFilters > a:focus-visible { outline:2px solid var(--pp-text-primary); outline-offset:3px; }
+.flowFeedback { margin:20px 0; }
+.builderFeedback { position:relative; display:grid; grid-template-columns:minmax(0,1fr) 44px; align-items:start; gap:8px; margin:12px 18px; }
+.builderFeedback > button { display:grid; place-items:center; width:44px; height:44px; padding:0; border:1px solid var(--pp-border); border-radius:50%; background:var(--pp-surface); color:var(--pp-text-primary); cursor:pointer; }
+.builderFeedback > button svg { width:18px; height:18px; }
+.newWorkspace .providerUnavailable { border:1px solid var(--pp-border); background:var(--pp-surface-subtle); color:var(--pp-text-secondary); }
+.newWorkspace .providerUnavailable strong,.newWorkspace .providerUnavailable p { color:inherit; }
+.publishConfirm > button:first-child { width:44px; height:44px; }
+.publishConfirm > button:disabled { cursor:wait; opacity:.6; }
+.libraryDrawer,.historyPanel { max-height:100dvh; }
+@media(max-width:900px) {
+  .indexToolbar { grid-template-columns:auto minmax(0,1fr); gap:12px; margin:12px 0 20px; }
+  .desktopFilters { display:none; }
+  .filterTrigger { min-height:48px; min-width:0; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:0 14px; border:1px solid var(--pp-border); border-radius:999px; background:var(--pp-surface); color:var(--pp-text-primary); font-size:14px; font-weight:650; cursor:pointer; }
+  .filterTrigger > span { font-size:12px; color:var(--pp-text-muted); }
+  .filterTrigger svg { width:16px; height:16px; }
+  .indexCreate { justify-self:end; }
+  .indexCreate > a { padding:0 14px; }
+  .indexNote { font-size:13px; }
+  .workspace .planRow,.workspace .planRowLink { min-height:128px; }
+  .builderPage .mobilePrimaryAction { bottom:var(--cheipi-dock-clearance,calc(92px + env(safe-area-inset-bottom,0px))); }
+  .builderPage:has(input:focus,textarea:focus,select:focus) .mobilePrimaryAction { position:static; margin:20px 18px; }
+  .builderPage:has(input:focus,textarea:focus,select:focus) { padding-bottom:110px; }
+  .libraryDrawer { height:92dvh; }
+  .historyPanel { height:min(82dvh,680px); }
+}
+@media(max-width:360px) {
+  .filterTrigger { gap:5px; padding:0 10px; }
+  .indexCreate > a { gap:5px; padding:0 12px; }
+  .indexCreate > a > svg { width:16px; }
+}
+
+.indexSearch { grid-column:1/-1; display:grid; grid-template-columns:minmax(0,1fr) 48px; align-items:center; border:1px solid var(--pp-border); border-radius:999px; background:var(--pp-surface); overflow:hidden; }
+.indexSearch input { width:100%; min-width:0; min-height:48px; padding:12px 18px; border:0; background:transparent; color:var(--pp-text-primary); font:inherit; font-size:16px; }
+.indexSearch input:focus { outline:none; }
+.indexSearch:focus-within { outline:2px solid var(--pp-text-primary); outline-offset:2px; }
+.indexSearch button { width:48px; height:48px; display:grid; place-items:center; padding:0; border:0; background:transparent; color:var(--pp-text-primary); cursor:pointer; }
+.indexSearch button svg { width:20px; height:20px; }
+.indexSearch button:disabled { cursor:wait; opacity:.5; }
+.indexNote:empty { display:none; }
+
+.publishConfirm > .confirmationFeedback { display:block; margin:0 0 16px; text-align:left; }
+
+@media(max-width:1024px) {
+  :global(.cheipi-personal-app) .workspace { width:calc(100% - 2 * var(--cheipi-gutter,24px))!important; }
+}

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { normalizeProfileSection, profileSectionHref } from "../../src/lib/navigation/profile-sections.ts";
 
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), "utf8");
 
@@ -18,9 +19,17 @@ test("trainer shell exposes only supported production destinations", async () =>
     await access(new URL(`../../src/app${destination}/page.tsx`, import.meta.url));
   }
   assert.match(navigation, /aria-current=/);
+  assert.match(navigation, /aria-label=\{item\.label\}/);
   const business = await read("src/app/dashboard/business/page.tsx");
-  for (const route of ["/dashboard/site", "/dashboard/leads", "/dashboard/settings/billing", "/dashboard/profile"]) {
+  for (const route of ["/dashboard/site", "/dashboard/leads", "/dashboard/settings/billing"]) {
     assert.ok(business.includes(route), `Business must expose ${route}`);
+  }
+  for (const section of ["profile", "appearance", "account"]) {
+    assert.ok(business.includes(`profileSectionHref("${section}")`), `Business must link directly to ${section}`);
+    const destination = new URL(profileSectionHref(section), "https://cheipi.test");
+    assert.equal(destination.pathname, "/dashboard/profile");
+    assert.equal(normalizeProfileSection(destination.searchParams.get("section")), section);
+    await access(new URL(`../../src/app${destination.pathname}/page.tsx`, import.meta.url));
   }
 });
 

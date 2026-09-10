@@ -33,9 +33,9 @@ function eligibleControl(target: EventTarget | null) {
   return null;
 }
 
-export function AppFullscreenController() {
+export function AppFullscreenController({ automatic = true }: { automatic?: boolean }) {
   useEffect(() => {
-    if (isStandalone() || !isMobileAppContext()) return;
+    if (!automatic || isStandalone() || !isMobileAppContext()) return;
 
     function handleEligibleClick(event: MouseEvent) {
       if (!event.isTrusted || !eligibleControl(event.target)) return;
@@ -47,7 +47,7 @@ export function AppFullscreenController() {
 
     document.addEventListener("click", handleEligibleClick, { capture: true });
     return () => document.removeEventListener("click", handleEligibleClick, { capture: true });
-  }, []);
+  }, [automatic]);
 
   return null;
 }
