@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import { BillingCheckoutButton } from "@/components/billing/BillingCheckoutButton";
 import { requireUser } from "@/lib/auth/user";
 import { isDemoWorkspaceRequest } from "@/lib/demo/workspace";
@@ -81,5 +82,6 @@ export default async function BillingSettingsPage({
       </div>}
       {!demoMode && !paid ? <BillingCheckoutButton /> : null}
     </section>
+  <DashboardMotionReady route="/dashboard/settings/billing" />
   </main>;
 }

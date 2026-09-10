@@ -10,6 +10,8 @@ import {
   generateWorkoutAiDraftAction,
   materializeWorkoutAiDraftAction,
 } from "@/app/actions/workouts";
+import { ActionFeedback, type ActionFeedbackState } from "@/components/ui/ActionFeedback";
+import { workoutListHref, workoutVersionHref } from "./workout-navigation";
 import { Avatar } from "@/components/ui/PPerfilPrimitives";
 import type { Exercise } from "@/lib/domain/workouts";
 import type { WorkoutAiDraftOutput } from "@/lib/workouts/ai-contract";
@@ -37,12 +39,14 @@ export function NewWorkoutFlow({
   providerStatus,
   initialMode,
   initialStudentId,
+  returnHref,
 }: {
   contexts: WorkoutStudentContext[];
   exercises: Exercise[];
   providerStatus: WorkoutAiProviderStatus;
   initialMode: CreationMode | null;
   initialStudentId: string | null;
+  returnHref?: string;
 }) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(initialStudentId);
@@ -51,7 +55,7 @@ export function NewWorkoutFlow({
   const [name, setName] = useState("Novo plano de treino");
   const [goal, setGoal] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<ActionFeedbackState | null>(null);
   const [generated, setGenerated] = useState<WorkoutAiDraftOutput | null>(null);
   const [generatedProviderId, setGeneratedProviderId] = useState<string | null>(null);
   const [resolutionChoices, setResolutionChoices] = useState<Record<string, string>>({});
@@ -61,7 +65,9 @@ export function NewWorkoutFlow({
   const [customYoutube, setCustomYoutube] = useState("");
   const [pending, startTransition] = useTransition();
   const selected = contexts.find((context) => context.student.id === selectedId) ?? null;
-  const backHref = initialStudentId ? `/dashboard/workouts?student=${initialStudentId}` : "/dashboard/workouts";
+  const backHref = returnHref ?? (initialStudentId ? `/dashboard/workouts?student=${initialStudentId}` : "/dashboard/workouts");
+  const context = new URLSearchParams(backHref.split("?")[1]);
+  const selectedReturnHref = workoutListHref({ q: context.get("q") ?? undefined, status: context.get("status") ?? undefined, student: selected?.student.id, discarded: context.get("discarded") ?? undefined });
   const step = selected ? 2 : 1;
   const unresolved = useMemo(() => generated?.sessions.flatMap((session, sessionIndex) =>
     session.sections.flatMap((section, sectionIndex) => section.exercises.flatMap((exercise, exerciseIndex) =>
@@ -92,9 +98,9 @@ export function NewWorkoutFlow({
 
   function resolveWithExisting(position: ExercisePosition) {
     const exerciseId = resolutionChoices[positionKey(position)];
-    if (!exerciseId) return setMessage("Selecione um exercício da sua biblioteca.");
+    if (!exerciseId) return setMessage({ message: "Selecione um exercício da sua biblioteca.", tone: "info" });
     updateExercise(position, (exercise) => ({ ...exercise, exerciseId, unresolvedExerciseName: null }));
-    setMessage("Exercício associado ao catálogo.");
+    setMessage({ message: "Exercício associado ao catálogo.", tone: "success" });
   }
 
   function removeUnresolved(position: ExercisePosition) {
@@ -102,7 +108,7 @@ export function NewWorkoutFlow({
       if (!current) return current;
       const section = current.sessions[position.sessionIndex]?.sections[position.sectionIndex];
       if (!section || section.exercises.length <= 1) {
-        setMessage("Uma seção precisa manter pelo menos um exercício. Substitua este item.");
+        setMessage({ message: "Uma seção precisa manter pelo menos um exercício. Substitua este item.", tone: "warning" });
         return current;
       }
       return {
@@ -142,7 +148,7 @@ export function NewWorkoutFlow({
         locale: "pt-BR",
         youtubeUrl: customYoutube,
       });
-      setMessage(result.message);
+      setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
       if (result.ok && result.exercise) {
         setAvailableExercises((current) => [result.exercise!, ...current]);
         updateExercise(target, (exercise) => ({ ...exercise, exerciseId: result.exercise!.id, unresolvedExerciseName: null }));
@@ -156,8 +162,8 @@ export function NewWorkoutFlow({
     setMessage(null);
     startTransition(async () => {
       const result = await createManualWorkoutAction({ relationshipId: selected.student.id, name, goal });
-      setMessage(result.message);
-      if (result.ok && result.resultId) router.push(`/dashboard/workouts/${result.resultId}?student=${selected.student.id}`);
+      setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
+      if (result.ok && result.resultId) router.push(workoutVersionHref(result.resultId, selectedReturnHref));
     });
   }
 
@@ -167,7 +173,7 @@ export function NewWorkoutFlow({
     setGenerated(null);
     startTransition(async () => {
       const result = await generateWorkoutAiDraftAction({ relationshipId: selected.student.id, prompt });
-      setMessage(result.message);
+      setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
       if (result.ok && result.generated) {
         setGenerated(result.generated);
         setGeneratedProviderId(result.providerId ?? null);
@@ -180,8 +186,8 @@ export function NewWorkoutFlow({
     setMessage(null);
     startTransition(async () => {
       const result = await materializeWorkoutAiDraftAction({ relationshipId: selected.student.id, prompt, draft: generated, providerId: generatedProviderId ?? undefined });
-      setMessage(result.message);
-      if (result.ok && result.resultId) router.push(`/dashboard/workouts/${result.resultId}?student=${selected.student.id}`);
+      setMessage({ message: result.message, tone: result.ok ? "success" : "danger" });
+      if (result.ok && result.resultId) router.push(workoutVersionHref(result.resultId, selectedReturnHref));
     });
   }
 
@@ -246,6 +252,6 @@ export function NewWorkoutFlow({
       </section> : null}
     </>}
 
-    {message ? <p className={`${styles.actionMessage}${generated ? ` ${styles.successMessage}` : ""}`} role="status">{message}</p> : null}
+    {message ? <div className={styles.flowFeedback}><ActionFeedback feedback={message} /></div> : null}
   </main>;
 }

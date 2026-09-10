@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Activity, CalendarDays, ChevronRight, ClipboardCheck, Dumbbell, Mail, Plus, UserRoundX } from "lucide-react";
@@ -10,6 +11,7 @@ import { getTrainerAssessmentIndex } from "@/lib/assessments/workspace";
 import { getTrainerProgressWorkspace } from "@/lib/progress/workspace";
 import { getStudentDetail } from "@/lib/supabase/students";
 import { getWorkoutIndex } from "@/lib/workouts/workspace";
+import { studentRecordHref, type StudentListContext } from "@/lib/navigation/student-list";
 
 const statusLabels = { active: "Ativo", inactive: "Inativo", ended: "Encerrado" } as const;
 const assessmentLabels = { DRAFT: "Rascunho", SENT: "Enviada", ANSWERED: "Respondida", IN_REVIEW: "Em revisão", COMPLETED: "Concluída" } as const;
@@ -19,8 +21,8 @@ function shortDate(value: string | null | undefined) {
   return value ? new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }) : "Sem data";
 }
 
-export default async function StudentDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function StudentDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<StudentListContext> }) {
+  const [{ id }, listContext] = await Promise.all([params, searchParams]);
   const student = await getStudentDetail(id);
   if (!student) notFound();
   const [workoutWorkspace, assessmentWorkspace, progress] = await Promise.all([
@@ -39,7 +41,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
   const attentionAssessment = assessments.find(({ assessment }) => assessment.status === "ANSWERED" || assessment.status === "IN_REVIEW") ?? null;
 
   return <main className="dashboard-main pp-record-page pp-student-record">
-    <StudentRecordChrome student={student} active="overview" />
+    <StudentRecordChrome student={student} active="overview" listContext={listContext} />
     <section className="pp-student-pulse" aria-label="Resumo do aluno">
       <div><span>Acompanhamento</span><strong>{student.status === "active" ? "Acompanhamento ativo" : statusLabels[student.status]}</strong></div>
       <div><span>Treino atual</span><strong>{currentWorkout?.plan.name ?? "Nenhum treino publicado"}</strong></div>
@@ -50,7 +52,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
         <nav className="pp-student-quick-actions" aria-label="Ações rápidas do aluno">
           <Link href={`/dashboard/workouts/new?student=${student.id}`}><Plus aria-hidden="true" />Criar treino</Link>
           <Link href={`/dashboard/assessments/new?student=${student.id}`}><ClipboardCheck aria-hidden="true" />Nova avaliação</Link>
-          <Link href={`/dashboard/students/${student.id}/progress`}><Activity aria-hidden="true" />Ver progresso</Link>
+          <Link href={studentRecordHref(student.id, listContext, "progress")}><Activity aria-hidden="true" />Ver progresso</Link>
         </nav>
 
         <section className="pp-student-open-section" aria-labelledby="student-workout-title">
@@ -69,7 +71,7 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
             {assessments.slice(0, 2).map(({ assessment }) => <Link href={`/dashboard/assessments/${assessment.id}?student=${student.id}`} key={assessment.id}>
               <span className="pp-student-row-icon"><ClipboardCheck aria-hidden="true" /></span><span><strong>{assessment.title}</strong><small>Atualizada em {shortDate(assessment.updatedAt)}</small></span><Status tone={assessment.status === "COMPLETED" ? "success" : assessment.status === "IN_REVIEW" || assessment.status === "ANSWERED" ? "warning" : "neutral"}>{assessmentLabels[assessment.status]}</Status><ChevronRight aria-hidden="true" />
             </Link>)}
-            {latestTraining ? <Link href={`/dashboard/students/${student.id}/progress`}>
+            {latestTraining ? <Link href={studentRecordHref(student.id, listContext, "progress")}>
               <span className="pp-student-row-icon"><Activity aria-hidden="true" /></span><span><strong>Treino mais recente</strong><small>{latestTraining.sessionName} · {shortDate(latestTraining.happenedAt)}</small></span><Status tone={latestTraining.status === "COMPLETED" ? "success" : "neutral"}>{latestTraining.status === "COMPLETED" ? "Concluído" : "Interrompido"}</Status><ChevronRight aria-hidden="true" />
             </Link> : null}
             {!assessments.length && !latestTraining ? <p className="pp-student-inline-empty">Ainda não há atividades ou avaliações registradas.</p> : null}
@@ -94,5 +96,6 @@ export default async function StudentDetail({ params }: { params: Promise<{ id: 
         </section>
       </aside>
     </div>
+  <DashboardMotionReady route={`/dashboard/students/${id}`} />
   </main>;
 }

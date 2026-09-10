@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -19,7 +20,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useRef, useState, type FormHTMLAttributes, type ReactNode } from "react";
+import { useActionState, useEffect, useRef, useState, type FormHTMLAttributes, type ReactNode } from "react";
 import {
   deleteService,
   deleteMethodologyItem,
@@ -39,7 +40,7 @@ import { TemplatePreview } from "@/components/dashboard/TemplatePreview";
 import { HeadlineAssistant } from "@/components/dashboard/HeadlineAssistant";
 import { AssistedTextField, SpecialtyAssistant } from "@/components/dashboard/AssistedTextField";
 import { SiteSectionOrganizer } from "@/components/dashboard/SiteSectionOrganizer";
-import { EmptyState, SectionHeader } from "@/components/ui/PPerfilPrimitives";
+import { EmptyState, SectionHeader, FeedbackMessage } from "@/components/ui/PPerfilPrimitives";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
 import { AIAssistButton } from "@/components/dashboard/AIAssistButton";
 import { bioSuggestions, methodologySuggestions, serviceDescriptionSuggestions, specialtySuggestions, testimonialsIntroSuggestions } from "@/data/site/content-suggestions";
@@ -55,19 +56,42 @@ import type {
 } from "@/lib/domain/trainer";
 import { type TemplateDefinition } from "@/lib/domain/template-registry";
 import { curatedSiteTemplates, getSiteTemplatePresentation } from "@/lib/domain/site-template-presentation";
-import { normalizeSiteEditorSection, siteEditorTab, type SiteEditorSection, type SiteEditorTab } from "@/lib/navigation/site-editor";
+import { normalizeSiteEditorSection, siteEditorTab, type SiteEditorSection } from "@/lib/navigation/site-editor";
+
+import styles from "./SiteEditorNavigation.module.css";
 
 const initialState: SiteActionState = {};
+
+type EditorDestination = SiteEditorSection | "contact";
+const editorDestinations: Array<{ id: EditorDestination; label: string; detail: string }> = [
+  { id: "presentation", label: "Apresentação", detail: "Textos e especialidades" },
+  { id: "methodology", label: "Metodologia", detail: "Etapas do seu acompanhamento" },
+  { id: "services", label: "Serviços", detail: "Ofertas e valores" },
+  { id: "testimonials", label: "Depoimentos", detail: "Relatos dos seus alunos" },
+  { id: "identity", label: "Aparência", detail: "Imagens e cor da marca" },
+  { id: "organize", label: "Seções", detail: "Ordem e visibilidade" },
+  { id: "contact", label: "Contato", detail: "WhatsApp e Instagram" },
+];
+
+function EditorNavigation({ active, onSelect }: { active: EditorDestination; onSelect: (destination: EditorDestination) => void }) {
+  const disclosure = useRef<HTMLDetailsElement>(null);
+  const current = editorDestinations.find(({ id }) => id === active)!;
+  return <details ref={disclosure} className={styles.navigation}>
+    <summary><span>Editar: <strong>{current.label}</strong></span><ChevronDown aria-hidden="true" /></summary>
+    <nav aria-label="Editar site">
+      {editorDestinations.map(({ id, label, detail }) => <button key={id} type="button" aria-current={active === id ? "page" : undefined} onClick={() => {
+        if (disclosure.current) disclosure.current.open = false;
+        onSelect(id);
+      }}><span><strong>{label}</strong><small>{detail}</small></span>{active === id ? <Check aria-hidden="true" /> : <ChevronRight aria-hidden="true" />}</button>)}
+    </nav>
+  </details>;
+}
 
 type SiteSection = "overview" | "templates" | "personalize" | "contact" | "performance" | "publication";
 const siteSections: SiteSection[] = ["overview", "templates", "personalize", "contact", "performance", "publication"];
 
 function ActionMessage({ state }: { state: SiteActionState }) {
-  return state.message ? (
-    <p className={`builder-message ${state.ok ? "success" : "error"}`} role="status">
-      {state.message}
-    </p>
-  ) : null;
+  return state.message ? <FeedbackMessage tone={state.ok ? "success" : "danger"}>{state.message}</FeedbackMessage> : null;
 }
 
 function Submit({ pending, children }: { pending: boolean; children: ReactNode }) {
@@ -279,6 +303,16 @@ export function SiteBuilder({
   const section = siteSections.includes(requestedSection) ? requestedSection : "overview";
   const personalization = normalizeSiteEditorSection(searchParams.get("editor"));
   const personalizationTab = siteEditorTab(personalization);
+  const activeEditor: EditorDestination = section === "contact" ? "contact" : personalization;
+  const editorLabel = editorDestinations.find(({ id }) => id === activeEditor)!.label;
+  const editorContent = useRef<HTMLDivElement>(null);
+  const previousEditor = useRef(`${section}:${personalization}`);
+  useEffect(() => {
+    const destination = `${section}:${personalization}`;
+    if (previousEditor.current === destination) return;
+    previousEditor.current = destination;
+    if (section === "personalize" || section === "contact") editorContent.current?.focus({ preventScroll: true });
+  }, [section, personalization]);
   function setSection(next: SiteSection, editor: SiteEditorSection = personalization) {
     const url = new URL(window.location.href);
     if (next === "overview") url.searchParams.delete("view");
@@ -288,8 +322,13 @@ export function SiteBuilder({
     window.history.pushState(null, "", url.pathname + url.search);
     window.scrollTo({ top: 0, behavior: "instant" });
   }
-  function setPersonalization(next: SiteEditorSection) {
-    setSection("personalize", next);
+  function chooseEditor(next: EditorDestination) {
+    if (next === activeEditor) {
+      editorContent.current?.focus({ preventScroll: true });
+      return;
+    }
+    if (next === "contact") setSection("contact");
+    else setSection("personalize", next);
   }
   const [presentationState, presentationAction, presentationPending] = useActionState(savePresentation, initialState);
   const [contactState, contactAction, contactPending] = useActionState(saveContact, initialState);
@@ -324,8 +363,8 @@ export function SiteBuilder({
   }
 
   return (
-    <div className="pp-site-product cheipi-site-builder" data-view={section} data-demo-workspace={demoMode || undefined}>
-      {section !== "overview" ? <button type="button" className="cheipi-back" onClick={() => setSection("overview")}><ChevronLeft aria-hidden="true" />Meu site</button> : null}
+    <div className={`pp-site-product cheipi-site-builder ${styles.root}`} data-view={section} data-demo-workspace={demoMode || undefined}>
+      {section !== "overview" ? <button type="button" className="cheipi-back" onClick={() => setSection(section === "contact" ? "personalize" : "overview")}><ChevronLeft aria-hidden="true" />{section === "contact" ? "Editor do site" : "Meu site"}</button> : null}
       {shareMessage ? <p role="status" className="builder-message">{shareMessage}</p> : null}
 
       {section === "overview" ? (
@@ -383,20 +422,9 @@ export function SiteBuilder({
       {section === "personalize" ? (
         <section className="pp-site-view" aria-label="Personalização do site">
           <SectionHeader title="Do seu jeito" description="Salve as alterações e confira como ficam no seu site." action={<Link href={`/dashboard/preview?returnView=personalize&returnEditor=${personalization}`}>Visualizar <ExternalLink aria-hidden="true" /></Link>} />
-          <nav className="pp-site-editor-tabs" aria-label="Modos de personalização">
-            {([['content', 'Conteúdo'], ['appearance', 'Aparência'], ['organize', 'Seções']] as Array<[SiteEditorTab, string]>).map(([id, label]) => <button key={id} type="button" className={personalizationTab === id ? "is-active" : ""} aria-current={personalizationTab === id ? "page" : undefined} onClick={() => setPersonalization(id === "appearance" ? "identity" : id === "organize" ? "organize" : personalizationTab === "content" ? personalization : "presentation")}>{label}</button>)}
-          </nav>
-
-          <button type="button" className="cheipi-contact-entry" onClick={() => setSection("contact")}><MessageCircle aria-hidden="true" /><span>Contato e redes sociais</span><ChevronRight aria-hidden="true" /></button>
-          {personalizationTab === "content" ? <div className="pp-site-editor-layout">
-            <nav className="pp-site-editor-navigation" aria-label="Conteúdo do site">
-              {([
-                ["presentation", "Apresentação", "Textos e especialidades"],
-                ["methodology", "Metodologia", `${methodology.length} etapas`],
-                ["services", "Serviços", `${services.length} cadastrados`],
-                ["testimonials", "Depoimentos", `${testimonials.length} cadastrados`],
-              ] as Array<[SiteEditorSection, string, string]>).map(([id, label, detail]) => <button key={id} type="button" className={personalization === id ? "is-active" : ""} onClick={() => setPersonalization(id)}><span>{label}</span><small>{detail}</small></button>)}
-            </nav>
+          <EditorNavigation active={activeEditor} onSelect={chooseEditor} />
+          <div ref={editorContent} className={styles.editorContent} tabIndex={-1} role="region" aria-label={`Editor de ${editorLabel}`}>
+          {personalizationTab === "content" ? <div className={styles.contentLayout}>
             <div className="pp-site-editor-panel">
               {personalization === "presentation" ? <><header><Settings2 aria-hidden="true" /><div><h2>Apresentação</h2><p>Use sugestões ou escreva com suas palavras. Tudo continua editável.</p></div></header><form action={presentationAction} className="builder-form"><label>Nome profissional<input name="display_name" required minLength={2} maxLength={100} defaultValue={profile.display_name} /></label><HeadlineAssistant initialValue={profile.headline} /><AssistedTextField name="bio" label="Bio" initialValue={profile.bio} suggestions={bioSuggestions} maxLength={2000} rows={5} /><SpecialtyAssistant initialValue={profile.specialty} suggestions={specialtySuggestions} /><AssistedTextField name="methodology_description" label="Introdução da metodologia" initialValue={profile.methodology_description ?? ""} suggestions={methodologySuggestions} maxLength={1000} rows={4} /><AssistedTextField name="testimonials_intro" label="Introdução dos depoimentos" initialValue={profile.testimonials_intro ?? ""} suggestions={testimonialsIntroSuggestions} maxLength={500} rows={3} /><label className="check-row"><input type="checkbox" name="profile_status_enabled" defaultChecked={profile.profile_status_enabled ?? false} /> Exibir status público no site</label><div className="builder-grid"><label>Texto do status<input name="profile_status_text" maxLength={40} defaultValue={profile.profile_status_text ?? ""} placeholder="Agenda aberta" /></label><label>Tom do status<select name="profile_status_semantic_tone" defaultValue={profile.profile_status_semantic_tone ?? ""}><option value="">Selecione</option><option value="availability">Disponibilidade</option><option value="online">Online</option><option value="announcement">Anúncio</option><option value="attention">Atenção</option><option value="neutral">Neutro</option></select></label></div><input type="hidden" name="city" value={profile.city ?? ""} /><input type="hidden" name="cref" value={profile.cref ?? ""} /><label>Modalidade<select name="service_mode" defaultValue={profile.service_mode}><option value="online">Online</option><option value="presencial">Presencial</option><option value="both">Online e presencial</option></select></label><Submit pending={presentationPending}>Salvar conteúdo</Submit><ActionMessage state={presentationState} /></form></> : null}
               {personalization === "methodology" ? <><header><Settings2 aria-hidden="true" /><div><h2>Metodologia</h2><p>Cadastre de 1 a 5 etapas reais. A ordem menor aparece primeiro.</p></div></header><div className="pp-collection-list">{methodology.map((item) => <details key={item.id}><summary><span><strong>{item.title}</strong><small>Ordem {item.position}</small></span><Pencil aria-hidden="true" /></summary><MethodologyItemForm item={item} defaultPosition={item.position} /></details>)}{addingMethodology ? <MethodologyItemForm defaultPosition={(methodology[methodology.length - 1]?.position ?? 0) + 10} /> : methodology.length < 5 ? <button type="button" className="builder-secondary" onClick={() => setAddingMethodology(true)}><Plus aria-hidden="true" /> Adicionar etapa</button> : <p className="section-help">Limite de 5 etapas atingido.</p>}</div></> : null}
@@ -408,13 +436,15 @@ export function SiteBuilder({
           {personalizationTab === "appearance" ? <div className="pp-site-editor-panel pp-site-editor-panel--standalone"><header><Settings2 aria-hidden="true" /><div><h2>Aparência</h2><p>Atualize as imagens e a cor aplicada ao template.</p></div></header><div className="pp-upload-stack"><UploadForm kind="profile" label="Foto de perfil" /><UploadForm kind="hero" label="Imagem principal" /><UploadForm kind="logo" label="Logo opcional" /></div><form action={identityAction} className="builder-form pp-color-form"><label>Cor da marca<input type="color" name="primary_color" defaultValue={profile.primary_color} /></label><p className="section-help">A cor é aplicada como acento; a composição original do template permanece protegida.</p><Submit pending={identityPending}>Salvar aparência</Submit><ActionMessage state={identityState} /></form></div> : null}
 
           {personalizationTab === "organize" ? <SiteSectionOrganizer key={profile.template_id} profile={profile} /> : null}
+          </div>
         </section>
       ) : null}
 
       {section === "contact" ? (
         <section className="pp-site-view" aria-label="Contato e conversão">
           <SectionHeader title="Contato e conversão" description="Mantenha os canais usados pelos visitantes para falar com você." />
-          <div className="pp-site-contact-layout">
+          <EditorNavigation active="contact" onSelect={chooseEditor} />
+          <div ref={editorContent} className={`pp-site-contact-layout ${styles.editorContent}`} tabIndex={-1} role="region" aria-label="Editor de contato">
             <form action={contactAction} className="builder-form pp-site-contact-form"><label>WhatsApp<input name="whatsapp" required inputMode="tel" defaultValue={profile.whatsapp} /></label><label>Instagram — usuário<input name="instagram_handle" maxLength={30} defaultValue={instagram.handle ?? ""} placeholder="seu.usuario" /><small>Informe sem o @.</small></label><label>Instagram — link<input name="instagram_url" type="url" maxLength={300} defaultValue={instagram.url ?? ""} placeholder="https://www.instagram.com/seu.usuario/" /></label><Submit pending={contactPending}>Salvar contato</Submit><ActionMessage state={contactState} /></form>
         <aside><MessageCircle aria-hidden="true" /><h2>Link do seu site</h2><p>cheipi.com/p/{profile.slug}</p><div><button type="button" onClick={copyLink}><Copy aria-hidden="true" /> Copiar link</button><button type="button" onClick={share}><Share2 aria-hidden="true" /> Compartilhar</button></div></aside>
           </div>

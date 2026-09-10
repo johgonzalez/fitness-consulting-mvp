@@ -12,7 +12,7 @@ export const workoutStatusLabels: Record<WorkoutVersionStatus, string> = {
 
 export const workoutStatusTones: Record<WorkoutVersionStatus, "accent" | "success" | "neutral" | "warning"> = {
   DRAFT: "accent",
-  APPROVED: "warning",
+  APPROVED: "neutral",
   PUBLISHED: "success",
   ARCHIVED: "neutral",
 };

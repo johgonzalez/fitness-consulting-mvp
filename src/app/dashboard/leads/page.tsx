@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Clock3, LockKeyhole, MapPin, SlidersHorizontal, UsersRound } from "lucide-react";
@@ -99,5 +100,6 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
         <div className="pp-leads-config-surface__secondary"><Link href="/dashboard/leads" className="pp-button pp-button--secondary">Fechar configuração</Link></div>
       </section> : <Link href="/dashboard/leads?settings=1" className="pp-config-link"><SlidersHorizontal aria-hidden="true" />Configuração de recebimento <span>{data.settings.accepting_new_clients ? "Ativa" : "Pausada"}</span></Link>}
     </>}
+  <DashboardMotionReady route="/dashboard/leads" />
   </main>;
 }

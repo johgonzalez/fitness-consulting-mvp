@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { CalendarDays, ClipboardCheck, Clock3, Mail, Search, UserRoundPlus, UsersRound } from "lucide-react";
 import { InviteStudentForm } from "@/components/students/InviteStudentForm";
@@ -6,25 +7,19 @@ import { InvitationManagementActions } from "@/components/students/InvitationMan
 import { ContextPanel, DataList, DataListRow, IdentityCell, OperationalToolbar } from "@/components/ui/PPerfilOperational";
 import { Avatar, EmptyState, Status } from "@/components/ui/PPerfilPrimitives";
 import type { RelationshipState } from "@/lib/domain/students";
+import { normalizeStudentListContext, studentListHref, studentRecordHref, type StudentListContext, type StudentListFilter } from "@/lib/navigation/student-list";
 import { getStudentsWorkspace } from "@/lib/supabase/students";
 
 const statusLabels: Record<RelationshipState, string> = { active: "Ativo", inactive: "Inativo", ended: "Encerrado" };
 
-export default async function StudentsPage({ searchParams }: { searchParams: Promise<{ status?: string; add?: string; q?: string }> }) {
+export default async function StudentsPage({ searchParams }: { searchParams: Promise<StudentListContext & { add?: string }> }) {
   const [query, workspace] = await Promise.all([searchParams, getStudentsWorkspace()]);
   const { students, invitations } = workspace;
-  const filter = query.status === "active" || query.status === "inactive" ? query.status : "all";
-  const search = query.q?.trim().slice(0, 120) ?? "";
+  const { status: filter, q: search } = normalizeStudentListContext(query);
   const normalizedSearch = search.toLocaleLowerCase("pt-BR");
   const filteredByStatus = filter === "all" ? students : filter === "active" ? students.filter((student) => student.status === "active") : students.filter((student) => student.status !== "active");
   const visible = normalizedSearch ? filteredByStatus.filter((student) => `${student.name} ${student.email ?? ""}`.toLocaleLowerCase("pt-BR").includes(normalizedSearch)) : filteredByStatus;
-  const studentsHref = (status: "all" | "active" | "inactive", add = false) => {
-    const params = new URLSearchParams();
-    if (status !== "all") params.set("status", status);
-    if (search) params.set("q", search);
-    if (add) params.set("add", "1");
-    return `/dashboard/students${params.size ? `?${params}` : ""}${add ? "#add-student" : ""}`;
-  };
+  const studentsHref = (status: StudentListFilter, add = false) => studentListHref({ status, q: search }, add);
 
   return <main className="dashboard-main pp-workspace pp-students-workspace">
     <header className="pp-page-header">
@@ -72,7 +67,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     </section> : null}
 
     {visible.length ? <DataList label="Alunos" columns={["Aluno", "Acompanhamento", "Origem", "Desde", "Status", ""]} className="pp-student-list pp-student-list--v1d">
-      {visible.map((student) => <DataListRow href={`/dashboard/students/${student.id}`} key={student.id}>
+      {visible.map((student) => <DataListRow href={studentRecordHref(student.id, { status: filter, q: search })} key={student.id}>
         <IdentityCell name={student.name} detail={student.email ?? "E-mail não informado"} imageUrl={student.profileImageUrl} />
         <span className="pp-data-cell pp-data-cell--stacked" role="cell"><strong>{student.status === "active" ? "Acompanhamento ativo" : student.status === "inactive" ? "Acompanhamento inativo" : "Acompanhamento encerrado"}</strong><small>{statusLabels[student.status]}</small></span>
         <span className="pp-data-cell" role="cell">{student.origin === "lead_conversion" ? "Lead convertido" : "Convite manual"}</span>
@@ -82,5 +77,6 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     </DataList> : <section className="pp-panel pp-student-empty">
       <EmptyState icon={UsersRound} title={search ? "Nenhum aluno encontrado" : "Nenhum aluno neste filtro"} description={search ? "Revise o nome ou e-mail e tente novamente." : "Convide seu primeiro aluno por e-mail."} action={search ? <Link href={filter === "all" ? "/dashboard/students" : `/dashboard/students?status=${filter}`} className="pp-button pp-button--secondary">Limpar busca</Link> : <Link href="/dashboard/students?add=1" className="pp-button pp-button--secondary">Adicionar aluno</Link>} />
     </section>}
+  <DashboardMotionReady route="/dashboard/students" />
   </main>;
 }

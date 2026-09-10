@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, Mail, MapPin, MessageCircle, Phone, Radar, Target } from "lucide-react";
@@ -104,5 +105,6 @@ export default async function LeadDetail({ params }: { params: Promise<{ id: str
         </dl>
       </ContextPanel>
     </MasterDetail>
+  <DashboardMotionReady route={`/dashboard/leads/${id}`} />
   </main>;
 }
