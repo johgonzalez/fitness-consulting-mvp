@@ -1,3 +1,4 @@
+import { DashboardMotionReady } from "@/components/dashboard/DashboardMotion";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarDays, Clock3, Eye, MessageSquareText, Ruler, ShieldCheck, UserRound } from "lucide-react";
@@ -30,14 +31,14 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
     { title: "Percepção do período", questions: responseQuestions.filter((question) => question.type === "SCALE") },
     { title: "Registros complementares", questions: responseQuestions.filter((question) => question.type === "PHOTO_REQUEST") },
   ].filter((group) => group.questions.length > 0);
-  const eventLabels = { CREATED: "Avaliação criada", DRAFT_UPDATED: "Configuração do Draft atualizada", SENT: "Enviada ao aluno", ANSWER_SAVED: "Resposta salva", SUBMITTED: "Respostas enviadas", REVIEW_STARTED: "Revisão iniciada", COMPLETED: "Avaliação concluída" } as const;
+  const eventLabels = { CREATED: "Avaliação criada", DRAFT_UPDATED: "Rascunho atualizado", SENT: "Enviada ao aluno", ANSWER_SAVED: "Resposta salva", SUBMITTED: "Respostas enviadas", REVIEW_STARTED: "Revisão iniciada", COMPLETED: "Avaliação concluída" } as const;
 
   return <main className="dashboard-main pp-record-page pp-assessment-record">
     <Link href={backHref} className="pp-back-link"><ArrowLeft aria-hidden="true" />Voltar para avaliações</Link>
 
     <header className="pp-record-header pp-assessment-record__header">
       <Avatar name={studentName} imageUrl={student?.profileImageUrl} size="large" />
-      <div><div className="pp-record-header__title"><h1>{assessment.title}</h1><AssessmentStatusBadge status={assessment.status} /></div><p>{studentName} · {template ? assessmentTypeLabels[template.assessmentType] : "Avaliação versionada"}</p></div>
+      <div><div className="pp-record-header__title"><h1>{assessment.title}</h1><AssessmentStatusBadge status={assessment.status} /></div><p>{studentName} · {template ? assessmentTypeLabels[template.assessmentType] : "Avaliação personalizada"}</p></div>
     </header>
 
     <nav className="pp-record-tabs" aria-label="Seções da avaliação">
@@ -45,25 +46,25 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
     </nav>
 
     <MasterDetail aside={<>
-      {assessment.status === "DRAFT" ? <ActionGroup title="Configuração do Draft" description="Título, prazo e prioridade podem ser ajustados até o envio.">
+      {assessment.status === "DRAFT" ? <ActionGroup title="Editar rascunho" description="Título, prazo e prioridade podem ser ajustados até o envio.">
         <DraftAssessmentMetadataForm assessmentId={assessment.id} title={assessment.title} isRequired={assessment.isRequired} dueAt={assessment.dueAt} />
       </ActionGroup> : null}
-      <ActionGroup title="Próxima ação" description={assessment.status === "DRAFT" ? "Revise os dados e confirme o envio." : assessment.status === "SENT" ? "A avaliação está disponível para o aluno responder." : assessment.status === "ANSWERED" ? "Abra a revisão para preparar sua devolutiva." : assessment.status === "IN_REVIEW" ? "Registre o feedback antes de concluir." : "O ciclo está concluído e preservado como histórico."}>
-        {assessment.status === "DRAFT" ? <><AssessmentLifecycleAction kind="send" assessmentId={assessment.id} studentName={studentName} assessmentTitle={assessment.title} returnHref={backHref} /><p className="pp-assessment-constraint">Após o envio, título, prazo e prioridade tornam-se somente leitura na V1.</p></> : null}
-        {assessment.status === "SENT" ? <div className="pp-waiting-state"><Clock3 aria-hidden="true" /><strong>Aguardando resposta</strong><p>Nenhuma notificação fictícia foi registrada. O status mudará somente após o envio real do aluno.</p><Link href={`/student/assessments/${assessment.id}`} className="pp-button pp-button--secondary"><Eye aria-hidden="true" />Abrir experiência do aluno</Link></div> : null}
+      <ActionGroup title="Próxima ação" description={assessment.status === "DRAFT" ? "Revise os dados e confirme o envio." : assessment.status === "SENT" ? "A avaliação está disponível para o aluno responder." : assessment.status === "ANSWERED" ? "Abra a revisão para preparar sua devolutiva." : assessment.status === "IN_REVIEW" ? "Registre o feedback antes de concluir." : "A avaliação está concluída e disponível no histórico."}>
+        {assessment.status === "DRAFT" ? <><AssessmentLifecycleAction kind="send" assessmentId={assessment.id} studentName={studentName} assessmentTitle={assessment.title} returnHref={backHref} /><p className="pp-assessment-constraint">Após enviar, não será possível alterar título, prazo ou prioridade.</p></> : null}
+        {assessment.status === "SENT" ? <div className="pp-waiting-state"><Clock3 aria-hidden="true" /><strong>Aguardando resposta</strong><p>Você poderá revisar assim que o aluno enviar as respostas.</p><Link href={`/student/assessments/${assessment.id}`} className="pp-button pp-button--secondary"><Eye aria-hidden="true" />Ver como aluno</Link></div> : null}
         {assessment.status === "ANSWERED" ? <AssessmentLifecycleAction kind="review" assessmentId={assessment.id} studentName={studentName} assessmentTitle={assessment.title} /> : null}
         {assessment.status === "IN_REVIEW" ? <AssessmentLifecycleAction kind="complete" assessmentId={assessment.id} studentName={studentName} assessmentTitle={assessment.title} /> : null}
-        {assessment.status === "COMPLETED" ? <div className="pp-completed-state"><ShieldCheck aria-hidden="true" /><strong>Histórico somente leitura</strong><p>A conclusão, as respostas, medidas e a devolutiva não são editáveis nesta etapa.</p><Link href={`/student/assessments/${assessment.id}`} className="pp-button pp-button--secondary"><Eye aria-hidden="true" />Ver experiência final</Link></div> : null}
+        {assessment.status === "COMPLETED" ? <div className="pp-completed-state"><ShieldCheck aria-hidden="true" /><strong>Avaliação concluída</strong><p>A conclusão, as respostas, medidas e a devolutiva não são editáveis nesta etapa.</p><Link href={`/student/assessments/${assessment.id}`} className="pp-button pp-button--secondary"><Eye aria-hidden="true" />Ver devolutiva do aluno</Link></div> : null}
       </ActionGroup>
-      <ActionGroup title="Contexto do aluno">
+      <ActionGroup title="Aluno">
         <div className="pp-assessment-student-card"><Avatar name={studentName} imageUrl={student?.profileImageUrl} size="medium" /><span><strong>{studentName}</strong><small>{student?.email ?? "Contato protegido"}</small></span></div>
         {student ? <Link className="pp-text-link" href={`/dashboard/students/${student.id}`}><UserRound aria-hidden="true" />Abrir perfil do aluno</Link> : null}
       </ActionGroup>
     </>}>
-      <ContextPanel title="Visão geral" description={assessment.status === "DRAFT" ? "A configuração pode ser ajustada no painel enquanto o status permanecer Draft." : "Dados imutáveis desta aplicação após o envio."} className="pp-assessment-overview" >
+      <ContextPanel title="Visão geral" description={assessment.status === "DRAFT" ? "Você pode ajustar o rascunho antes de enviar." : "Informações da avaliação enviada."} className="pp-assessment-overview" >
         <dl className="pp-detail-list" id="visao-geral">
           <div><dt>Status</dt><dd><AssessmentStatusBadge status={assessment.status} /></dd></div>
-          <div><dt>Modelo</dt><dd>{template?.name ?? "Versão preservada"}<small>{template ? assessmentTypeLabels[template.assessmentType] : assessment.templateVersionId}</small></dd></div>
+          <div><dt>Modelo</dt><dd>{template?.name ?? "Versão preservada"}<small>{template ? assessmentTypeLabels[template.assessmentType] : "Modelo desta avaliação"}</small></dd></div>
           <div><dt><CalendarDays aria-hidden="true" />Criada em</dt><dd>{formatAssessmentDate(assessment.createdAt)}</dd></div>
           <div><dt><CalendarDays aria-hidden="true" />Prazo</dt><dd>{formatAssessmentDate(assessment.dueAt, "Sem prazo")}</dd></div>
           <div><dt>Prioridade</dt><dd>{assessment.isRequired ? "Resposta obrigatória" : "Resposta opcional"}</dd></div>
@@ -77,23 +78,24 @@ export default async function TrainerAssessmentDetailPage({ params, searchParams
         </div>
       </ContextPanel>
 
-      <ContextPanel title="Medidas" description="Valor, unidade e contexto de origem são exibidos sem conversão automática." className="pp-assessment-measurements">
+      <ContextPanel title="Medidas" description="Medidas registradas nesta avaliação." className="pp-assessment-measurements">
         <div id="medidas">
           {measurementQuestions.length ? <div className="pp-measurement-list">{measurementQuestions.map((question) => {
             const measurement = measurements.find((item) => item.measurementCode === question.measurement.code);
             const answerValue = answersByKey.get(question.key);
-            return <article key={question.key}><span><Ruler aria-hidden="true" /></span><div><strong>{localText(question.label)}</strong><small>{measurement ? `Origem: esta avaliação · ${formatAssessmentDateTime(measurement.measuredAt)}` : "Sem medida extraída desta avaliação"}</small></div><b>{measurement ? `${measurement.value.toLocaleString("pt-BR")} ${measurement.unitCode}` : formatAnswer(question, answerValue)}</b></article>;
+            return <article key={question.key}><span><Ruler aria-hidden="true" /></span><div><strong>{localText(question.label)}</strong><small>{measurement ? `Origem: esta avaliação · ${formatAssessmentDateTime(measurement.measuredAt)}` : "Ainda não registrada"}</small></div><b>{measurement ? `${measurement.value.toLocaleString("pt-BR")} ${measurement.unitCode}` : formatAnswer(question, answerValue)}</b></article>;
           })}</div> : <EmptyState compact icon={Ruler} title="Modelo sem medidas" description="Esta versão não solicita medidas corporais." />}
         </div>
       </ContextPanel>
 
       <ContextPanel title="Feedback do Personal" description={assessment.status === "COMPLETED" ? "Devolutiva final liberada ao aluno." : "A devolutiva é escrita durante a revisão e só aparece ao aluno após a conclusão."} className="pp-assessment-feedback">
-        <div id="feedback">{assessment.status === "COMPLETED" && assessment.trainerFeedback ? <blockquote><MessageSquareText aria-hidden="true" /><p>{assessment.trainerFeedback}</p><footer>Devolutiva de {formatAssessmentDate(assessment.completedAt)}</footer></blockquote> : <p className="pp-muted-copy">{assessment.status === "IN_REVIEW" ? "Use o painel de ação para escrever e confirmar o feedback final." : "Nenhum feedback final disponível neste estado."}</p>}</div>
+        <div id="feedback">{assessment.status === "COMPLETED" && assessment.trainerFeedback ? <blockquote><MessageSquareText aria-hidden="true" /><p>{assessment.trainerFeedback}</p><footer>Devolutiva de {formatAssessmentDate(assessment.completedAt)}</footer></blockquote> : <p className="pp-muted-copy">{assessment.status === "IN_REVIEW" ? "Use o painel de ação para escrever e confirmar o feedback final." : "A devolutiva aparecerá aqui após a conclusão."}</p>}</div>
       </ContextPanel>
 
-      <ContextPanel title="Histórico" description="Linha do tempo derivada dos timestamps autoritativos do ciclo." className="pp-assessment-history">
-        <ol id="historico">{events.map((event, index) => <li key={event.id}><span className={index === 0 ? "active" : undefined} /><div><strong>{eventLabels[event.eventType]}{event.eventType === "ANSWER_SAVED" && typeof event.metadata.question_key === "string" ? ` · ${event.metadata.question_key}` : ""}</strong><small>{formatAssessmentDateTime(event.createdAt)}</small></div></li>)}</ol>
+      <ContextPanel title="Histórico" description="Da criação à devolutiva." className="pp-assessment-history">
+        <ol id="historico">{events.map((event, index) => <li key={event.id}><span className={index === 0 ? "active" : undefined} /><div><strong>{eventLabels[event.eventType]}</strong><small>{formatAssessmentDateTime(event.createdAt)}</small></div></li>)}</ol>
       </ContextPanel>
     </MasterDetail>
+  <DashboardMotionReady route={`/dashboard/assessments/${id}`} />
   </main>;
 }

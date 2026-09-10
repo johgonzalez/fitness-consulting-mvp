@@ -18,6 +18,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { TrainerSiteData } from "@/lib/domain/trainer-site";
+import { mixBrandColor, readableBrandText, textOnBrandColor } from "./brand-contrast";
 import "./approved-profile.css";
 
 const maxProcessSteps = 5;
@@ -74,6 +75,8 @@ export function Template01({ site }: { site: TrainerSiteData }) {
   const showAuthority = visible.has("about") || visible.has("specialties") || visible.has("positioning");
   const themeStyle = {
     "--profile-accent": site.site.accent,
+    "--profile-on-accent": textOnBrandColor(site.site.accent),
+    "--profile-accent-text": readableBrandText(site.site.accent, [mixBrandColor(site.site.accent, "#ffffff", 0.11)]),
     "--profile-soft": `color-mix(in srgb, ${site.site.accent} 11%, white)`,
     "--profile-deep": `color-mix(in srgb, ${site.site.accent} 38%, #07111f)`,
     "--profile-glow": `color-mix(in srgb, ${site.site.accent} 72%, #ffffff)`,

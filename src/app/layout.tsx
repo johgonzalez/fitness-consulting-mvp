@@ -23,6 +23,9 @@ import "./assessments-progress-v1.css";
 import "./cheipi-auth-entry-v1.css";
 import "./visual-launch-candidate.css";
 import "./community.css";
+import "./personal-mobile-redesign.css";
+import "./personal-entry-redesign.css";
+import "./personal-workspaces-redesign.css";
 
 const inter = Inter({ variable: "--font-body", subsets: ["latin"] });
 const manrope = Manrope({ variable: "--font-display", subsets: ["latin"] });

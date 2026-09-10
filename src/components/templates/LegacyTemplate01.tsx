@@ -8,6 +8,7 @@ import { TemplateAction } from "@/components/templates/TemplateAction";
 import { TrainerInstagramSection } from "@/components/templates/TrainerInstagramSection";
 import type { TrainerSiteContactMode, TrainerSiteData, TrainerSiteService } from "@/lib/domain/trainer-site";
 import { getSectionMeta, type SiteSectionId } from "@/lib/domain/site-sections";
+import { mixBrandColor, readableBrandText, textOnBrandColor } from "./brand-contrast";
 import styles from "./essential-editorial.module.css";
 
 function Brand({ site }: { site: TrainerSiteData }) {
@@ -70,6 +71,8 @@ function ExperiencePhone({ site }: { site: TrainerSiteData }) {
 }
 
 export function LegacyTemplate01({ site }: { site: TrainerSiteData }) {
+  const accentStrong = mixBrandColor(site.site.accent, "#21173a", 0.78);
+  const accentText = readableBrandText(accentStrong, ["#f0ebf8", "#f1efea", mixBrandColor(site.site.accent, "#ffffff", 0.12)]);
   const heroMedia = site.media.hero;
   const aboutMedia = site.media.about ?? site.media.coaching;
   const methodMedia = site.media.movement_primary;
@@ -85,7 +88,7 @@ export function LegacyTemplate01({ site }: { site: TrainerSiteData }) {
       className={styles.root}
       id="pperfil-essential-root"
       data-essential-root
-      style={{ "--ee-accent": site.site.accent } as CSSProperties}
+      style={{ "--ee-accent": site.site.accent, "--ee-accent-strong": accentStrong, "--ee-on-accent": textOnBrandColor(accentStrong), "--ee-accent-text": accentText } as CSSProperties}
     >
       <header className={styles.header} style={{ order: -2 }}>
         <Brand site={site} />

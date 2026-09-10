@@ -1,0 +1,136 @@
+/* Personal workspaces: student records and assessments share the app's solid palette. */
+.cheipi-personal-app :is(.pp-students-workspace, .pp-student-record, .pp-assessments-workspace, .pp-assessment-create, .pp-assessment-record) {
+  font-size: 16px;
+}
+
+.cheipi-personal-app :is(.pp-students-workspace, .pp-student-record, .pp-assessments-workspace, .pp-assessment-create, .pp-assessment-record) :is(p, small, dt, label, .pp-back-link, .pp-text-link) {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cheipi-personal-app :is(.pp-students-workspace, .pp-student-record, .pp-assessments-workspace, .pp-assessment-create, .pp-assessment-record) :is(input, textarea, select) {
+  min-width: 0;
+  font-size: 16px;
+}
+
+.cheipi-personal-app :is(.pp-student-list, .pp-assessment-list, .pp-invitations, .pp-student-relationship, .pp-student-open-section, .pp-wizard-surface) {
+  border: 0;
+  border-radius: 0;
+  background: var(--pp-background);
+  box-shadow: none;
+}
+
+.cheipi-personal-app :is(.pp-student-list, .pp-assessment-list) :is(.pp-identity-cell strong, .pp-data-cell strong) { font-size: 16px; }
+.cheipi-personal-app .pp-student-search { margin-block: 18px 24px; min-height: 52px; background: var(--pp-surface-subtle); }
+.cheipi-personal-app .pp-student-search input { min-height: 50px; }
+.cheipi-personal-app .pp-student-search button { min-height: 44px; font-size: 14px; }
+.cheipi-personal-app .pp-invitations { padding: 0 0 20px; }
+.cheipi-personal-app .pp-invitations > header { align-items: flex-start; }
+.cheipi-personal-app .pp-invitation-row { border-radius: 0; background: var(--pp-background); box-shadow: none; }
+.cheipi-personal-app .pp-invitation-row strong { font-size: 16px; overflow-wrap: anywhere; }
+.cheipi-personal-app .pp-inline-create { scroll-margin-top: 24px; }
+.cheipi-personal-app .pp-student-pulse { border: 0; border-block: 1px solid var(--pp-divider); border-radius: 0; background: var(--pp-background); box-shadow: none; }
+.cheipi-personal-app .pp-student-pulse > div { padding: 16px 0; }
+.cheipi-personal-app .pp-student-pulse strong { font-size: 16px; }
+.cheipi-personal-app .pp-student-pulse span { font-size: 14px; }
+.cheipi-personal-app .pp-student-quick-actions { gap: 0; border-bottom: 1px solid var(--pp-divider); }
+.cheipi-personal-app .pp-student-quick-actions a { border: 0; border-radius: 0; background: var(--pp-background); box-shadow: none; font-size: 14px; }
+.cheipi-personal-app .pp-student-quick-actions a:first-child { color: var(--pp-text-primary); }
+.cheipi-personal-app .pp-student-open-section { padding: 24px 0; }
+.cheipi-personal-app .pp-student-open-section > header { padding: 0 0 18px; }
+.cheipi-personal-app .pp-student-open-section h2 { font-size: 22px; }
+.cheipi-personal-app .pp-student-open-section header a { font-size: 14px; }
+.cheipi-personal-app :is(.pp-student-feature-row, .pp-student-operational-list > a) { border-radius: 0; padding: 18px 0; background: var(--pp-background); }
+.cheipi-personal-app :is(.pp-student-feature-row, .pp-student-operational-list > a) strong { font-size: 16px; }
+.cheipi-personal-app .pp-student-row-icon { background: var(--pp-surface-subtle); color: var(--pp-text-primary); }
+.cheipi-personal-app .pp-student-relationship { padding: 24px 0; }
+.cheipi-personal-app .pp-student-relationship dd { font-size: 16px; overflow-wrap: anywhere; }
+.cheipi-personal-app .pp-student-relationship__action button { min-height: 44px; font-size: 14px; }
+.cheipi-personal-app .pp-wizard-surface { min-height: 0; }
+.cheipi-personal-app .pp-wizard-step { padding: 24px 0; }
+.cheipi-personal-app .pp-wizard-step > header { padding-bottom: 22px; }
+.cheipi-personal-app .pp-wizard-progress { width: 100%; max-width: 540px; margin-inline: 0; }
+.cheipi-personal-app .pp-wizard-progress li small { font-size: 14px; }
+.cheipi-personal-app .pp-wizard-progress li.active > span,
+.cheipi-personal-app .pp-wizard-progress li.complete > span { color: var(--pp-background); background: var(--pp-text-primary); border-color: var(--pp-text-primary); }
+.cheipi-personal-app .pp-wizard-progress li.complete:before { background: var(--pp-text-primary); }
+.cheipi-personal-app .pp-choice-grid { gap: 0; }
+.cheipi-personal-app :is(.pp-choice-grid, .pp-template-choice) label {
+  border: 0;
+  border-bottom: 1px solid var(--pp-divider);
+  border-radius: 0;
+  background: var(--pp-background);
+}
+.cheipi-personal-app :is(.pp-choice-grid, .pp-template-choice) label.selected { background: var(--pp-surface-subtle); border-color: var(--pp-divider); }
+.cheipi-personal-app :is(.pp-choice-grid, .pp-template-choice) label:has(input:focus-visible) { outline: 2px solid var(--pp-text-primary); outline-offset: 3px; }
+.cheipi-personal-app :is(.pp-choice-grid, .pp-template-choice) label.selected > i { background: var(--pp-text-primary); color: var(--pp-background); border-color: var(--pp-text-primary); }
+.cheipi-personal-app .pp-choice-grid label { min-height: 86px; padding: 16px 12px; }
+.cheipi-personal-app .pp-choice-grid strong { font-size: 16px; }
+.cheipi-personal-app .pp-template-choice { gap: 0; }
+.cheipi-personal-app .pp-template-choice label { min-height: 190px; padding: 22px 14px; }
+.cheipi-personal-app .pp-template-choice label > strong { margin-top: 16px; font-size: 20px; }
+.cheipi-personal-app .pp-template-choice__type { padding: 0; background: transparent; font-size: 14px; text-transform: none; }
+.cheipi-personal-app .pp-wizard-actions { padding: 12px 0; }
+.cheipi-personal-app .pp-assessment-record :is(.pp-context-panel, .pp-action-group) { padding-inline: 0; border: 0; border-bottom: 1px solid var(--pp-divider); border-radius: 0; background: var(--pp-background); box-shadow: none; }
+.cheipi-personal-app .pp-assessment-record .pp-context-panel__body { padding: 20px 0; }
+.cheipi-personal-app .pp-assessment-record :is(.pp-context-panel, .pp-action-group) > header { padding: 20px 0 0; }
+.cheipi-personal-app .pp-assessment-record .pp-action-group > div { padding: 20px 0; }
+.cheipi-personal-app .pp-assessment-record .pp-detail-list dd { font-size: 16px; }
+.cheipi-personal-app .pp-assessment-record .pp-context-panel h2,
+.cheipi-personal-app .pp-assessment-record .pp-action-group h2 { font-size: 22px; }
+.cheipi-personal-app .pp-assessment-history strong { font-size: 16px; }
+.cheipi-personal-app .pp-assessment-feedback blockquote { background: var(--pp-surface-subtle); }
+.cheipi-personal-app .pp-assessment-record :is(#visao-geral, #respostas, #medidas, #feedback, #historico) { scroll-margin-top: 24px; }
+
+@media (max-width: 900px) {
+  .cheipi-personal-app :is(.pp-student-record, .pp-assessment-record) .pp-record-header { align-items: flex-start; padding-inline: 0; }
+  .cheipi-personal-app :is(.pp-student-record, .pp-assessment-record) .pp-record-header h1 { font-size: 28px; overflow-wrap: anywhere; }
+  .cheipi-personal-app :is(.pp-student-record, .pp-assessment-record) .pp-record-header p { overflow-wrap: anywhere; }
+  .cheipi-personal-app :is(.pp-student-record, .pp-assessment-record) .pp-record-tabs {
+    position: static;
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    max-width: 100%;
+    padding-inline: 0;
+    border-radius: 0;
+    background: var(--pp-background);
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+  .cheipi-personal-app :is(.pp-student-record, .pp-assessment-record) .pp-record-tabs a { flex: none; min-height: 52px; padding-inline: 0; font-size: 14px; scroll-snap-align: start; }
+  .cheipi-personal-app :is(.pp-student-list, .pp-assessment-list) .pp-data-list__row {
+    margin: 0;
+    padding: 22px 0;
+    border: 0;
+    border-bottom: 1px solid var(--pp-divider);
+    border-radius: 0;
+    background: var(--pp-background);
+    box-shadow: none;
+  }
+  .cheipi-personal-app .pp-student-pulse { grid-template-columns: 1fr; padding: 0; }
+  .cheipi-personal-app .pp-student-pulse > div { display: grid; grid-template-columns: minmax(0, 1fr); align-items: baseline; gap: 6px; border: 0; border-bottom: 1px solid var(--pp-divider); }
+  .cheipi-personal-app .pp-student-pulse strong { white-space: normal; overflow-wrap: anywhere; }
+  .cheipi-personal-app .pp-student-pulse > div:last-child { border-bottom: 0; }
+  .cheipi-personal-app .pp-student-quick-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cheipi-personal-app .pp-student-quick-actions a { min-height: 92px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 12px 4px; text-align: center; }
+  .cheipi-personal-app .pp-student-quick-actions a svg { width: 24px; height: 24px; }
+  .cheipi-personal-app .pp-student-workspace { gap: 0; }
+  .cheipi-personal-app .pp-student-relationship { border-top: 1px solid var(--pp-divider); }
+  .cheipi-personal-app .pp-assessment-record .pp-master-detail { display: flex; flex-direction: column; gap: 0; }
+  .cheipi-personal-app .pp-assessment-record .pp-master-detail__aside { position: static; order: -1; }
+  .cheipi-personal-app .pp-assessment-record .pp-master-detail__main { min-width: 0; }
+  .cheipi-personal-app .pp-choice-grid,
+  .cheipi-personal-app .pp-template-choice { grid-template-columns: 1fr; }
+  .cheipi-personal-app .pp-wizard-progress li small { font-size: 14px; }
+  .cheipi-personal-app .pp-wizard-actions { position: sticky; bottom: calc(88px + env(safe-area-inset-bottom, 0px)); z-index: 5; gap: 10px; border-top: 1px solid var(--pp-divider); background: var(--pp-background); }
+  .cheipi-personal-app .pp-wizard-actions > div { min-width: 0; flex: 1; flex-wrap: wrap; justify-content: flex-end; }
+  .cheipi-personal-app .pp-wizard-actions .pp-button { min-height: 48px; }
+}
+
+@media (max-width: 620px) {
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header { flex-wrap: wrap; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header > div { flex: 1 1 180px; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header .pp-button { width: auto; max-width: 100%; padding: 10px 14px; }
+  .cheipi-personal-app .pp-students-workspace > .pp-page-header .pp-button svg { flex: none; }
+}

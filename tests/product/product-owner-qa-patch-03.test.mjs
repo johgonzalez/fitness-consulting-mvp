@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { stageOf } from "../../src/lib/onboarding/stages.ts";
 
 const read = (path) => readFile(new URL(`../../${path}`, import.meta.url), "utf8");
 const migrationPath = "supabase/migrations/20260904220500_product_owner_qa_patch_03.sql";
@@ -38,7 +39,12 @@ test("public address is a dedicated resumable step before template selection", a
   ]);
   assert.match(migration, /add column if not exists requested_slug text/);
   assert.match(migration, /add column if not exists slug_completed_at timestamptz/);
-  assert.match(component, /if\(!draft\.slug_completed_at\)return"slug"/);
+  assert.match(component, /import \{ stageOf, type OnboardingStage \} from "@\/lib\/onboarding\/stages"/);
+  assert.match(component, /authoritativeStage=stageOf\(draft,profile,step\)/);
+  const priorSteps = { identity_completed_at: "saved", professional_completed_at: "saved", social_completed_at: "saved" };
+  assert.equal(stageOf(priorSteps, null), "slug");
+  assert.equal(stageOf({ ...priorSteps, slug_completed_at: null }, null, "template"), "slug");
+  assert.equal(stageOf({ ...priorSteps, slug_completed_at: "saved" }, null), "template");
   assert.ok(component.indexOf('stage==="slug"') < component.indexOf('stage==="template"'));
   assert.match(component, /cheipi\.com\/p\//);
   assert.match(component, /checkOnboardingSlugAvailability/);

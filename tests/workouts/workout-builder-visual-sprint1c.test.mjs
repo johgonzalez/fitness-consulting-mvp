@@ -41,12 +41,23 @@ test("mobile flow keeps one editor expanded and exposes accessible reorder contr
 });
 
 test("exercise library provides quiet search, clearing and direct row addition", async () => {
-  const library = await read("src/components/workouts/ExerciseLibraryDrawer.tsx");
+  const [library, modal] = await Promise.all([
+    read("src/components/workouts/ExerciseLibraryDrawer.tsx"),
+    read("src/components/ui/ModalSurface.tsx"),
+  ]);
   assert.match(library, /aria-label="Limpar busca"/);
   assert.match(library, /className=\{styles\.libraryCardAdd\}/);
   assert.match(library, /onClick=\{\(\) => onChoose\(exercise\)\}/);
-  assert.match(library, /searchRef\.current\?\.focus\(\)/);
-  assert.match(library, /event\.key === "Escape"/);
+  assert.match(library, /onClick=\{\(\) => setQuery\(""\)\} aria-label="Limpar busca"/);
+  assert.match(library, /<input ref=\{searchRef\} data-modal-initial-focus value=\{query\}/);
+  assert.match(library, /aria-label="Buscar exercício"/);
+  assert.match(library, /<ModalSurface open=\{open\} onClose=\{onClose\} pending=\{pending\} labelledBy="exercise-library-title"/);
+  assert.match(modal, /<dialog ref=\{dialogRef\}/);
+  assert.match(modal, /dialog\.showModal\(\)/);
+  assert.match(modal, /dialog\.querySelector<HTMLElement>\("\[data-modal-initial-focus\]"\)\?\.focus\(\)/);
+  assert.match(modal, /const previousFocus = document\.activeElement/);
+  assert.match(modal, /if \(previousFocus\?\.isConnected\) previousFocus\.focus\(\)/);
+  assert.match(modal, /onCancel=\{\(event\) => \{ event\.preventDefault\(\); if \(!pending\) onClose\(\); \}\}/);
 });
 
 test("draft archive and workout lifecycle remain separate from exercise completion", async () => {

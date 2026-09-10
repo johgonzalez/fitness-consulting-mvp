@@ -49,7 +49,7 @@ test("AI output remains an explicit Trainer-reviewed draft", () => {
   assert.doesNotMatch(generateBody, /\.publish\(/);
   assert.doesNotMatch(generateBody, /materializeAiDraft/);
   assert.match(creationFlow, /Revise o treino antes de publicar\. A IA gera um rascunho e não substitui sua avaliação profissional\./);
-  assert.match(creationFlow, /Abrir no Builder/);
+  assert.match(creationFlow, /onClick=\{openGeneratedDraft\}/);
   assert.match(creationFlow, /Descartar e gerar novamente/);
 });
 

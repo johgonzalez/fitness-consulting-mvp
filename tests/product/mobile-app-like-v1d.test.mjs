@@ -19,11 +19,12 @@ test("mobile text controls keep an iOS-safe size without disabling zoom", async 
 });
 
 test("fullscreen is interaction-gated, session scoped, reversible and standalone safe", async () => {
-  const [controller, trainerLayout, studentShell, navigation] = await Promise.all([
+  const [controller, trainerLayout, studentShell, navigation, profile] = await Promise.all([
     read("src/components/app-shell/AppFullscreenController.tsx"),
     read("src/app/dashboard/layout.tsx"),
     read("src/components/student/StudentAppShell.tsx"),
     read("src/components/dashboard/BottomNavigation.tsx"),
+    read("src/components/dashboard/ProfileEditor.tsx"),
   ]);
   assert.match(controller, /document\.addEventListener\("click"/);
   assert.match(controller, /event\.isTrusted/);
@@ -34,8 +35,17 @@ test("fullscreen is interaction-gated, session scoped, reversible and standalone
   assert.match(controller, /display-mode: standalone/);
   assert.match(controller, /pointer: coarse/);
   assert.match(controller, /standalone\?: boolean/);
-  assert.match(trainerLayout, /AppFullscreenController/);
+  assert.match(controller, /AppFullscreenController\(\{ automatic = true \}/);
+  assert.match(controller, /if \(!automatic \|\| isStandalone\(\) \|\| !isMobileAppContext\(\)\) return/);
+  assert.match(controller, /\}, \[automatic\]\)/);
+  assert.match(trainerLayout, /<AppFullscreenController automatic=\{false\} \/>/);
   assert.match(studentShell, /AppFullscreenController/);
-  assert.match(navigation, /FullscreenUtility/);
+  assert.doesNotMatch(studentShell, /AppFullscreenController[^>]*automatic=\{false\}/);
+  assert.doesNotMatch(navigation, /FullscreenUtility/);
+  const appearance = profile.slice(profile.indexOf('activeSection === "appearance"'));
+  assert.match(appearance, /<FullscreenUtility \/>/);
+  assert.equal((profile.match(/<FullscreenUtility/g) ?? []).length, 1);
+  assert.match(controller, /onClick=\{toggleFullscreen\}/);
+  assert.match(controller, /aria-pressed=\{active\}/);
   assert.doesNotMatch(controller, /scroll|pointermove|focusin/);
 });

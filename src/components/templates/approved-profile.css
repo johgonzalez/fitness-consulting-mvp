@@ -350,7 +350,7 @@
 .section-heading > div > p,
 .light-eyebrow {
   margin: 0;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.105em;
@@ -427,7 +427,7 @@
 
 .primary-cta {
   background: var(--profile-accent);
-  color: white;
+  color: var(--profile-on-accent);
   box-shadow: 0 0.8rem 1.8rem color-mix(in srgb, var(--profile-accent) 24%, transparent);
 }
 
@@ -484,7 +484,7 @@
 .hero-trust svg {
   width: 1rem;
   height: 1rem;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
 }
 
 .section-block,
@@ -604,7 +604,7 @@
 .method-list > article > svg {
   width: 1.25rem;
   margin-top: 0.08rem;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
 }
 
 .method-list h3,
@@ -674,7 +674,7 @@
 
 .service-eyebrow {
   margin: 0 0 0.3rem;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -743,7 +743,7 @@
 .service-card li svg {
   width: 1rem;
   height: 1rem;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
 }
 
 .service-footer > a {
@@ -764,7 +764,7 @@
 
 .service-card.featured .service-footer > a {
   background: var(--profile-accent);
-  color: white;
+  color: var(--profile-on-accent);
 }
 
 .service-footer > a svg {
@@ -969,7 +969,7 @@
 }
 
 .week-card > span {
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
   font-size: 0.72rem;
   font-weight: 800;
 }
@@ -1018,7 +1018,7 @@
   place-items: center;
   border-radius: 0.75rem;
   background: var(--profile-soft);
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
 }
 
 .workout-icon svg {
@@ -1052,7 +1052,7 @@
   align-items: center;
   justify-content: space-between;
   background: var(--profile-accent);
-  color: white;
+  color: var(--profile-on-accent);
   font: inherit;
   font-size: 0.65rem;
   font-weight: 750;
@@ -1120,7 +1120,7 @@
   border: 1px solid color-mix(in srgb, var(--profile-accent) 28%, #dfe3e8);
   border-radius: 50%;
   background: transparent;
-  color: var(--profile-accent);
+  color: var(--profile-accent-text);
   font-size: 0.72rem;
   font-weight: 850;
 }
@@ -1210,7 +1210,7 @@
 
 .contact-primary {
   background: var(--profile-accent);
-  color: white;
+  color: var(--profile-on-accent);
   box-shadow: 0 0.8rem 2rem color-mix(in srgb, var(--profile-accent) 20%, transparent);
 }
 
@@ -1263,7 +1263,7 @@
   border: 1px solid rgb(255 255 255 / 18%);
   border-radius: 999px;
   background: var(--profile-accent);
-  color: white;
+  color: var(--profile-on-accent);
   box-shadow: 0 1rem 2.5rem rgb(17 19 24 / 27%);
 }
 

@@ -12,7 +12,9 @@ export async function GET(request: Request) {
   const safePath = requestedPath?.startsWith("/student/") || requestedPath?.startsWith("/dashboard")
     ? requestedPath
     : "/dashboard";
-  const response = NextResponse.redirect(new URL(safePath, request.url));
+  const host = request.headers.get("host") || "localhost:3000";
+  const protocol = request.headers.get("x-forwarded-proto") || "http";
+  const response = NextResponse.redirect(`${protocol}://${host}${safePath}`);
   response.cookies.set(DEMO_COOKIE_NAME, DEMO_COOKIE_VALUE, {
     httpOnly: true,
     sameSite: "lax",

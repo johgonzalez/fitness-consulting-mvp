@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { SecureLogoutForm } from "@/components/auth/SecureLogoutForm";
-import { BrandLogo } from "./BrandLogo";
+import { CheipiBrand } from "@/components/auth/CheipiBrand";
 import { TrainerAvatar } from "./TrainerAvatar";
 import { ThemeToggle } from "./ThemeToggle";
 
 export function DashboardHeader({ demoMode = false }: { demoMode?: boolean }) {
   return <header className="dashboard-header"><div>
-    <BrandLogo monochrome />
+    <CheipiBrand href="/dashboard" symbolOnly />
     {demoMode ? <Link href="/demo?next=/student/today" className="pp-demo-indicator" title="Abrir portal demo do aluno"><span aria-hidden="true" /><strong>Demo workspace</strong><em>· Ver como aluno</em></Link> : null}
   </div></header>;
 }
